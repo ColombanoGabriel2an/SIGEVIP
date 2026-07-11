@@ -43,6 +43,8 @@
 
   <ItemGroup>
     <Compile Include="ArchitectureTests.cs" />
+    <Compile Include="Domain\ViajeTests.cs" />
+    <Compile Include="Domain\ViaticoTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 

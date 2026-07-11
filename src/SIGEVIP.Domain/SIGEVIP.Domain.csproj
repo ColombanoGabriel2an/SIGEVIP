@@ -42,7 +42,19 @@
 
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="Entities\Viaje.cs" />
+    <Compile Include="Entities\Viatico.cs" />
+    <Compile Include="Enums\EstadoViaje.cs" />
+    <Compile Include="Enums\EstadoViatico.cs" />
+    <Compile Include="Enums\TipoViaje.cs" />
+    <Compile Include="Exceptions\ReglaNegocioException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="States\EstadoViajeAbierto.cs" />
+    <Compile Include="States\EstadoViajeAprobado.cs" />
+    <Compile Include="States\EstadoViajeCancelado.cs" />
+    <Compile Include="States\EstadoViajeEnRendicion.cs" />
+    <Compile Include="States\EstadoViajeFactory.cs" />
+    <Compile Include="States\IEstadoViaje.cs" />
   </ItemGroup>
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

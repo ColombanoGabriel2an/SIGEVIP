@@ -17,11 +17,12 @@ Contiene:
 - Entidades del negocio.
 - Reglas de negocio.
 - Enumeraciones.
-- Interfaces del dominio.
+- Estados y transiciones del dominio.
+- Excepciones de reglas de negocio.
 - Patrón State aplicado a Viaje.
-- Componentes de seguridad del patrón Composite.
+- Componentes de seguridad del patrón Composite, en una etapa posterior.
 
-No debe depender de otras capas.
+No depende de otras capas.
 
 ### SIGEVIP.Application
 
@@ -30,6 +31,7 @@ Contiene:
 - Casos de uso.
 - Servicios de aplicación.
 - Validaciones de coordinación.
+- Autorización.
 - Interfaces de repositorios.
 - Modelos de entrada y salida.
 
@@ -43,6 +45,7 @@ Contiene:
 - Acceso a SQL Server.
 - Repositorios.
 - Configuración de conexión.
+- Transacciones.
 - Auditoría técnica.
 - Servicios externos o de infraestructura.
 
@@ -73,30 +76,76 @@ Depende inicialmente de `SIGEVIP.Domain` y `SIGEVIP.Application`.
 
 ## 4. Dirección de dependencias
 
-WinForms
-   ├── Application
-   ├── Domain
-   └── Infrastructure
-          ├── Application
-          └── Domain
+    WinForms
+       ├── Application
+       ├── Domain
+       └── Infrastructure
+              ├── Application
+              └── Domain
 
-Tests
-   ├── Application
-   └── Domain>>>EOF
+    Tests
+       ├── Application
+       └── Domain
 
-## 5. Persistencia
+`SIGEVIP.Domain` no posee referencias hacia Application, Infrastructure, WinForms ni Tests.
+
+## 5. Dominio implementado en el primer bloque
+
+El agregado principal es `Viaje`.
+
+`Viaje` controla:
+
+- Sus fechas.
+- Su tipo.
+- El monto anticipado.
+- Su estado actual.
+- Su colección de viáticos.
+- El total gastado.
+- El saldo pendiente.
+- Las transiciones de estado.
+- La incorporación y exclusión lógica de viáticos.
+
+La colección interna utiliza `List<Viatico>`, pero se expone como `IReadOnlyCollection<Viatico>` para impedir modificaciones libres desde el exterior.
+
+## 6. Patrón State
+
+El patrón State se aplica al ciclo de vida de `Viaje`.
+
+La interfaz `IEstadoViaje` define las operaciones:
+
+- Validar modificación.
+- Enviar a rendición.
+- Aprobar.
+- Cancelar.
+
+Implementaciones:
+
+- `EstadoViajeAbierto`
+- `EstadoViajeEnRendicion`
+- `EstadoViajeAprobado`
+- `EstadoViajeCancelado`
+
+El estado persistible se representa mediante el enum `EstadoViaje`.
+
+`EstadoViajeFactory` permite reconstruir el objeto State desde ese valor persistible. Los objetos State no se almacenarán directamente en SQL Server.
+
+## 7. Persistencia
 
 La persistencia se implementará mediante ADO.NET y SQL Server.
 
 No se utilizará Entity Framework.
 
-## 6. Principios
+La implementación de repositorios y migraciones pertenece a un bloque posterior.
 
- - Separación de responsabilidades.
- - Bajo acoplamiento.
- - Alta cohesión.
- - Validación explícita.
- - Gestión centralizada de errores.
- - Uso de variables de configuración.
- - No almacenar secretos en el repositorio.
- - Desarrollo incremental y ejecutable.
+## 8. Principios aplicados
+
+- Separación de responsabilidades.
+- Bajo acoplamiento.
+- Alta cohesión.
+- Encapsulamiento de colecciones.
+- Validación explícita.
+- Excepciones específicas del dominio.
+- Gestión centralizada de errores en capas superiores.
+- Uso de variables de configuración.
+- No almacenar secretos en el repositorio.
+- Desarrollo incremental y ejecutable.

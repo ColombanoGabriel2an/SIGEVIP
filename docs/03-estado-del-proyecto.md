@@ -2,40 +2,97 @@
 
 ## Etapa actual
 
-Preparación técnica inicial.
+Etapa 2: modelo de dominio.
 
-## Completado
+Bloque actual: Viajes, viáticos, patrón State y reglas económicas.
 
-- Repositorio Git localizado.
+## Rama de trabajo
+
+`desarrollo/dominio-viajes-viaticos`
+
+## Base técnica
+
+- Rama de origen: `desarrollo/estructura-base`
+- Commit base: `544047d`
+- Working tree inicial verificado como limpio.
+
+## Completado previamente
+
+- Repositorio Git configurado.
 - Remoto GitHub verificado.
-- Rama de trabajo creada.
-- Estructura de carpetas reorganizada.
 - Solución ubicada en la raíz.
-- Proyecto Domain creado.
-- Proyecto Application creado.
-- Proyecto Infrastructure creado.
-- Proyecto WinForms creado.
-- Proyecto MSTest creado.
+- Proyectos Domain, Application, Infrastructure, WinForms y Tests creados.
 - Referencias entre proyectos configuradas.
 - Todos los proyectos configurados para .NET Framework 4.8.
+- Proyecto MSTest configurado.
+- SQL Server configurado.
+- Base de datos `SIGEVIP` creada.
+- Conexión mediante autenticación integrada comprobada.
 - Aplicación WinForms mínima compilada y ejecutada.
-- Primera prueba MSTest compilada y ejecutada.
-- Carpetas iniciales para scripts SQL creadas.
+- Documentación técnica inicial creada.
 
-## Resultado técnico
+## Completado en el bloque actual
 
-Compilación correcta.
-0 advertencias.
-0 errores.
+- Enum `TipoViaje`.
+- Enum `EstadoViaje`.
+- Enum `EstadoViatico`.
+- Entidad `Viaje`.
+- Entidad `Viatico`.
+- Excepción `ReglaNegocioException`.
+- Interfaz `IEstadoViaje`.
+- Estado `Abierto`.
+- Estado `EnRendicion`.
+- Estado `Aprobado`.
+- Estado `Cancelado`.
+- Fábrica `EstadoViajeFactory`.
+- Colección controlada de viáticos.
+- Validación del período del viaje.
+- Validación de fecha del viático.
+- Validación de importes monetarios.
+- Cálculo de `TotalGastado`.
+- Cálculo de `SaldoPendiente`.
+- Exclusión lógica de viáticos.
+- Reactivación de viáticos.
+- Reconstrucción de un viaje desde un estado persistible.
+- Pruebas unitarias del dominio.
 
-Pruebas totales: 1.
-Pruebas correctas: 1.
-Pruebas fallidas: 0.
+## Resultado técnico verificado
 
-## Pendiente
- - Configurar conexión con SQL Server.
- - Crear script de comprobación de conexión.
- - Crear primera migración de base de datos.
- - Implementar dominio.
- - Implementar seguridad.
- - Implementar módulos funcionales.
+Compilación:
+
+- 0 advertencias.
+- 0 errores.
+
+Pruebas:
+
+- Pruebas totales: 38.
+- Pruebas correctas: 38.
+- Pruebas fallidas: 0.
+- Pruebas omitidas: 0.
+
+Ejecutor utilizado:
+
+`VSTest 17.13.0 x64`
+
+## Pendiente del bloque actual
+
+- Confirmar documentación.
+- Crear commit del bloque.
+- Subir la rama a GitHub.
+- Informar el resultado a la conversación MAESTRO.
+
+## Pendiente de bloques posteriores
+
+- Entidades Cliente y Visita.
+- Relación muchos a muchos entre Visita y Cliente.
+- Regla de cancelación condicionada por visitas existentes.
+- Persona y participantes del viaje.
+- Seguridad, usuarios, grupos y permisos.
+- Patrón Composite.
+- Servicios de aplicación y autorización.
+- Interfaces de repositorio.
+- Repositorios ADO.NET.
+- Migraciones SQL.
+- Auditoría persistente.
+- Interfaz funcional Windows Forms.
+- Pruebas de integración.
