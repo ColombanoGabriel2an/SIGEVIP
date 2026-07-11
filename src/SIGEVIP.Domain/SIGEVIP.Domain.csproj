@@ -43,6 +43,8 @@
   <ItemGroup>
     <Compile Include="Class1.cs" />
     <Compile Include="Entities\Cliente.cs" />
+    <Compile Include="Entities\Persona.cs" />
+    <Compile Include="Entities\Usuario.cs" />
     <Compile Include="Entities\Viaje.cs" />
     <Compile Include="Entities\Viatico.cs" />
     <Compile Include="Entities\Visita.cs" />
