@@ -42,8 +42,10 @@
 
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="Entities\Cliente.cs" />
     <Compile Include="Entities\Viaje.cs" />
     <Compile Include="Entities\Viatico.cs" />
+    <Compile Include="Entities\Visita.cs" />
     <Compile Include="Enums\EstadoViaje.cs" />
     <Compile Include="Enums\EstadoViatico.cs" />
     <Compile Include="Enums\TipoViaje.cs" />
