@@ -1,8 +1,8 @@
-# Modelo de dominio: Viajes, Viáticos, Clientes y Visitas
+# Modelo de dominio de SIGEVIP
 
 ## 1. Alcance
 
-Este documento describe los dos primeros incrementos del modelo de dominio de SIGEVIP.
+Este documento describe el modelo de dominio implementado hasta el Bloque 3.
 
 Incluye:
 
@@ -10,72 +10,60 @@ Incluye:
 - Viático.
 - Cliente.
 - Visita.
-- Tipo de viaje.
-- Estado del viaje.
-- Estado del viático.
-- Patrón State.
-- Reglas económicas.
-- Relación Viaje-Visita.
-- Relación muchos a muchos Visita-Cliente.
-
-No incluye todavía:
-
 - Persona.
-- Participantes.
 - Usuario.
 - Grupo.
 - Permiso.
-- Persistencia de las entidades.
-- Tabla `VisitaCliente`.
-- Servicios de aplicación.
-- Autorización por roles.
-- Formularios.
-- Reportes.
-- Mapas.
-- Geolocalización.
+- Patrón State.
+- Patrón Composite.
+- Relaciones entre entidades.
+- Activación y desactivación lógica.
+- Reglas económicas.
+- Representación segura de credenciales.
 
-## 2. Agregado principal
+No incluye todavía:
 
-`Viaje` continúa siendo la raíz del agregado.
+- persistencia completa;
+- repositorios ADO.NET;
+- migraciones de seguridad;
+- formularios funcionales;
+- recuperación de contraseña;
+- reportes;
+- mapas;
+- geolocalización.
 
-Es responsable de controlar:
+## 2. Agregado Viaje
 
-- Datos generales del viaje.
-- Período de fechas.
-- Tipo de viaje.
-- Monto anticipado.
-- Estado actual.
-- Colección de viáticos.
-- Colección de visitas.
-- Incorporación de viáticos.
-- Incorporación de visitas.
-- Exclusión y reactivación de viáticos.
-- Total gastado.
-- Saldo pendiente.
-- Transiciones de estado.
-- Regla de cancelación condicionada por visitas.
+`Viaje` es la raíz del agregado que administra:
 
-Los viáticos y las visitas se administran mediante operaciones del agregado Viaje.
+- datos generales;
+- período;
+- tipo;
+- monto anticipado;
+- estado;
+- viáticos;
+- visitas;
+- reglas económicas;
+- transiciones;
+- cancelación condicionada.
 
-## 3. Entidad Viaje
+### Atributos principales
 
-### Atributos
-
-- `IdViaje`: identificador del viaje.
-- `FechaInicio`: inicio del período.
-- `FechaFin`: fin del período.
-- `Descripcion`: descripción general.
-- `TipoViaje`: clasificación funcional.
-- `MontoAnticipado`: anticipo único asociado al viaje.
-- `EstadoActual`: representación persistible del estado.
-- `Viaticos`: colección de solo lectura.
-- `Visitas`: colección de solo lectura.
+- `IdViaje`
+- `FechaInicio`
+- `FechaFin`
+- `Descripcion`
+- `TipoViaje`
+- `MontoAnticipado`
+- `EstadoActual`
+- `Viaticos`
+- `Visitas`
 
 ### Propiedades calculadas
 
 `TotalGastado`:
 
-    suma de los montos de viáticos Vigentes
+    suma de los viáticos vigentes
 
 `SaldoPendiente`:
 
@@ -92,106 +80,229 @@ Los viáticos y las visitas se administran mediante operaciones del agregado Via
 - `Aprobar`
 - `Cancelar`
 
-### Reglas sobre visitas
-
-- Solo el estado Abierto admite nuevas visitas.
-- La fecha debe estar dentro del período del viaje.
-- La visita debe poseer al menos un cliente.
-- No se admiten visitas duplicadas.
-- Una visita no puede reasignarse a otro viaje.
-- Un viaje con visitas no puede cancelarse.
-
-## 4. Entidad Viatico
+## 3. Entidad Viatico
 
 ### Atributos
 
-- `IdViatico`: identificador del gasto.
-- `IdViaje`: identificador del viaje al que pertenece.
-- `Fecha`: fecha del gasto.
-- `Monto`: importe decimal mayor que cero.
-- `Descripcion`: detalle inicial del gasto.
-- `Estado`: Vigente o Excluido.
+- `IdViatico`
+- `IdViaje`
+- `Fecha`
+- `Monto`
+- `Descripcion`
+- `Estado`
 
-### Comportamientos internos
+### Reglas principales
 
-- Asociar a un viaje.
-- Excluir lógicamente.
-- Reactivar.
+- Debe pertenecer a un Viaje.
+- Su monto debe ser mayor que cero.
+- Su fecha debe estar dentro del período.
+- Nace como `Vigente`.
+- Puede excluirse lógicamente.
+- Solo los vigentes forman parte del total.
 
-Las operaciones internas evitan que capas externas alteren directamente la vigencia o la asociación.
-
-## 5. Entidad Cliente
-
-### Atributos
-
-- `IdCliente`: identificador.
-- `RazonSocial`: nombre empresarial obligatorio.
-- `Cuit`: identificador fiscal obligatorio.
-- `Email`: correo electrónico.
-- `Telefono`: teléfono.
-- `Localidad`: localidad habitual.
-- `Provincia`: provincia habitual.
-- `Activo`: estado lógico.
-
-### Comportamientos
-
-- `Activar`
-- `Desactivar`
-
-### Normalización de CUIT
-
-El CUIT se almacena sin espacios ni guiones.
-
-Ejemplo:
-
-    30-12345678-9 -> 30123456789
-
-Esta normalización no valida matemáticamente el CUIT ni reemplaza una futura validación fiscal.
-
-### Borrado lógico
-
-Cliente no se elimina físicamente.
-
-La propiedad `Activo` permite excluirlo de operaciones nuevas sin perder las relaciones históricas.
-
-### Unicidad pendiente
-
-La unicidad global de CUIT no se controla dentro de la entidad.
-
-Se implementará mediante:
-
-- servicio de aplicación;
-- repositorio;
-- índice único en SQL Server.
-
-## 6. Entidad Visita
+## 4. Entidad Cliente
 
 ### Atributos
 
-- `IdVisita`: identificador.
-- `IdViaje`: viaje al que pertenece.
-- `Fecha`: fecha concreta de la visita.
-- `Observacion`: detalle obligatorio.
-- `LocalidadEncuentro`: localidad concreta del encuentro.
-- `Clientes`: colección de solo lectura.
+- `IdCliente`
+- `RazonSocial`
+- `Cuit`
+- `Email`
+- `Telefono`
+- `Localidad`
+- `Provincia`
+- `Activo`
 
-### Comportamientos
+### Reglas principales
 
-- `AgregarCliente`
-- asociación interna a un Viaje.
+- Razón social obligatoria.
+- CUIT obligatorio.
+- Normalización sin espacios ni guiones.
+- Nace activo.
+- Admite activación y desactivación lógica.
+- No se elimina físicamente.
 
-### Reglas
+La unicidad global del CUIT todavía requiere repositorio e índice único.
+
+## 5. Entidad Visita
+
+### Atributos
+
+- `IdVisita`
+- `IdViaje`
+- `Fecha`
+- `Observacion`
+- `LocalidadEncuentro`
+- `Clientes`
+
+### Reglas principales
 
 - Observación obligatoria.
-- Localidad del encuentro obligatoria.
-- Cliente no nulo.
-- Uno o varios clientes.
-- Sin clientes duplicados.
-- La colección no puede modificarse directamente.
-- Antes de incorporarse a un Viaje debe tener al menos un cliente.
-- Una vez asociada no puede cambiar de Viaje.
+- Localidad obligatoria.
+- Debe tener al menos un Cliente.
+- Puede tener varios Clientes.
+- No admite Clientes nulos.
+- No admite Clientes duplicados.
+- No puede reasignarse a otro Viaje.
+- Solo puede agregarse a un Viaje Abierto.
 
-## 7. Cardinalidades
+## 6. Entidad Persona
+
+Persona representa información personal separada de la identidad de acceso.
+
+### Atributos
+
+- `IdPersona`
+- `Nombre`
+- `Apellido`
+- `Email`
+- `Activo`
+
+### Reglas principales
+
+- Nombre obligatorio.
+- Apellido obligatorio.
+- Email obligatorio.
+- Nace activa.
+- Puede desactivarse.
+- Puede reactivarse.
+- La baja es lógica.
+
+## 7. Entidad Usuario
+
+Usuario representa la identidad de acceso al sistema.
+
+### Atributos
+
+- `IdUsuario`
+- `IdPersona`
+- `NombreUsuario`
+- `PasswordHash`
+- `PasswordSalt`
+- `IteracionesPassword`
+- `Activo`
+- `Grupos`
+
+### Reglas principales
+
+- Todo Usuario requiere una Persona válida.
+- El nombre se normaliza a minúsculas.
+- No almacena contraseña en texto plano.
+- Hash y salt se protegen mediante copias defensivas.
+- Las iteraciones se conservan junto a las credenciales.
+- Nace activo.
+- Puede activarse y desactivarse.
+- Puede pertenecer a uno o varios Grupos.
+- No admite Grupos nulos.
+- No admite Grupos duplicados.
+- La colección de Grupos es de solo lectura.
+
+La unicidad global del nombre de usuario se implementará en Application, Infrastructure y SQL Server.
+
+## 8. Entidad Permiso
+
+Permiso representa una autorización funcional concreta.
+
+### Atributos
+
+- `IdPermiso`
+- `Codigo`
+- `Nombre`
+- `Descripcion`
+- `Activo`
+
+### Reglas principales
+
+- Código obligatorio.
+- Nombre obligatorio.
+- Código normalizado a mayúsculas.
+- Descripción opcional.
+- Nace activo.
+- Puede activarse y desactivarse.
+- Un Permiso inactivo no es efectivo.
+
+Permiso implementa `IPermisoComponente` como componente hoja.
+
+## 9. Entidad Grupo
+
+Grupo representa una agrupación configurable de permisos.
+
+### Atributos
+
+- `IdGrupo`
+- `Codigo`
+- `Nombre`
+- `Descripcion`
+- `Activo`
+- `Componentes`
+
+### Comportamientos
+
+- `AgregarComponente`
+- `Activar`
+- `Desactivar`
+- `ObtenerPermisosEfectivos`
+
+### Reglas principales
+
+- Código obligatorio.
+- Nombre obligatorio.
+- Código normalizado a mayúsculas.
+- Puede contener Permisos.
+- Puede contener Grupos.
+- No admite componentes nulos.
+- No admite duplicados.
+- No puede contenerse a sí mismo.
+- No puede formar ciclos indirectos.
+- Un Grupo inactivo no aporta permisos.
+- Un Grupo hijo inactivo no aporta permisos.
+- Los permisos efectivos se deduplican por código.
+
+Grupo implementa `IPermisoComponente` como componente compuesto.
+
+## 10. Interfaz IPermisoComponente
+
+La interfaz permite tratar uniformemente a Permiso y Grupo.
+
+Expone:
+
+- `IdComponente`
+- `Codigo`
+- `Activo`
+- `ObtenerPermisosEfectivos()`
+
+Esta estructura implementa el patrón Composite.
+
+## 11. Relaciones
+
+### Persona y Usuario
+
+    Persona 1 -------- 0..1 Usuario
+
+Una Persona puede existir sin Usuario.
+
+Todo Usuario requiere una Persona.
+
+### Usuario y Grupo
+
+    Usuario N -------- N Grupo
+
+Un Usuario puede pertenecer a varios Grupos.
+
+Un Grupo puede asignarse a varios Usuarios.
+
+La tabla asociativa futura será `UsuarioGrupo`.
+
+### Grupo y componentes
+
+    Grupo 1 -------- 0..N IPermisoComponente
+
+Un componente puede ser:
+
+- Permiso;
+- Grupo.
+
+La persistencia deberá representar la estructura sin introducir ciclos.
 
 ### Viaje y Visita
 
@@ -199,160 +310,114 @@ Se implementará mediante:
 
 Cada Visita pertenece a un único Viaje.
 
-No existen visitas independientes dentro del flujo funcional del sistema.
-
 ### Visita y Cliente
 
     Visita N -------- N Cliente
 
-Cada Visita debe tener al menos un Cliente.
+La tabla asociativa futura será `VisitaCliente`.
 
-Un Cliente puede aparecer en múltiples visitas históricas.
-
-En el dominio, la relación se representa desde Visita mediante una colección de Cliente.
-
-Cliente no mantiene una colección bidireccional de visitas porque no aporta comportamiento necesario en este incremento.
-
-## 8. Identificación de duplicados
+## 12. Identificación de duplicados
 
 ### Cliente dentro de Visita
 
-Dos clientes se consideran equivalentes para una asociación cuando:
+Se considera duplicado cuando:
 
-- son la misma referencia;
-- ambos tienen `IdCliente > 0` y el mismo identificador;
-- poseen el mismo CUIT normalizado.
-
-No se sobrescriben `Equals` ni `GetHashCode`.
-
-Esta decisión evita problemas de igualdad entre entidades nuevas sin identificador persistido.
+- es la misma referencia;
+- tiene el mismo `IdCliente` persistido;
+- tiene el mismo CUIT normalizado.
 
 ### Visita dentro de Viaje
 
-Dos visitas se consideran duplicadas cuando:
+Se considera duplicada cuando:
 
-- son la misma referencia;
-- ambas tienen `IdVisita > 0` y el mismo identificador.
+- es la misma referencia;
+- tiene el mismo `IdVisita` persistido.
 
-## 9. Enumeración TipoViaje
+### Grupo dentro de Usuario
 
-Valores exactos:
+Se considera duplicado cuando:
 
-- `Desplazamiento`
-- `EnOficina`
-- `EventoFeria`
+- es la misma referencia;
+- tiene el mismo identificador persistido;
+- tiene el mismo código normalizado.
 
-## 10. Enumeración EstadoViaje
+### Componente dentro de Grupo
 
-Valores exactos:
+Se considera duplicado cuando:
+
+- es la misma referencia;
+- tiene el mismo identificador persistido;
+- tiene el mismo código normalizado.
+
+No se sobrescribieron `Equals` ni `GetHashCode`.
+
+## 13. Patrón State
+
+El patrón State se aplica a Viaje.
+
+Estados:
 
 - `Abierto`
 - `EnRendicion`
 - `Aprobado`
 - `Cancelado`
 
-## 11. Enumeración EstadoViatico
+`IEstadoViaje` encapsula las operaciones dependientes del estado.
 
-Valores:
+`EstadoViajeFactory` reconstruye el comportamiento desde el enum persistible.
 
-- `Vigente`
-- `Excluido`
+## 14. Patrón Composite
 
-## 12. Patrón State
+El patrón Composite se aplica a la seguridad.
 
-La interfaz `IEstadoViaje` representa las operaciones cuyo resultado depende del estado actual.
+- Permiso es hoja.
+- Grupo es compuesto.
+- Grupo puede contener permisos y grupos.
+- La autorización consulta permisos efectivos sin distinguir el tipo concreto.
+- Se previenen ciclos y duplicados.
 
-Cada clase concreta encapsula las transiciones permitidas y rechaza las inválidas mediante `ReglaNegocioException`.
+## 15. Credenciales
 
-### Abierto
+Usuario almacena:
 
-Permite:
+- hash;
+- salt;
+- iteraciones.
 
-- Agregar viáticos.
-- Agregar visitas.
-- Enviar a rendición.
-- Cancelar cuando no existen visitas.
+No almacena:
 
-No permite:
+- contraseña en texto plano;
+- contraseña reversible;
+- algoritmo embebido en la entidad.
 
-- Aprobar directamente.
+La generación y verificación pertenece a `IPasswordHasher`.
 
-### EnRendicion
+## 16. Compatibilidad con persistencia
 
-Permite:
+La persistencia futura requerirá:
 
-- Aprobar.
-- Cancelar cuando no existen visitas.
-- Excluir viáticos.
-- Reactivar viáticos.
+- `Persona`
+- `Usuario`
+- `Grupo`
+- `Permiso`
+- `UsuarioGrupo`
+- estructura de componentes de Grupo
+- `Viaje`
+- `Viatico`
+- `Cliente`
+- `Visita`
+- `VisitaCliente`
 
-Bloquea:
+Los objetos de comportamiento State no se almacenarán directamente.
 
-- Agregar viáticos.
-- Agregar visitas.
-- Modificaciones administrativas generales.
+## 17. Pendientes
 
-### Aprobado
-
-Es final.
-
-No permite:
-
-- Modificar.
-- Agregar viáticos.
-- Agregar visitas.
-- Enviar a rendición.
-- Aprobar nuevamente.
-- Cancelar.
-
-### Cancelado
-
-Es final.
-
-No permite:
-
-- Modificar.
-- Agregar viáticos.
-- Agregar visitas.
-- Enviar a rendición.
-- Aprobar.
-- Cancelar nuevamente.
-
-## 13. Cancelación condicionada
-
-Antes de ejecutar la transición del patrón State, `Viaje.Cancelar()` verifica la colección de visitas.
-
-Cuando existe al menos una visita:
-
-- se genera `ReglaNegocioException`;
-- no se ejecuta la transición;
-- el estado anterior se conserva.
-
-La regla se aplica tanto en Abierto como en EnRendicion.
-
-## 14. Compatibilidad con persistencia
-
-El objeto State se mantiene únicamente en memoria.
-
-Para persistencia se utilizará `EstadoViaje`.
-
-Al reconstruir el agregado, `EstadoViajeFactory` transforma el enum almacenado en una implementación concreta de `IEstadoViaje`.
-
-La persistencia futura utilizará:
-
-- tabla `Viaje`;
-- tabla `Viatico`;
-- tabla `Cliente`;
-- tabla `Visita`;
-- tabla asociativa `VisitaCliente`.
-
-## 15. Pendientes del modelo
-
-- Reconstrucción completa del agregado con colecciones persistidas.
-- Unicidad global de CUIT.
-- Casos de uso de modificación de Cliente.
-- Persistencia de Visita y Cliente.
-- Persistencia de `VisitaCliente`.
-- Consultas históricas.
-- Auditoría de exclusión de viáticos.
-- Servicios de autorización.
+- Repositorios de seguridad.
+- Reconstrucción de Usuario con Grupos.
+- Persistencia de Composite.
+- Unicidad de nombre de usuario.
+- Unicidad de CUIT.
+- Casos de uso de gestión.
+- Auditoría.
+- Interfaz.
+- Pruebas de integración con SQL Server.

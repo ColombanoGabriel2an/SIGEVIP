@@ -1,10 +1,10 @@
-# Reglas de negocio: Viajes, Viáticos, Clientes y Visitas
+# Reglas de negocio de SIGEVIP
 
-## 1. Reglas de Viaje y Viático implementadas
+## 1. Viaje y Viático
 
 ### RN-VIA-01
 
-Un viaje nuevo nace en estado `Abierto`.
+Un Viaje nuevo nace en estado `Abierto`.
 
 ### RN-VIA-02
 
@@ -12,11 +12,7 @@ La fecha de inicio no puede ser posterior a la fecha de fin.
 
 ### RN-VIA-03
 
-El tipo de viaje debe ser uno de los valores definidos:
-
-- Desplazamiento.
-- EnOficina.
-- EventoFeria.
+El tipo debe ser un valor definido.
 
 ### RN-VIA-04
 
@@ -24,107 +20,63 @@ El monto anticipado no puede ser negativo.
 
 ### RN-VIA-05
 
-Solo un viaje en estado `Abierto` admite la incorporación de nuevos viáticos.
+Solo un Viaje Abierto admite nuevos Viáticos.
 
 ### RN-VIA-06
 
-Un viaje `Abierto` puede pasar a `EnRendicion`.
+Solo un Viaje Abierto admite nuevas Visitas.
 
 ### RN-VIA-07
 
-Un viaje `EnRendicion` puede pasar a `Aprobado`.
+Abierto puede pasar a EnRendicion.
 
 ### RN-VIA-08
 
-Un viaje no puede aprobarse directamente desde `Abierto`.
+EnRendicion puede pasar a Aprobado.
 
 ### RN-VIA-09
 
-Un viaje sin visitas puede cancelarse desde `Abierto` o `EnRendicion`.
+Abierto y EnRendicion pueden cancelarse cuando no poseen Visitas.
 
 ### RN-VIA-10
 
-Un viaje con una o más visitas registradas no puede cancelarse.
+Un Viaje con Visitas no puede cancelarse.
 
 ### RN-VIA-11
 
-Cuando una cancelación se rechaza por visitas existentes, el estado previo se conserva.
+Aprobado y Cancelado son estados finales.
 
 ### RN-VIA-12
 
-`Aprobado` es un estado final.
+Las transiciones inválidas generan `ReglaNegocioException`.
 
 ### RN-VIA-13
 
-`Cancelado` es un estado final.
+El monto de un Viático debe ser mayor que cero.
 
 ### RN-VIA-14
 
-Las transiciones inválidas generan `ReglaNegocioException`.
+La fecha del Viático debe estar dentro del período.
 
 ### RN-VIA-15
 
-La colección de viáticos no puede modificarse desde el exterior.
+Todo Viático nace Vigente.
 
 ### RN-VIA-16
 
-Un mismo objeto viático no puede agregarse dos veces.
+La exclusión del Viático es lógica.
 
 ### RN-VIA-17
 
-Un viático asociado a un viaje no puede reasignarse.
+Solo los Viáticos vigentes integran el total gastado.
 
 ### RN-VIA-18
 
-La fecha del viático debe estar entre `FechaInicio` y `FechaFin`, inclusive.
-
-### RN-VIA-19
-
-El monto de un viático debe ser mayor que cero.
-
-### RN-VIA-20
-
-Todo viático nuevo nace en estado `Vigente`.
-
-### RN-VIA-21
-
-La exclusión de un viático es lógica.
-
-### RN-VIA-22
-
-Un viático puede excluirse o reactivarse mientras el viaje está `EnRendicion`.
-
-### RN-VIA-23
-
-Solo los viáticos vigentes participan de `TotalGastado`.
-
-### RN-VIA-24
-
-Cuando no existen viáticos vigentes, `TotalGastado` es cero.
-
-### RN-VIA-25
-
 El saldo se calcula mediante:
 
-    SaldoPendiente = TotalGastado - MontoAnticipado
+    TotalGastado - MontoAnticipado
 
-### RN-VIA-26
-
-Cuando el saldo es mayor que cero, la empresa debe pagar la diferencia.
-
-### RN-VIA-27
-
-Cuando el saldo es menor que cero, corresponde una devolución a la empresa.
-
-### RN-VIA-28
-
-Cuando el saldo es igual a cero, no existe diferencia económica.
-
-### RN-VIA-29
-
-La liquidación económica se realiza fuera de SIGEVIP.
-
-## 2. Reglas de Cliente implementadas
+## 2. Cliente y Visita
 
 ### RN-CLI-01
 
@@ -140,158 +92,356 @@ El CUIT se normaliza eliminando espacios y guiones.
 
 ### RN-CLI-04
 
-La normalización no constituye una validación fiscal estricta.
+Cliente nace activo.
 
 ### RN-CLI-05
 
-Todo cliente nuevo nace activo.
+Cliente utiliza baja lógica.
 
 ### RN-CLI-06
 
-Un cliente puede desactivarse lógicamente.
-
-### RN-CLI-07
-
-Un cliente desactivado puede volver a activarse.
-
-### RN-CLI-08
-
-Cliente no se elimina físicamente.
-
-### RN-CLI-09
-
-La unicidad global de CUIT no se controla dentro de la entidad.
-
-## 3. Reglas de Visita implementadas
+La unicidad global del CUIT no pertenece a la entidad.
 
 ### RN-VIS-01
 
-Toda visita debe incorporarse a un viaje existente.
+Toda Visita debe pertenecer a un Viaje.
 
 ### RN-VIS-02
 
-Solo un viaje `Abierto` admite nuevas visitas.
+La fecha debe estar dentro del período del Viaje.
 
 ### RN-VIS-03
 
-EnRendicion, Aprobado y Cancelado bloquean nuevas visitas.
+La observación es obligatoria.
 
 ### RN-VIS-04
 
-La fecha de la visita debe estar entre `FechaInicio` y `FechaFin`, inclusive.
+La localidad del encuentro es obligatoria.
 
 ### RN-VIS-05
 
-La observación es obligatoria.
+Una Visita debe tener al menos un Cliente.
 
 ### RN-VIS-06
 
-La localidad del encuentro es obligatoria.
+Puede asociarse con varios Clientes.
 
 ### RN-VIS-07
 
-Una visita debe tener al menos un cliente antes de incorporarse a un viaje.
+No admite Clientes nulos.
 
 ### RN-VIS-08
 
-Una visita puede asociarse con uno o varios clientes.
+No admite Clientes duplicados.
 
 ### RN-VIS-09
 
-No se admiten clientes nulos.
+Una Visita no puede reasignarse a otro Viaje.
 
-### RN-VIS-10
+## 3. Persona
 
-No se admite dos veces el mismo cliente en una visita.
+### RN-PER-01
 
-### RN-VIS-11
+Nombre es obligatorio.
 
-La colección de clientes no puede modificarse directamente desde el exterior.
+### RN-PER-02
 
-### RN-VIS-12
+Apellido es obligatorio.
 
-La colección de visitas del viaje no puede modificarse directamente desde el exterior.
+### RN-PER-03
 
-### RN-VIS-13
+Email es obligatorio.
 
-Una visita no puede agregarse dos veces al mismo viaje.
+### RN-PER-04
 
-### RN-VIS-14
+Persona nace activa.
 
-Una visita asociada a un viaje no puede reasignarse a otro.
+### RN-PER-05
 
-### RN-VIS-15
+La baja de Persona es lógica.
 
-La localidad concreta del encuentro pertenece a Visita.
+### RN-PER-06
 
-### RN-VIS-16
+Persona puede reactivarse.
 
-La localidad habitual pertenece a Cliente.
+## 4. Usuario
 
-### RN-VIS-17
+### RN-USU-01
 
-Viatico pertenece exclusivamente a Viaje y no a Visita.
+Todo Usuario debe estar asociado con una Persona válida.
 
-## 4. Reglas de identificación de duplicados
+### RN-USU-02
 
-### RN-DUP-01
+El nombre de usuario es obligatorio.
 
-Un cliente se considera repetido si es la misma referencia.
+### RN-USU-03
 
-### RN-DUP-02
+El nombre se normaliza eliminando espacios exteriores y convirtiéndolo a minúsculas.
 
-Un cliente persistido se considera repetido cuando posee el mismo `IdCliente` mayor que cero.
+### RN-USU-04
 
-### RN-DUP-03
+Usuario no almacena contraseña en texto plano.
 
-Un cliente se considera repetido cuando posee el mismo CUIT normalizado.
+### RN-USU-05
 
-### RN-DUP-04
+Hash y salt son obligatorios.
 
-Una visita se considera repetida si es la misma referencia.
+### RN-USU-06
 
-### RN-DUP-05
+Las iteraciones deben ser mayores que cero.
 
-Una visita persistida se considera repetida cuando posee el mismo `IdVisita` mayor que cero.
+### RN-USU-07
 
-## 5. Reglas pendientes
+Usuario nace activo.
+
+### RN-USU-08
+
+Usuario puede desactivarse y reactivarse.
+
+### RN-USU-09
+
+Usuario puede pertenecer a uno o varios Grupos.
+
+### RN-USU-10
+
+No se admiten Grupos nulos.
+
+### RN-USU-11
+
+No se admiten Grupos duplicados.
+
+### RN-USU-12
+
+La colección de Grupos no puede modificarse directamente.
+
+### RN-USU-13
+
+La unicidad global del nombre de usuario se controlará fuera de la entidad.
+
+## 5. Grupo y Permiso
+
+### RN-SEG-01
+
+El código de Permiso es obligatorio.
+
+### RN-SEG-02
+
+El nombre de Permiso es obligatorio.
+
+### RN-SEG-03
+
+El código de Permiso se normaliza a mayúsculas.
+
+### RN-SEG-04
+
+Permiso nace activo.
+
+### RN-SEG-05
+
+Un Permiso inactivo no es efectivo.
+
+### RN-SEG-06
+
+El código de Grupo es obligatorio.
+
+### RN-SEG-07
+
+El nombre de Grupo es obligatorio.
+
+### RN-SEG-08
+
+Grupo nace activo.
+
+### RN-SEG-09
+
+Grupo puede contener Permisos.
+
+### RN-SEG-10
+
+Grupo puede contener otros Grupos.
+
+### RN-SEG-11
+
+Grupo no admite componentes nulos.
+
+### RN-SEG-12
+
+Grupo no admite componentes duplicados.
+
+### RN-SEG-13
+
+Grupo no puede contenerse a sí mismo.
+
+### RN-SEG-14
+
+Grupo no puede formar ciclos indirectos.
+
+### RN-SEG-15
+
+Grupo inactivo no aporta permisos.
+
+### RN-SEG-16
+
+Grupo hijo inactivo no aporta permisos.
+
+### RN-SEG-17
+
+Los permisos efectivos se deduplican por código normalizado.
+
+## 6. Autenticación
+
+### RN-AUT-01
+
+Nombre de usuario y contraseña son obligatorios para autenticar.
+
+### RN-AUT-02
+
+El nombre de usuario se normaliza antes de consultar el repositorio.
+
+### RN-AUT-03
+
+Usuario inexistente no puede autenticarse.
+
+### RN-AUT-04
+
+Usuario inactivo no puede autenticarse.
+
+### RN-AUT-05
+
+Contraseña incorrecta no puede autenticarse.
+
+### RN-AUT-06
+
+Las credenciales inválidas producen un resultado fallido y no una excepción de flujo normal.
+
+### RN-AUT-07
+
+Usuario inexistente, inactivo y contraseña incorrecta utilizan el mismo mensaje público.
+
+### RN-AUT-08
+
+Una autenticación exitosa devuelve el Usuario autenticado.
+
+## 7. Autorización
+
+### RN-AUTZ-01
+
+Usuario nulo no está autorizado.
+
+### RN-AUTZ-02
+
+Usuario inactivo no está autorizado.
+
+### RN-AUTZ-03
+
+El código de permiso solicitado es obligatorio.
+
+### RN-AUTZ-04
+
+El código se normaliza antes de comparar.
+
+### RN-AUTZ-05
+
+La autorización considera todos los Grupos activos del Usuario.
+
+### RN-AUTZ-06
+
+La autorización considera Permisos anidados.
+
+### RN-AUTZ-07
+
+La autorización ignora Grupos y Permisos inactivos.
+
+### RN-AUTZ-08
+
+La ausencia del Permiso produce resultado falso.
+
+## 8. Sesión
+
+### RN-SES-01
+
+Una sesión nueva comienza sin Usuario.
+
+### RN-SES-02
+
+Solo un Usuario activo puede iniciar sesión.
+
+### RN-SES-03
+
+No puede iniciarse sesión con Usuario nulo.
+
+### RN-SES-04
+
+Cerrar sesión elimina el Usuario actual.
+
+### RN-SES-05
+
+La sesión no se implementa mediante estado global estático.
+
+## 9. Hash de contraseñas
+
+### RN-CRY-01
+
+Las contraseñas se transforman mediante PBKDF2-HMAC-SHA256.
+
+### RN-CRY-02
+
+Cada creación de hash genera un salt aleatorio.
+
+### RN-CRY-03
+
+El salt posee 32 bytes.
+
+### RN-CRY-04
+
+El hash posee 32 bytes.
+
+### RN-CRY-05
+
+La implementación actual utiliza 100000 iteraciones.
+
+### RN-CRY-06
+
+Las iteraciones se almacenan con las credenciales.
+
+### RN-CRY-07
+
+La comparación de hashes se realiza en tiempo constante.
+
+### RN-CRY-08
+
+Un hash modificado no valida la contraseña.
+
+### RN-CRY-09
+
+Una contraseña vacía no puede procesarse.
+
+## 10. Reglas pendientes
 
 ### RN-PEN-01
 
-La exclusión de un viático deberá registrar:
-
-- Motivo.
-- Usuario.
-- Fecha y hora.
-
-Estado: pendiente de Application, seguridad, auditoría y persistencia.
+La unicidad de nombre de usuario debe asegurarse mediante servicio, repositorio e índice único.
 
 ### RN-PEN-02
 
-Solo el rol Administrativo podrá cargar viáticos, registrar visitas y enviar el viaje a rendición.
-
-Estado: pendiente de la capa Application.
+La unicidad de CUIT debe asegurarse mediante servicio, repositorio e índice único.
 
 ### RN-PEN-03
 
-Solo el rol Gerente podrá excluir viáticos y aprobar el viaje completo.
-
-Estado: pendiente de la capa Application.
+La exclusión de Viáticos debe registrar motivo, Usuario y fecha.
 
 ### RN-PEN-04
 
-La unicidad global de CUIT deberá controlarse mediante repositorio, servicio e índice único.
-
-Estado: pendiente de Application, Infrastructure y SQL Server.
+Los casos de uso funcionales deberán consultar `AutorizacionService`.
 
 ### RN-PEN-05
 
-Las consultas históricas de clientes y visitas requieren repositorios y servicios.
-
-Estado: pendiente.
+La interfaz deberá ocultar o deshabilitar acciones no autorizadas.
 
 ### RN-PEN-06
 
-El comprobante y sus validaciones fiscales se incorporarán en una ampliación posterior del modelo de viáticos.
+Cambio y recuperación de contraseña requieren definición e implementación adicional.
 
-Estado: pendiente de definición.
+### RN-PEN-07
+
+La persistencia del Composite debe impedir ciclos también a nivel de datos.

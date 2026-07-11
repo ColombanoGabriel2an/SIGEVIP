@@ -2,115 +2,134 @@
 
 ## Etapa actual
 
-Etapa 2: modelo de dominio.
+Etapa 3: autenticación, usuarios, grupos, permisos y seguridad.
 
-Bloque actual: Cliente, Visita e integración de visitas con Viaje.
+Bloque actual: cierre documental del dominio y servicios básicos de seguridad.
 
 ## Rama de trabajo
 
 `desarrollo/dominio-viajes-viaticos`
 
-## Punto de partida del Bloque 2
+## Último commit técnico publicado
 
-- Rama base conservada: `desarrollo/dominio-viajes-viaticos`
-- Commit inicial aprobado: `90edf06`
-- Mensaje: `Implemento dominio de viajes y viáticos`
-- Working tree inicial verificado como limpio.
-- Rama local sincronizada con `origin/desarrollo/dominio-viajes-viaticos`.
+- Commit: `64a2161`
+- Mensaje: `Incorporo hash seguro de contraseñas`
+
+La rama local se encuentra sincronizada con:
+
+`origin/desarrollo/dominio-viajes-viaticos`
 
 ## Completado previamente
 
 - Repositorio Git configurado.
 - Remoto GitHub verificado.
 - Solución ubicada en la raíz.
-- Proyectos Domain, Application, Infrastructure, WinForms y Tests creados.
-- Referencias entre proyectos configuradas.
-- Todos los proyectos configurados para .NET Framework 4.8.
-- Proyecto MSTest configurado.
-- SQL Server configurado.
-- Base de datos `SIGEVIP` creada.
-- Conexión mediante autenticación integrada comprobada.
-- Aplicación WinForms mínima compilada y ejecutada.
-- Documentación técnica inicial creada.
-- Dominio de Viaje y Viatico.
-- Patrón State aplicado a Viaje.
-- Reglas económicas.
-- Exclusión y reactivación lógica de viáticos.
-- Excepción `ReglaNegocioException`.
+- Proyectos Domain, Application, Infrastructure, WinForms y Tests.
+- .NET Framework 4.8.
+- MSTest.
+- SQL Server local.
+- Base `SIGEVIP`.
+- Conexión integrada comprobada.
+- Aplicación WinForms mínima.
+- Dominio de Viaje y Viático.
+- Patrón State.
+- Cliente.
+- Visita.
+- Relación Viaje-Visita.
+- Relación muchos a muchos Visita-Cliente.
 
-## Completado en el Bloque 2
+## Completado en el Bloque 3
 
-### Cliente
+### Persona
 
-- Entidad `Cliente`.
-- Razón social obligatoria.
-- CUIT obligatorio.
-- Normalización básica del CUIT.
-- Estado inicial activo.
-- Activación.
-- Desactivación lógica.
-- Conservación de datos históricos.
-- Sin borrado físico.
+- Entidad separada de Usuario.
+- Nombre obligatorio.
+- Apellido obligatorio.
+- Email obligatorio.
+- Estado activo inicial.
+- Activación y desactivación lógica.
 
-### Visita
+### Usuario
 
-- Entidad `Visita`.
-- Fecha de visita.
-- Observación obligatoria.
-- Localidad del encuentro obligatoria.
-- Asociación controlada con uno o varios clientes.
-- Colección privada de clientes.
-- Exposición mediante `IReadOnlyCollection<Cliente>`.
-- Prevención de clientes nulos.
-- Prevención de asociaciones duplicadas.
-- Asociación controlada con un viaje.
+- Asociación obligatoria con Persona.
+- Nombre de usuario normalizado.
+- Hash, salt e iteraciones.
+- Copias defensivas de datos criptográficos.
+- Activación y desactivación.
+- Asociación con uno o varios grupos.
+- Prevención de grupos nulos y duplicados.
 
-### Integración con Viaje
+### Permiso
 
-- Colección privada de visitas.
-- Exposición mediante `IReadOnlyCollection<Visita>`.
-- Alta de visitas como operación del agregado Viaje.
-- Validación de estado Abierto.
-- Validación de fecha dentro del período.
-- Validación de al menos un cliente.
-- Prevención de visitas duplicadas.
-- Prevención de reasignación a otro viaje.
-- Bloqueo de nuevas visitas en EnRendicion, Aprobado y Cancelado.
-- Bloqueo de cancelación cuando existen visitas registradas.
-- Conservación del estado cuando la cancelación es rechazada.
+- Código obligatorio y normalizado.
+- Nombre obligatorio.
+- Descripción opcional.
+- Estado activo.
+- Activación y desactivación.
+- Componente hoja del patrón Composite.
 
-### Relación Visita-Cliente
+### Grupo
 
-- Relación muchos a muchos representada en el dominio mediante la colección de clientes de Visita.
-- Cliente no mantiene una colección bidireccional de visitas.
-- La tabla asociativa futura se denominará `VisitaCliente`.
-- La persistencia SQL de esta relación todavía no fue implementada.
+- Código obligatorio y normalizado.
+- Nombre obligatorio.
+- Descripción opcional.
+- Estado activo.
+- Activación y desactivación.
+- Componente compuesto.
+- Permisos directos.
+- Grupos anidados.
+- Prevención de duplicados.
+- Prevención de ciclos directos e indirectos.
+- Obtención de permisos efectivos.
+- Eliminación de permisos repetidos.
 
-## Decisión de identificación de duplicados
+### Autenticación
 
-### Clientes dentro de una visita
+- Contrato `IUsuarioAutenticacionRepository`.
+- Contrato `IPasswordHasher`.
+- Servicio `AutenticacionService`.
+- Resultado explícito de autenticación.
+- Rechazo de entradas vacías.
+- Rechazo de usuario inexistente.
+- Rechazo de usuario inactivo.
+- Rechazo de contraseña incorrecta.
+- Mensaje público genérico.
+- Normalización del nombre de usuario.
 
-Un cliente se considera repetido cuando:
+### Autorización
 
-- es la misma referencia;
-- ambos objetos tienen `IdCliente` mayor que cero e igual;
-- ambos objetos poseen el mismo CUIT normalizado.
+- Servicio `AutorizacionService`.
+- Consulta por código de permiso.
+- Normalización de código.
+- Unión de permisos de múltiples grupos.
+- Soporte de permisos anidados.
+- Rechazo de usuario nulo o inactivo.
 
-No se sobrescribieron `Equals` ni `GetHashCode`.
+### Sesión
 
-### Visitas dentro de un viaje
+- Contrato `ISesionActual`.
+- Implementación `SesionActual`.
+- Sesión no estática.
+- Inicio con usuario activo.
+- Cierre de sesión.
+- Rechazo de usuario nulo o inactivo.
 
-Una visita se considera repetida cuando:
+### Hash seguro
 
-- es la misma referencia;
-- ambos objetos tienen `IdVisita` mayor que cero e igual.
+- Implementación `Pbkdf2PasswordHasher`.
+- PBKDF2-HMAC-SHA256.
+- Salt aleatorio de 32 bytes.
+- Hash de 32 bytes.
+- 100000 iteraciones.
+- Comparación en tiempo constante.
+- Sin dependencias externas.
 
-## Commits realizados en el Bloque 2
+## Commits del Bloque 3
 
-- `dd6915d` — `Agrego dominio de clientes y visitas`
-- `4ee6c1e` — `Integro visitas al agregado Viaje`
-
-El commit documental se registrará después de validar estos documentos.
+- `09f90eb` — `Agrego dominio de personas y usuarios`
+- `b69fa36` — `Implemento Composite de grupos y permisos`
+- `ea8e92e` — `Agrego autenticación y autorización`
+- `64a2161` — `Incorporo hash seguro de contraseñas`
 
 ## Resultado técnico verificado
 
@@ -118,55 +137,69 @@ Compilación:
 
 - 0 advertencias.
 - 0 errores.
+- Tiempo registrado: 1,29 segundos.
 
 Pruebas:
 
-- Pruebas totales: 71.
-- Pruebas correctas: 71.
-- Pruebas fallidas: 0.
-- Pruebas omitidas: 0.
+- Totales: 145.
+- Correctas: 145.
+- Fallidas: 0.
+- Omitidas: 0.
+- Tiempo registrado: 4,0902 segundos.
 
-Ejecutor utilizado:
+Ejecutor:
 
 `VSTest 17.13.0 x64`
 
-Tiempo total registrado en la última ejecución:
+## Estado de requisitos de seguridad
 
-`0,8536 segundos`
+### Parcialmente implementados
 
-## Estado del repositorio antes del commit documental
+- RF01: iniciar sesión.
+- RF02: gestionar usuarios.
+- RF03: modificar usuarios.
 
-- Rama local sincronizada con la rama remota.
-- Último commit publicado: `4ee6c1e`.
-- Working tree limpio antes de modificar la documentación.
-- No se realizó merge a `main`.
-- No se creó una nueva rama.
+Faltan persistencia e interfaz.
+
+### Implementado en dominio
+
+- RF04: eliminar o desactivar usuario.
+
+Se implementó como desactivación lógica.
+
+### Implementado en Application
+
+- RF37: validar permisos antes de ejecutar operaciones.
+- RF39: restringir acceso según permisos.
+
+La aplicación concreta de estos servicios a cada caso de uso se realizará en bloques funcionales posteriores.
+
+### Pendiente
+
+- RF38: ocultar o deshabilitar funciones no autorizadas en la interfaz.
 
 ## Pendiente inmediato
 
-- Revisar diferencias documentales.
-- Validar que no existan errores de formato.
+- Actualizar documentación del Bloque 3.
+- Validar diferencias documentales.
+- Compilar nuevamente.
+- Ejecutar las 145 pruebas.
 - Crear commit documental.
-- Ejecutar compilación y pruebas finales del Bloque 2.
-- Subir el commit documental.
-- Preparar el informe de cierre para MAESTRO.
+- Publicar el commit.
+- Generar informe de transferencia para MAESTRO.
 
-## Pendiente de bloques posteriores
+## Pendiente de etapas posteriores
 
-- Modificación completa de clientes mediante casos de uso.
-- Unicidad global de CUIT.
-- Repositorios de Cliente, Viaje y Visita.
-- Persistencia de la relación `VisitaCliente`.
-- Consultas históricas.
-- Listados y filtros.
-- Persona y participantes del viaje.
-- Seguridad, usuarios, grupos y permisos.
-- Patrón Composite.
-- Autorización por roles.
-- Servicios de aplicación.
-- Migraciones SQL.
+- Tablas SQL de Persona, Usuario, Grupo y Permiso.
+- Relaciones UsuarioGrupo.
+- Relaciones GrupoComponente.
+- Repositorio ADO.NET de autenticación.
+- Unicidad de nombre de usuario.
+- Datos iniciales de grupos y permisos.
+- Interfaz de login.
+- Gestión visual de usuarios.
+- Cambio de contraseña.
+- Recuperación de contraseña.
 - Auditoría persistente.
-- Interfaz funcional Windows Forms.
-- Reportes.
-- Mapas y geolocalización.
+- Aplicación de permisos a casos de uso.
 - Pruebas de integración con SQL Server.
