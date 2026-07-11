@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="ArchitectureTests.cs" />
     <Compile Include="Domain\ClienteTests.cs" />
+    <Compile Include="Domain\GrupoPermisoTests.cs" />
     <Compile Include="Domain\PersonaTests.cs" />
     <Compile Include="Domain\UsuarioTests.cs" />
     <Compile Include="Domain\ViajeTests.cs" />

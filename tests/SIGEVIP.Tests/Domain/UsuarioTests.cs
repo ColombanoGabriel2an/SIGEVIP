@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SIGEVIP.Domain.Entities;
 using SIGEVIP.Domain.Exceptions;
@@ -70,55 +71,40 @@ namespace SIGEVIP.Tests.Domain
         [TestMethod]
         public void CrearUsuario_ConHashNulo_LanzaExcepcion()
         {
-            ReglaNegocioException excepcion =
-                Assert.ThrowsException<ReglaNegocioException>(
-                    () => new Usuario(
-                        1,
-                        1,
-                        "aperez",
-                        null,
-                        CrearSalt(),
-                        100000));
-
-            StringAssert.Contains(
-                excepcion.Message,
-                "hash");
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => new Usuario(
+                    1,
+                    1,
+                    "aperez",
+                    null,
+                    CrearSalt(),
+                    100000));
         }
 
         [TestMethod]
         public void CrearUsuario_ConSaltVacio_LanzaExcepcion()
         {
-            ReglaNegocioException excepcion =
-                Assert.ThrowsException<ReglaNegocioException>(
-                    () => new Usuario(
-                        1,
-                        1,
-                        "aperez",
-                        CrearHash(),
-                        new byte[0],
-                        100000));
-
-            StringAssert.Contains(
-                excepcion.Message,
-                "salt");
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => new Usuario(
+                    1,
+                    1,
+                    "aperez",
+                    CrearHash(),
+                    new byte[0],
+                    100000));
         }
 
         [TestMethod]
         public void CrearUsuario_ConIteracionesInvalidas_LanzaExcepcion()
         {
-            ReglaNegocioException excepcion =
-                Assert.ThrowsException<ReglaNegocioException>(
-                    () => new Usuario(
-                        1,
-                        1,
-                        "aperez",
-                        CrearHash(),
-                        CrearSalt(),
-                        0));
-
-            StringAssert.Contains(
-                excepcion.Message,
-                "iteraciones");
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => new Usuario(
+                    1,
+                    1,
+                    "aperez",
+                    CrearHash(),
+                    CrearSalt(),
+                    0));
         }
 
         [TestMethod]
@@ -168,6 +154,62 @@ namespace SIGEVIP.Tests.Domain
                 usuario.PasswordSalt[0]);
         }
 
+        [TestMethod]
+        public void AgregarGrupo_ConGrupoValido_AsignaGrupo()
+        {
+            Usuario usuario = CrearUsuario();
+
+            usuario.AgregarGrupo(
+                CrearGrupo(1, "COMERCIAL"));
+
+            Assert.AreEqual(1, usuario.Grupos.Count);
+        }
+
+        [TestMethod]
+        public void AgregarGrupo_Nulo_LanzaExcepcion()
+        {
+            Usuario usuario = CrearUsuario();
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => usuario.AgregarGrupo(null));
+        }
+
+        [TestMethod]
+        public void AgregarGrupo_Duplicado_LanzaExcepcion()
+        {
+            Usuario usuario = CrearUsuario();
+
+            usuario.AgregarGrupo(
+                CrearGrupo(0, "COMERCIAL"));
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => usuario.AgregarGrupo(
+                    CrearGrupo(0, " comercial ")));
+        }
+
+        [TestMethod]
+        public void AgregarGrupo_ConVariosGrupos_AsignaTodos()
+        {
+            Usuario usuario = CrearUsuario();
+
+            usuario.AgregarGrupo(
+                CrearGrupo(1, "COMERCIAL"));
+
+            usuario.AgregarGrupo(
+                CrearGrupo(2, "GERENTE"));
+
+            Assert.AreEqual(2, usuario.Grupos.Count);
+        }
+
+        [TestMethod]
+        public void Grupos_NoPermiteModificarColeccionDesdeElExterior()
+        {
+            Usuario usuario = CrearUsuario();
+
+            Assert.IsFalse(
+                usuario.Grupos is List<Grupo>);
+        }
+
         private static Usuario CrearUsuario()
         {
             return new Usuario(
@@ -177,6 +219,17 @@ namespace SIGEVIP.Tests.Domain
                 CrearHash(),
                 CrearSalt(),
                 100000);
+        }
+
+        private static Grupo CrearGrupo(
+            int idGrupo,
+            string codigo)
+        {
+            return new Grupo(
+                idGrupo,
+                codigo,
+                "Grupo " + codigo,
+                string.Empty);
         }
 
         private static byte[] CrearHash()

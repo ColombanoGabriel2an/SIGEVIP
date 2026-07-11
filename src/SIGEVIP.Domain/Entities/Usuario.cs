@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using SIGEVIP.Domain.Exceptions;
 
 namespace SIGEVIP.Domain.Entities
@@ -7,6 +10,7 @@ namespace SIGEVIP.Domain.Entities
     {
         private readonly byte[] _passwordHash;
         private readonly byte[] _passwordSalt;
+        private readonly List<Grupo> _grupos;
 
         public Usuario(
             int idUsuario,
@@ -54,6 +58,7 @@ namespace SIGEVIP.Domain.Entities
 
             _passwordHash = CopiarArreglo(passwordHash);
             _passwordSalt = CopiarArreglo(passwordSalt);
+            _grupos = new List<Grupo>();
         }
 
         public int IdUsuario { get; private set; }
@@ -76,6 +81,14 @@ namespace SIGEVIP.Domain.Entities
             get { return CopiarArreglo(_passwordSalt); }
         }
 
+        public IReadOnlyCollection<Grupo> Grupos
+        {
+            get
+            {
+                return new ReadOnlyCollection<Grupo>(_grupos);
+            }
+        }
+
         public void Activar()
         {
             Activo = true;
@@ -86,12 +99,53 @@ namespace SIGEVIP.Domain.Entities
             Activo = false;
         }
 
+        public void AgregarGrupo(Grupo grupo)
+        {
+            if (grupo == null)
+            {
+                throw new ReglaNegocioException(
+                    "Debe indicar un grupo válido.");
+            }
+
+            if (_grupos.Any(
+                existente =>
+                    SonElMismoGrupo(existente, grupo)))
+            {
+                throw new ReglaNegocioException(
+                    "El grupo ya se encuentra asignado al usuario.");
+            }
+
+            _grupos.Add(grupo);
+        }
+
         internal static string NormalizarNombreUsuario(
             string nombreUsuario)
         {
             return string.IsNullOrWhiteSpace(nombreUsuario)
                 ? string.Empty
                 : nombreUsuario.Trim().ToLowerInvariant();
+        }
+
+        private static bool SonElMismoGrupo(
+            Grupo existente,
+            Grupo candidato)
+        {
+            if (ReferenceEquals(existente, candidato))
+            {
+                return true;
+            }
+
+            if (existente.IdGrupo > 0 &&
+                candidato.IdGrupo > 0 &&
+                existente.IdGrupo == candidato.IdGrupo)
+            {
+                return true;
+            }
+
+            return string.Equals(
+                Grupo.NormalizarCodigo(existente.Codigo),
+                Grupo.NormalizarCodigo(candidato.Codigo),
+                StringComparison.OrdinalIgnoreCase);
         }
 
         private static byte[] CopiarArreglo(byte[] origen)
