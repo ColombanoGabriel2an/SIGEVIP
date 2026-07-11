@@ -11,6 +11,7 @@ namespace SIGEVIP.Domain.Entities
     public sealed class Viaje
     {
         private readonly List<Viatico> _viaticos;
+        private readonly List<Visita> _visitas;
         private IEstadoViaje _estadoActual;
 
         public Viaje(
@@ -66,6 +67,7 @@ namespace SIGEVIP.Domain.Entities
             MontoAnticipado = montoAnticipado;
 
             _viaticos = new List<Viatico>();
+            _visitas = new List<Visita>();
             _estadoActual = EstadoViajeFactory.Crear(estado);
         }
 
@@ -88,7 +90,20 @@ namespace SIGEVIP.Domain.Entities
 
         public IReadOnlyCollection<Viatico> Viaticos
         {
-            get { return new ReadOnlyCollection<Viatico>(_viaticos); }
+            get
+            {
+                return new ReadOnlyCollection<Viatico>(
+                    _viaticos);
+            }
+        }
+
+        public IReadOnlyCollection<Visita> Visitas
+        {
+            get
+            {
+                return new ReadOnlyCollection<Visita>(
+                    _visitas);
+            }
         }
 
         public decimal TotalGastado
@@ -96,7 +111,10 @@ namespace SIGEVIP.Domain.Entities
             get
             {
                 return _viaticos
-                    .Where(viatico => viatico.Estado == EstadoViatico.Vigente)
+                    .Where(
+                        viatico =>
+                            viatico.Estado ==
+                            EstadoViatico.Vigente)
                     .Sum(viatico => viatico.Monto);
             }
         }
@@ -117,7 +135,8 @@ namespace SIGEVIP.Domain.Entities
             _estadoActual.ValidarModificacion();
             ValidarFechaViatico(viatico.Fecha);
 
-            if (_viaticos.Any(item => ReferenceEquals(item, viatico)))
+            if (_viaticos.Any(
+                item => ReferenceEquals(item, viatico)))
             {
                 throw new ReglaNegocioException(
                     "El viático ya fue agregado al viaje.");
@@ -125,6 +144,34 @@ namespace SIGEVIP.Domain.Entities
 
             viatico.AsociarAViaje(IdViaje);
             _viaticos.Add(viatico);
+        }
+
+        public void AgregarVisita(Visita visita)
+        {
+            if (visita == null)
+            {
+                throw new ReglaNegocioException(
+                    "Debe indicar una visita válida.");
+            }
+
+            _estadoActual.ValidarModificacion();
+            ValidarFechaVisita(visita.Fecha);
+
+            if (!visita.TieneClientes)
+            {
+                throw new ReglaNegocioException(
+                    "La visita debe tener al menos un cliente asociado.");
+            }
+
+            if (_visitas.Any(
+                item => SonLaMismaVisita(item, visita)))
+            {
+                throw new ReglaNegocioException(
+                    "La visita ya fue agregada al viaje.");
+            }
+
+            visita.AsociarAViaje(IdViaje);
+            _visitas.Add(visita);
         }
 
         public void ExcluirViatico(Viatico viatico)
@@ -160,37 +207,80 @@ namespace SIGEVIP.Domain.Entities
 
         public void EnviarARendicion()
         {
-            _estadoActual = _estadoActual.EnviarARendicion();
+            _estadoActual =
+                _estadoActual.EnviarARendicion();
         }
 
         public void Aprobar()
         {
-            _estadoActual = _estadoActual.Aprobar();
+            _estadoActual =
+                _estadoActual.Aprobar();
         }
 
         public void Cancelar()
         {
-            _estadoActual = _estadoActual.Cancelar();
+            if (_visitas.Count > 0)
+            {
+                throw new ReglaNegocioException(
+                    "El viaje no puede cancelarse porque posee visitas registradas.");
+            }
+
+            _estadoActual =
+                _estadoActual.Cancelar();
         }
 
-        private void ValidarFechaViatico(DateTime fechaViatico)
+        private void ValidarFechaViatico(
+            DateTime fechaViatico)
         {
             DateTime fecha = fechaViatico.Date;
 
-            if (fecha < FechaInicio || fecha > FechaFin)
+            if (fecha < FechaInicio ||
+                fecha > FechaFin)
             {
                 throw new ReglaNegocioException(
                     "La fecha del viático debe encontrarse dentro del período del viaje.");
             }
         }
 
-        private void ValidarViaticoPerteneciente(Viatico viatico)
+        private void ValidarFechaVisita(
+            DateTime fechaVisita)
         {
-            if (viatico == null || !_viaticos.Contains(viatico))
+            DateTime fecha = fechaVisita.Date;
+
+            if (fecha < FechaInicio ||
+                fecha > FechaFin)
+            {
+                throw new ReglaNegocioException(
+                    "La fecha de la visita debe encontrarse dentro del período del viaje.");
+            }
+        }
+
+        private void ValidarViaticoPerteneciente(
+            Viatico viatico)
+        {
+            if (viatico == null ||
+                !_viaticos.Contains(viatico))
             {
                 throw new ReglaNegocioException(
                     "El viático indicado no pertenece al viaje.");
             }
+        }
+
+        private static bool SonLaMismaVisita(
+            Visita existente,
+            Visita candidata)
+        {
+            if (ReferenceEquals(
+                existente,
+                candidata))
+            {
+                return true;
+            }
+
+            return existente.IdVisita > 0 &&
+                   candidata.IdVisita > 0 &&
+                   existente.IdVisita ==
+                   candidata.IdVisita;
         }
     }
 }

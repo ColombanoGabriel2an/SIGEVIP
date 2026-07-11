@@ -45,6 +45,7 @@
     <Compile Include="ArchitectureTests.cs" />
     <Compile Include="Domain\ClienteTests.cs" />
     <Compile Include="Domain\ViajeTests.cs" />
+    <Compile Include="Domain\ViajeVisitaTests.cs" />
     <Compile Include="Domain\ViaticoTests.cs" />
     <Compile Include="Domain\VisitaTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
