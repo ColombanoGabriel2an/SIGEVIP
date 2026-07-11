@@ -43,6 +43,14 @@
   <ItemGroup>
     <Compile Include="Class1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\AutenticacionService.cs" />
+    <Compile Include="Security\AutorizacionService.cs" />
+    <Compile Include="Security\IPasswordHasher.cs" />
+    <Compile Include="Security\ISesionActual.cs" />
+    <Compile Include="Security\IUsuarioAutenticacionRepository.cs" />
+    <Compile Include="Security\PasswordHashResult.cs" />
+    <Compile Include="Security\ResultadoAutenticacion.cs" />
+    <Compile Include="Security\SesionActual.cs" />
   </ItemGroup>
 
   <ItemGroup>
