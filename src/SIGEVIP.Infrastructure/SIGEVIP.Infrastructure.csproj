@@ -44,6 +44,8 @@
 
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="Data\DatabaseHealthCheck.cs" />
+    <Compile Include="Data\SqlConnectionFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
