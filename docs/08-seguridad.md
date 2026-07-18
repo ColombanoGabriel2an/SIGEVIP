@@ -2,7 +2,7 @@
 
 ## 1. Alcance implementado
 
-El bloque de seguridad contiene:
+El subsistema de seguridad contiene:
 
 - Persona.
 - Usuario.
@@ -13,16 +13,22 @@ El bloque de seguridad contiene:
 - Autorización.
 - Sesión actual.
 - Hash PBKDF2-HMAC-SHA256.
+- Persistencia SQL del modelo de seguridad.
+- Catálogos iniciales de grupos y permisos.
+- Script reproducible de validación.
 
 No incluye todavía:
 
-- persistencia SQL;
+- repositorio ADO.NET de autenticación;
+- casos de uso de gestión de usuarios;
+- usuario administrador inicial;
 - interfaz de login;
 - recuperación por correo;
 - bloqueo por intentos fallidos;
 - autenticación multifactor;
 - tokens;
-- servicios web.
+- servicios web;
+- auditoría persistente.
 
 ## 2. Persona y Usuario
 
@@ -41,6 +47,15 @@ Usuario contiene:
 
 Todo Usuario requiere una Persona válida.
 
+La relación persistente es:
+
+    Persona 1 -------- 0..1 Usuario
+
+Se implementa mediante:
+
+- clave foránea `FK_Usuario_Persona`;
+- índice único `UX_Usuario_IdPersona`.
+
 ## 3. Grupos y permisos
 
 La autorización no utiliza roles fijos en código.
@@ -54,7 +69,53 @@ Un Grupo puede contener:
 
 La estructura utiliza el patrón Composite.
 
-## 4. Permisos efectivos
+La persistencia se divide en:
+
+- `UsuarioGrupo`;
+- `GrupoPermiso`;
+- `GrupoGrupo`.
+
+No se utiliza una tabla polimórfica única.
+
+## 4. Persistencia del Composite
+
+### GrupoPermiso
+
+Representa la asociación entre un Grupo y un Permiso.
+
+La clave primaria compuesta:
+
+    IdGrupo + IdPermiso
+
+impide relaciones duplicadas.
+
+### GrupoGrupo
+
+Representa una relación jerárquica:
+
+- grupo padre;
+- grupo hijo.
+
+La clave primaria compuesta:
+
+    IdGrupoPadre + IdGrupoHijo
+
+impide relaciones duplicadas.
+
+La restricción:
+
+`CK_GrupoGrupo_GruposDiferentes`
+
+impide que un grupo se asocie directamente consigo mismo.
+
+Los ciclos indirectos no se resuelven mediante triggers.
+
+Se validarán:
+
+- en Application;
+- al reconstruir el Composite desde persistencia.
+
+## 5. Permisos efectivos
 
 Los permisos efectivos de un Usuario son la unión de los permisos de todos sus grupos activos.
 
@@ -71,7 +132,7 @@ No se consideran:
 
 Los permisos repetidos se eliminan por código normalizado.
 
-## 5. Prevención de ciclos
+## 6. Prevención de ciclos
 
 Grupo rechaza:
 
@@ -83,7 +144,9 @@ Grupo rechaza:
 
 Esto evita recorridos infinitos y configuraciones inválidas.
 
-## 6. Autenticación
+La base de datos complementa esta validación impidiendo la autorreferencia directa.
+
+## 7. Autenticación
 
 `AutenticacionService` coordina:
 
@@ -100,7 +163,11 @@ El mensaje público es siempre:
 
     Credenciales inválidas.
 
-## 7. Hash de contraseñas
+La autenticación persistente todavía requiere la implementación concreta de:
+
+`IUsuarioAutenticacionRepository`
+
+## 8. Hash de contraseñas
 
 La implementación concreta es:
 
@@ -108,17 +175,17 @@ La implementación concreta es:
 
 Parámetros:
 
-- Algoritmo: PBKDF2.
-- Función seudorrandom: HMAC-SHA256.
-- Salt: 32 bytes.
-- Hash: 32 bytes.
-- Iteraciones: 100000.
+- algoritmo: PBKDF2;
+- función seudorrandom: HMAC-SHA256;
+- salt: 32 bytes;
+- hash: 32 bytes;
+- iteraciones: 100000.
 
 El salt se genera mediante `RandomNumberGenerator`.
 
 Cada contraseña produce un salt distinto.
 
-## 8. Comparación de hashes
+## 9. Comparación de hashes
 
 La comparación no utiliza una igualdad que finalice al encontrar el primer byte diferente.
 
@@ -126,30 +193,49 @@ Se acumulan las diferencias de todos los bytes.
 
 Esto reduce diferencias temporales observables durante la comparación.
 
-## 9. Almacenamiento futuro
+## 10. Almacenamiento de credenciales
 
-La tabla Usuario deberá almacenar:
+La tabla `dbo.Usuario` almacena:
 
-- IdUsuario.
-- IdPersona.
-- NombreUsuario.
-- PasswordHash.
-- PasswordSalt.
-- IteracionesPassword.
-- Activo.
+- `IdUsuario`;
+- `IdPersona`;
+- `NombreUsuario`;
+- `PasswordHash`;
+- `PasswordSalt`;
+- `IteracionesPassword`;
+- `Activo`.
 
-No se almacenará:
+Tipos relevantes:
+
+- `PasswordHash VARBINARY(32)`;
+- `PasswordSalt VARBINARY(32)`;
+- `IteracionesPassword INT`.
+
+Restricciones:
+
+- hash obligatorio;
+- salt obligatorio;
+- longitud exacta de 32 bytes;
+- iteraciones mayores que cero;
+- nombre de usuario obligatorio;
+- nombre de usuario único;
+- Persona obligatoria;
+- una Persona no puede tener más de un Usuario.
+
+No se almacena:
 
 - contraseña en texto plano;
 - contraseña reversible;
-- clave fija dentro del código.
+- contraseña temporal;
+- rol como texto;
+- clave criptográfica fija.
 
-## 10. Autorización
+## 11. Autorización
 
 `AutorizacionService.TienePermiso()` recibe:
 
-- Usuario.
-- Código de permiso.
+- Usuario;
+- código de permiso.
 
 El servicio:
 
@@ -160,7 +246,7 @@ El servicio:
 - consulta permisos efectivos;
 - devuelve verdadero o falso.
 
-## 11. Sesión
+## 12. Sesión
 
 `SesionActual` es una implementación en memoria.
 
@@ -177,7 +263,75 @@ No permite iniciar sesión con:
 - usuario nulo;
 - usuario inactivo.
 
-## 12. Responsabilidades pendientes
+## 13. Bajas lógicas
+
+Las tablas:
+
+- Persona;
+- Usuario;
+- Grupo;
+- Permiso;
+
+incluyen la columna:
+
+`Activo BIT NOT NULL DEFAULT 1`
+
+No se implementa borrado físico como operación funcional.
+
+Las claves foráneas utilizan:
+
+`NO_ACTION`
+
+No se utiliza `ON DELETE CASCADE`.
+
+## 14. Catálogos iniciales
+
+El seed crea los grupos:
+
+- `COMERCIAL`;
+- `ADMINISTRATIVO`;
+- `GERENTE`;
+- `ADMINISTRADOR_GENERAL`.
+
+También crea 17 permisos funcionales y 22 asociaciones Grupo-Permiso.
+
+El seed:
+
+- es reejecutable;
+- no duplica registros;
+- no crea usuarios;
+- no crea contraseñas;
+- no crea jerarquías de grupos no documentadas.
+
+El usuario administrador inicial se creará posteriormente desde C# mediante `Pbkdf2PasswordHasher`.
+
+## 15. Validación ejecutada
+
+La migración `002` se ejecutó correctamente.
+
+El seed se ejecutó dos veces sin duplicar información.
+
+Se comprobó:
+
+- 7 tablas;
+- 4 grupos;
+- 17 permisos;
+- 22 asociaciones GrupoPermiso;
+- 0 usuarios;
+- 0 relaciones UsuarioGrupo;
+- 0 relaciones GrupoGrupo;
+- índices únicos;
+- índices auxiliares;
+- claves foráneas;
+- acciones `NO_ACTION`;
+- restricciones `CHECK`;
+- ausencia de duplicados.
+
+Resultado:
+
+`VALIDACIÓN CORRECTA`
+
+## 16. Responsabilidades pendientes
 
 ### Application
 
@@ -186,14 +340,16 @@ No permite iniciar sesión con:
 - Recuperación de contraseña.
 - Aplicación de permisos a operaciones funcionales.
 - Auditoría de acciones.
+- Validación de ciclos al reconstruir grupos persistidos.
 
 ### Infrastructure
 
 - Repositorio ADO.NET de Usuario.
+- Implementación de `IUsuarioAutenticacionRepository`.
 - Repositorios de Grupo y Permiso.
+- Reconstrucción del Composite.
 - Persistencia de asociaciones.
-- Migraciones.
-- Semillas iniciales.
+- Creación controlada del administrador inicial.
 - Registro de auditoría.
 
 ### WinForms
@@ -205,12 +361,19 @@ No permite iniciar sesión con:
 - Gestión visual de permisos.
 - Ocultamiento o deshabilitación de controles.
 
-## 13. Estado académico
+## 17. Estado académico
 
-La base de seguridad está implementada y probada en Domain, Application e Infrastructure.
+La base de seguridad está implementada y probada en:
+
+- Domain;
+- Application;
+- Infrastructure;
+- SQL Server.
 
 Los requisitos de autenticación y gestión de usuarios continúan parciales hasta incorporar:
 
-- persistencia;
+- repositorios ADO.NET;
+- integración persistente;
+- casos de uso;
 - interfaz;
 - validación integrada reproducible.

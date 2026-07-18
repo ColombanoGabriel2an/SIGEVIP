@@ -4,7 +4,7 @@
 
 Etapa 3: autenticación, usuarios, grupos, permisos y seguridad.
 
-Bloque actual: cierre documental del dominio y servicios básicos de seguridad.
+Bloque actual: persistencia SQL del modelo de seguridad.
 
 ## Rama de trabajo
 
@@ -12,8 +12,8 @@ Bloque actual: cierre documental del dominio y servicios básicos de seguridad.
 
 ## Último commit técnico publicado
 
-- Commit: `64a2161`
-- Mensaje: `Incorporo hash seguro de contraseñas`
+- Commit: `a4b631c`
+- Mensaje: `Agrego esquema SQL de seguridad`
 
 La rama local se encuentra sincronizada con:
 
@@ -124,82 +124,273 @@ La rama local se encuentra sincronizada con:
 - Comparación en tiempo constante.
 - Sin dependencias externas.
 
-## Commits del Bloque 3
+## Completado en el Bloque 4
+
+### Migración de seguridad
+
+Se creó:
+
+`database/migrations/002_crear_seguridad.sql`
+
+La migración:
+
+- utiliza la base `SIGEVIP`;
+- se ejecuta dentro de una transacción;
+- utiliza `TRY/CATCH`;
+- revierte los cambios ante errores;
+- no elimina tablas;
+- no recrea la base;
+- registra la versión `002` en `dbo.VersionBaseDatos`;
+- evita registrar la versión más de una vez.
+
+### Tablas creadas
+
+- `dbo.Persona`
+- `dbo.Usuario`
+- `dbo.Grupo`
+- `dbo.Permiso`
+- `dbo.UsuarioGrupo`
+- `dbo.GrupoPermiso`
+- `dbo.GrupoGrupo`
+
+### Relaciones persistidas
+
+- Persona 1 a 0..1 Usuario.
+- Usuario N a N Grupo.
+- Grupo N a N Permiso.
+- Grupo N a N Grupo mediante relación padre-hijo.
+
+### Integridad
+
+Se incorporaron:
+
+- claves primarias simples;
+- claves primarias compuestas;
+- claves foráneas;
+- restricciones `CHECK`;
+- valores predeterminados;
+- índices únicos;
+- índices auxiliares;
+- acciones de eliminación `NO_ACTION`;
+- prevención de relaciones duplicadas;
+- prevención de autorreferencia directa entre grupos.
+
+### Credenciales
+
+La tabla `Usuario` persiste:
+
+- hash de 32 bytes;
+- salt de 32 bytes;
+- cantidad de iteraciones;
+- estado lógico.
+
+No persiste:
+
+- contraseña en texto plano;
+- contraseña reversible;
+- contraseña temporal;
+- rol como texto.
+
+### Catálogos iniciales
+
+Se creó:
+
+`database/seed/001_catalogos_seguridad.sql`
+
+Grupos iniciales:
+
+- `COMERCIAL`
+- `ADMINISTRATIVO`
+- `GERENTE`
+- `ADMINISTRADOR_GENERAL`
+
+Permisos iniciales:
+
+- 17 permisos funcionales.
+
+Asociaciones iniciales:
+
+- 22 asociaciones `GrupoPermiso`.
+
+El seed:
+
+- puede ejecutarse nuevamente;
+- no duplica grupos;
+- no duplica permisos;
+- no duplica asociaciones;
+- no crea usuarios;
+- no crea contraseñas;
+- no crea relaciones `GrupoGrupo` sin justificación funcional.
+
+### Validación SQL
+
+Se creó:
+
+`database/migrations/002_validar_seguridad.sql`
+
+La validación comprobó:
+
+- migración `002` registrada;
+- existencia de las siete tablas;
+- 4 grupos;
+- 17 permisos;
+- 22 asociaciones `GrupoPermiso`;
+- 0 usuarios;
+- 0 asociaciones `UsuarioGrupo`;
+- 0 relaciones `GrupoGrupo`;
+- índices únicos;
+- índices auxiliares;
+- siete claves foráneas;
+- acciones de eliminación `NO_ACTION`;
+- restricciones `CHECK` habilitadas;
+- restricciones confiables;
+- ausencia de duplicados.
+
+Resultado final:
+
+`VALIDACIÓN CORRECTA`
+
+## Commits relevantes
+
+### Bloque 3
 
 - `09f90eb` — `Agrego dominio de personas y usuarios`
 - `b69fa36` — `Implemento Composite de grupos y permisos`
 - `ea8e92e` — `Agrego autenticación y autorización`
 - `64a2161` — `Incorporo hash seguro de contraseñas`
+- `1464aa9` — `Documento seguridad y cierre del bloque 3`
+
+### Bloque 4
+
+- `a4b631c` — `Agrego esquema SQL de seguridad`
 
 ## Resultado técnico verificado
 
-Compilación:
+### Compilación
 
 - 0 advertencias.
 - 0 errores.
-- Tiempo registrado: 1,29 segundos.
+- Tiempo registrado: 8,48 segundos.
 
-Pruebas:
+### Pruebas
 
 - Totales: 145.
 - Correctas: 145.
 - Fallidas: 0.
-- Omitidas: 0.
-- Tiempo registrado: 4,0902 segundos.
+- Tiempo registrado: 4,2780 segundos.
 
 Ejecutor:
 
 `VSTest 17.13.0 x64`
 
+### Base de datos
+
+- Migración `002`: aplicada correctamente.
+- Seed: aplicado correctamente.
+- Seed reejecutado sin duplicados.
+- Validación SQL: correcta.
+
 ## Estado de requisitos de seguridad
 
-### Parcialmente implementados
+### RF01 — Iniciar sesión
 
-- RF01: iniciar sesión.
-- RF02: gestionar usuarios.
-- RF03: modificar usuarios.
+Parcialmente cubierto.
 
-Faltan persistencia e interfaz.
+Implementado:
 
-### Implementado en dominio
+- servicio de autenticación;
+- verificación segura de contraseña;
+- esquema SQL de credenciales.
 
-- RF04: eliminar o desactivar usuario.
+Pendiente:
 
-Se implementó como desactivación lógica.
+- repositorio ADO.NET;
+- integración persistente;
+- interfaz de login.
 
-### Implementado en Application
+### RF02 — Validar credenciales y habilitar funciones
 
-- RF37: validar permisos antes de ejecutar operaciones.
-- RF39: restringir acceso según permisos.
+Parcialmente cubierto.
 
-La aplicación concreta de estos servicios a cada caso de uso se realizará en bloques funcionales posteriores.
+Implementado:
 
-### Pendiente
+- autenticación en Application;
+- autorización por permisos;
+- esquema SQL preparado.
 
-- RF38: ocultar o deshabilitar funciones no autorizadas en la interfaz.
+Pendiente:
+
+- repositorio concreto;
+- sesión integrada con WinForms;
+- habilitación visual de funciones.
+
+### RF03 — Gestionar usuarios
+
+Parcialmente cubierto.
+
+Implementado:
+
+- entidad Usuario;
+- activación y desactivación;
+- asignación de grupos;
+- tablas Persona, Usuario y UsuarioGrupo.
+
+Pendiente:
+
+- casos de uso;
+- repositorios;
+- interfaz.
+
+### RF04 — Asignar uno o más grupos
+
+Persistencia preparada mediante `dbo.UsuarioGrupo`.
+
+La asignación funcional mediante casos de uso e interfaz permanece pendiente.
+
+### RF37 — Impedir accesos no autorizados
+
+Implementado en Application.
+
+La persistencia de grupos y permisos está preparada.
+
+La integración con los casos de uso concretos permanece pendiente.
+
+### RF38 — Ocultar opciones no habilitadas
+
+Pendiente de WinForms.
+
+### RF39 — Acceso mediante grupos y permisos
+
+Implementado en Domain y Application.
+
+Persistencia preparada mediante:
+
+- `UsuarioGrupo`;
+- `GrupoPermiso`;
+- `GrupoGrupo`.
 
 ## Pendiente inmediato
 
-- Actualizar documentación del Bloque 3.
-- Validar diferencias documentales.
-- Compilar nuevamente.
-- Ejecutar las 145 pruebas.
+- Actualizar documentación del Bloque 4.
+- Ejecutar verificación de formato.
 - Crear commit documental.
 - Publicar el commit.
-- Generar informe de transferencia para MAESTRO.
+- Generar informe de cierre para MAESTRO.
 
 ## Pendiente de etapas posteriores
 
-- Tablas SQL de Persona, Usuario, Grupo y Permiso.
-- Relaciones UsuarioGrupo.
-- Relaciones GrupoComponente.
-- Repositorio ADO.NET de autenticación.
-- Unicidad de nombre de usuario.
-- Datos iniciales de grupos y permisos.
+- Implementación ADO.NET de `IUsuarioAutenticacionRepository`.
+- Repositorios de Usuario, Grupo y Permiso.
+- Reconstrucción persistente del Composite.
+- Usuario administrador inicial generado desde C#.
+- Casos de uso de gestión de usuarios.
 - Interfaz de login.
 - Gestión visual de usuarios.
+- Gestión visual de grupos.
+- Gestión visual de permisos.
 - Cambio de contraseña.
 - Recuperación de contraseña.
 - Auditoría persistente.
 - Aplicación de permisos a casos de uso.
 - Pruebas de integración con SQL Server.
+- Persistencia de viajes, clientes, visitas y viáticos.
