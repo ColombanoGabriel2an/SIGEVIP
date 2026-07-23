@@ -163,9 +163,21 @@ El mensaje público es siempre:
 
     Credenciales inválidas.
 
-La autenticación persistente todavía requiere la implementación concreta de:
+La autenticación persistente utiliza:
 
-`IUsuarioAutenticacionRepository`
+`SIGEVIP.Infrastructure.Security.UsuarioAutenticacionRepository`
+
+El repositorio recupera desde SQL Server:
+
+- Usuario;
+- datos obligatorios de Persona;
+- grupos directos;
+- permisos;
+- asociaciones Grupo-Permiso;
+- grupos hijos;
+- jerarquías del Composite.
+
+Las relaciones persistidas inválidas se informan mediante `PersistenciaException`.
 
 ## 8. Hash de contraseñas
 
@@ -303,7 +315,14 @@ El seed:
 - no crea contraseñas;
 - no crea jerarquías de grupos no documentadas.
 
-El usuario administrador inicial se creará posteriormente desde C# mediante `Pbkdf2PasswordHasher`.
+El administrador inicial se crea desde C# mediante:
+
+- `InicializacionSeguridadService`;
+- `InicializacionSeguridadRepository`;
+- `Pbkdf2PasswordHasher`;
+- `tools/SIGEVIP.Setup`.
+
+La inserción de Persona, Usuario y UsuarioGrupo se realiza dentro de una única transacción.
 
 ## 15. Validación ejecutada
 
@@ -344,13 +363,21 @@ Resultado:
 
 ### Infrastructure
 
-- Repositorio ADO.NET de Usuario.
-- Implementación de `IUsuarioAutenticacionRepository`.
-- Repositorios de Grupo y Permiso.
-- Reconstrucción del Composite.
-- Persistencia de asociaciones.
-- Creación controlada del administrador inicial.
-- Registro de auditoría.
+Implementado:
+
+- repositorio ADO.NET de autenticación;
+- implementación de `IUsuarioAutenticacionRepository`;
+- reconstrucción de Usuario, Grupo y Permiso;
+- reconstrucción del Composite;
+- detección de ciclos persistidos;
+- creación transaccional del administrador inicial.
+
+Pendiente:
+
+- repositorios de mantenimiento de usuarios;
+- mantenimiento persistente de grupos y permisos;
+- persistencia de nuevas asociaciones desde casos de uso;
+- registro de auditoría.
 
 ### WinForms
 
@@ -370,10 +397,46 @@ La base de seguridad está implementada y probada en:
 - Infrastructure;
 - SQL Server.
 
-Los requisitos de autenticación y gestión de usuarios continúan parciales hasta incorporar:
+La autenticación persistente y la inicialización del administrador están implementadas y cuentan con validación reproducible.
 
-- repositorios ADO.NET;
-- integración persistente;
-- casos de uso;
-- interfaz;
-- validación integrada reproducible.
+Los requisitos continúan parciales hasta incorporar:
+
+- formulario de login;
+- integración de `SesionActual` con WinForms;
+- gestión visual de usuarios;
+- mantenimiento de grupos y permisos;
+- ocultamiento o deshabilitación de controles;
+- auditoría persistente.
+
+## 18. Configuración inicial
+
+La utilidad:
+
+`tools/SIGEVIP.Setup`
+
+permite crear el administrador sin incluir credenciales en SQL.
+
+Características:
+
+- consola .NET Framework 4.8;
+- contraseña oculta;
+- confirmación de contraseña;
+- PBKDF2-HMAC-SHA256;
+- transacción única;
+- asignación de `ADMINISTRADOR_GENERAL`;
+- detección de usuario existente;
+- códigos de salida explícitos.
+
+Códigos principales:
+
+- `0`: administrador creado;
+- `2`: validación rechazada;
+- `3`: usuario existente;
+- `4`: error de persistencia.
+
+## 19. Pruebas actuales
+
+- 164 pruebas totales.
+- 164 correctas.
+- 0 fallidas.
+- Pruebas unitarias e integración real con SQL Server.

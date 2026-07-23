@@ -5,9 +5,9 @@
 | Aplicación de escritorio | Windows Forms | SIGEVIP.WinForms | Compilación completa | Preparado |
 | Lenguaje C# | .NET Framework 4.8 | Todos | 0 advertencias y 0 errores | Implementado |
 | Arquitectura en capas | Domain, Application, Infrastructure y WinForms | Todos | ArchitectureTests | Implementado |
-| Persistencia local | SQL Server y ADO.NET | Infrastructure / database | Base SIGEVIP operativa | Parcialmente implementado |
-| RF01: iniciar sesión | `AutenticacionService`, PBKDF2 y tabla Usuario | Application / Infrastructure / database | Pruebas de autenticación y esquema SQL | Parcialmente implementado |
-| RF02: validar credenciales y habilitar funciones | Autenticación, autorización, sesión y persistencia preparada | Application / Infrastructure / database / WinForms | Pruebas de Application y migración SQL | Parcialmente implementado |
+| Persistencia local | SQL Server y ADO.NET | Infrastructure / database | Base SIGEVIP operativa y repositorios de seguridad | Implementado para seguridad |
+| RF01: iniciar sesión | `AutenticacionService`, PBKDF2, `UsuarioAutenticacionRepository` y tabla Usuario | Application / Infrastructure / database | Pruebas unitarias e integración SQL | Implementado sin interfaz gráfica |
+| RF02: validar credenciales y habilitar funciones | Autenticación, autorización, sesión y persistencia concreta | Application / Infrastructure / database / WinForms | Permisos directos, heredados y ciclos persistidos | Parcial: falta integración visual |
 | RF03: gestionar usuarios | Entidad Usuario y esquema Persona-Usuario-UsuarioGrupo | Domain / Application / database | Pruebas de Usuario y validación SQL | Parcialmente implementado |
 | RF04: asignar uno o más grupos | Colección de grupos y tabla `UsuarioGrupo` | Domain / database | Duplicados impedidos por dominio y PK compuesta | Parcialmente implementado |
 | RF05: registrar clientes | Entidad Cliente | Domain | Creación y validaciones | Parcialmente implementado |
@@ -31,13 +31,13 @@
 | RF29: excluir viáticos | Baja lógica | Domain | Exclusión y reactivación | Implementado |
 | RF30: aprobar viaje | `Viaje.Aprobar()` | Domain | EnRendicion a Aprobado | Implementado |
 | RF32: saldo final | Total vigente menos anticipo | Domain | Cálculos económicos | Implementado |
-| RF37: impedir accesos no autorizados | `AutorizacionService.TienePermiso()` y persistencia de permisos | Application / database | Permisos directos, anidados y esquema SQL | Implementado en Application; persistencia preparada |
+| RF37: impedir accesos no autorizados | `AutorizacionService.TienePermiso()` y persistencia de permisos | Application / Infrastructure / database | Permisos directos, anidados y reconstrucción SQL | Implementado en backend |
 | RF38: ocultar opciones no habilitadas | Ocultar o deshabilitar controles | WinForms | Pendiente | Pendiente |
-| RF39: acceso mediante grupos y permisos | Usuario activo, grupos, permisos y Composite | Domain / Application / database | Pruebas y validación SQL | Dominio y Application implementados; persistencia preparada |
+| RF39: acceso mediante grupos y permisos | Usuario activo, grupos, permisos y Composite persistido | Domain / Application / Infrastructure / database | Pruebas unitarias e integración SQL | Implementado en backend |
 | Persona 1 a 0..1 Usuario | Entidades separadas e índice único `UX_Usuario_IdPersona` | Domain / database | Restricción SQL verificada | Implementado |
 | Usuario N a N Grupo | Colección de Usuario y tabla `UsuarioGrupo` | Domain / database | PK compuesta y claves foráneas | Implementado en dominio y esquema |
 | Grupo N a N Permiso | Composite y tabla `GrupoPermiso` | Domain / database | 22 asociaciones iniciales | Implementado en dominio y esquema |
-| Grupo N a N Grupo | Composite y tabla `GrupoGrupo` | Domain / database | PK compuesta, FKs y CHECK | Implementado en esquema; sin jerarquías iniciales |
+| Grupo N a N Grupo | Composite y tabla `GrupoGrupo` | Domain / Infrastructure / database | Herencia real y ciclos persistidos | Implementado y probado |
 | Grupo Composite | Grupo contiene Permiso o Grupo | Domain | Ciclos, duplicados y anidamiento | Implementado |
 | Permiso hoja | `Permiso : IPermisoComponente` | Domain | Activo e inactivo | Implementado |
 | Autenticación segura | Mensaje público genérico | Application | Casos exitosos y fallidos | Implementado en Application |
@@ -46,8 +46,8 @@
 | Hash persistente | `VARBINARY(32)` para hash y salt | database | CHECK de longitud | Implementado en esquema |
 | Iteraciones persistentes | `IteracionesPassword` mayor que cero | Domain / database | Validación de dominio y CHECK SQL | Implementado |
 | Comparación segura | Comparación en tiempo constante | Infrastructure | Hash correcto y modificado | Implementado |
-| Repositorio de autenticación | `IUsuarioAutenticacionRepository` | Application | Repositorio falso | Contrato implementado |
-| Repositorio SQL de usuario | Implementación ADO.NET | Infrastructure | Pendiente | Pendiente |
+| Repositorio de autenticación | `IUsuarioAutenticacionRepository` | Application / Infrastructure | Repositorio falso y repositorio SQL | Contrato e implementación probados |
+| Repositorio SQL de usuario | `UsuarioAutenticacionRepository` con ADO.NET | Infrastructure | Integración real con SQL Server | Implementado |
 | Tablas de seguridad | Persona, Usuario, Grupo, Permiso y relaciones | database | Siete tablas verificadas | Implementado |
 | Bajas lógicas | Columnas `Activo` con valor inicial 1 | Domain / database | Defaults y reglas de dominio | Implementado |
 | Unicidad de usuario | `UX_Usuario_NombreUsuario` | database | Índice único verificado | Implementado en esquema |
@@ -58,10 +58,12 @@
 | Asignaciones iniciales | 22 asociaciones Grupo-Permiso | database/seed | Conteo y detalle por grupo | Implementado |
 | Seed reejecutable | Inserciones condicionadas y actualización controlada | database/seed | Segunda ejecución sin duplicados | Implementado |
 | Validación de esquema | `002_validar_seguridad.sql` | database/migrations | Resultado `VALIDACIÓN CORRECTA` | Implementado |
-| Usuario administrador inicial | Generación desde C# con PBKDF2 | Application / Infrastructure | Pendiente | Pendiente |
+| Usuario administrador inicial | Servicio, repositorio transaccional y `SIGEVIP.Setup` | Application / Infrastructure / tools | Creación, idempotencia, rollback y validación manual | Implementado |
 | Viaje 1 a 0..N Visitas | Colección privada `_visitas` | Domain | Alta y colección protegida | Implementado |
 | Visita N a N Cliente | Colección privada `_clientes` | Domain | Uno, varios y duplicados | Implementado |
 | State en Viaje | `IEstadoViaje` y estados concretos | Domain | Transiciones | Implementado |
 | Composite en seguridad | `IPermisoComponente`, Grupo y Permiso | Domain | Pruebas de ciclos, anidamiento y duplicados | Implementado |
+| Reconstrucción de seguridad | Usuario, grupos, permisos y grupos hijos desde SQL Server | Infrastructure | Grupos directos, permisos heredados y ciclos | Implementado |
+| Configuración inicial | `tools/SIGEVIP.Setup` | tools / Application / Infrastructure | Códigos 0 y 3, PBKDF2 y grupo verificados | Implementado |
 | Auditoría básica | Persistencia y servicios | Infrastructure / Application | Pendiente | Pendiente |
 | SQL reproducible | Migraciones, seed y validación | database | Ejecución reproducible en SSMS | Implementado para seguridad |

@@ -35,6 +35,8 @@ SIGEVIP/
 │   └── SIGEVIP.WinForms/
 ├── tests/
 │   └── SIGEVIP.Tests/
+├── tools/
+│   └── SIGEVIP.Setup/
 ├── database/
 │   ├── migrations/
 │   └── seed/
@@ -51,7 +53,13 @@ MSYS2_ARG_CONV_EXCL='*' "/c/Program Files/Microsoft Visual Studio/2022/Community
 
 ## Ejecución
 
+Aplicación principal:
+
 ./src/SIGEVIP.WinForms/bin/Debug/SIGEVIP.WinForms.exe
+
+Configuración inicial:
+
+./tools/SIGEVIP.Setup/bin/Debug/SIGEVIP.Setup.exe
 
 ## Pruebas
 
@@ -59,4 +67,24 @@ MSYS2_ARG_CONV_EXCL='*' "/c/Program Files/Microsoft Visual Studio/2022/Community
 
 ## Estado
 
-Actualmente se encuentra preparada la estructura técnica inicial. El dominio funcional será desarrollado en etapas posteriores.
+Se encuentran implementados:
+
+- arquitectura base;
+- dominio de clientes, viajes, visitas y viáticos;
+- autenticación y autorización;
+- PBKDF2-HMAC-SHA256;
+- persistencia SQL de seguridad;
+- repositorio ADO.NET de autenticación;
+- reconstrucción de grupos, permisos y jerarquías;
+- creación transaccional del administrador;
+- utilidad `SIGEVIP.Setup`;
+- 164 pruebas automatizadas correctas.
+
+Permanecen pendientes:
+
+- formulario de login;
+- integración de sesión con WinForms;
+- gestión visual de usuarios, grupos y permisos;
+- persistencia de módulos funcionales;
+- auditoría;
+- reportes y mapa.

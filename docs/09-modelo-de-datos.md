@@ -475,20 +475,37 @@ Resultado consolidado:
 
 `VALIDACIÓN CORRECTA`
 
-## 18. Reglas pendientes
+## 18. Reglas implementadas en el Bloque 5
 
-- Implementar repositorios ADO.NET.
-- Reconstruir Usuario con sus grupos.
-- Reconstruir Grupo con permisos y grupos hijos.
-- Detectar ciclos indirectos durante la reconstrucción.
-- Crear administrador inicial mediante C#.
-- Integrar autenticación con SQL Server.
-- Crear pruebas de integración.
-- Incorporar auditoría persistente.
+- Repositorio ADO.NET de autenticación.
+- Reconstrucción de Usuario con sus grupos.
+- Reconstrucción de Grupo con permisos y grupos hijos.
+- Detección de ciclos indirectos.
+- Creación transaccional del administrador inicial.
+- Integración con SQL Server.
+- Pruebas de integración.
+- PBKDF2 persistido.
+- Rollback e idempotencia.
 
-## 19. Commit técnico
+## 19. Reglas pendientes
 
-El esquema, seed y validación fueron publicados en:
+- Repositorios de mantenimiento de usuarios.
+- Alta y modificación persistente de grupos.
+- Alta y modificación persistente de permisos.
+- Persistencia funcional de nuevas asociaciones.
+- Auditoría persistente.
+- Integración con WinForms.
 
-- Commit: `a4b631c`
-- Mensaje: `Agrego esquema SQL de seguridad`
+## 20. Commits técnicos
+
+Persistencia SQL:
+
+- `a4b631c` — `Agrego esquema SQL de seguridad`
+- `2e567f2` — `Documento persistencia de seguridad`
+
+Integración persistente:
+
+- `cb52c7e` — `Implemento repositorio de autenticación`
+- `514ba5a` — `Agrego inicialización del administrador`
+- `a89c186` — `Agrego herramienta de configuración inicial`
+- `62396ba` — `Pruebo jerarquías persistidas de seguridad`

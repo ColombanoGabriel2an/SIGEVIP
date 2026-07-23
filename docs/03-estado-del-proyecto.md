@@ -4,7 +4,7 @@
 
 Etapa 3: autenticación, usuarios, grupos, permisos y seguridad.
 
-Bloque actual: persistencia SQL del modelo de seguridad.
+Bloque actual: cierre técnico y documental de la persistencia de seguridad.
 
 ## Rama de trabajo
 
@@ -12,8 +12,8 @@ Bloque actual: persistencia SQL del modelo de seguridad.
 
 ## Último commit técnico publicado
 
-- Commit: `a4b631c`
-- Mensaje: `Agrego esquema SQL de seguridad`
+- Commit: `62396ba`
+- Mensaje: `Pruebo jerarquías persistidas de seguridad`
 
 La rama local se encuentra sincronizada con:
 
@@ -250,6 +250,87 @@ Resultado final:
 
 `VALIDACIÓN CORRECTA`
 
+## Completado en el Bloque 5
+
+### Repositorio de autenticación
+
+Se implementó:
+
+`SIGEVIP.Infrastructure.Security.UsuarioAutenticacionRepository`
+
+La implementación:
+
+- utiliza ADO.NET y `System.Data.SqlClient`;
+- implementa `IUsuarioAutenticacionRepository`;
+- utiliza consultas parametrizadas;
+- no utiliza `SELECT *`;
+- evita consultas N+1;
+- recupera Usuario y datos obligatorios de Persona;
+- recupera grupos directos;
+- recupera permisos y asociaciones `GrupoPermiso`;
+- recupera grupos hijos y asociaciones `GrupoGrupo`;
+- reconstruye el patrón Composite;
+- conserva estados activos e inactivos;
+- detecta jerarquías persistidas inválidas;
+- transforma fallas técnicas en `PersistenciaException`.
+
+### Reconstrucción del Composite
+
+Se verificó mediante integración real con SQL Server:
+
+- recuperación de grupos directos;
+- recuperación de permisos directos;
+- herencia de permisos desde un grupo hijo;
+- detección y rechazo de ciclos persistidos;
+- limpieza de los datos temporales de prueba.
+
+### Inicialización del administrador
+
+Se implementaron:
+
+- `IInicializacionSeguridadRepository`;
+- `InicializacionSeguridadService`;
+- `ResultadoInicializacionSeguridad`;
+- `InicializacionSeguridadRepository`.
+
+La creación inicial:
+
+- valida campos obligatorios;
+- confirma la contraseña;
+- normaliza el nombre de usuario;
+- genera PBKDF2 mediante `Pbkdf2PasswordHasher`;
+- inserta Persona, Usuario y UsuarioGrupo;
+- asigna `ADMINISTRADOR_GENERAL`;
+- utiliza una única transacción;
+- revierte los cambios ante errores;
+- evita duplicar usuarios.
+
+### Herramienta de configuración
+
+Se creó:
+
+`tools/SIGEVIP.Setup`
+
+La utilidad:
+
+- es una consola .NET Framework 4.8;
+- solicita los datos del administrador;
+- oculta y confirma la contraseña;
+- utiliza la cadena de conexión `SIGEVIP`;
+- no muestra contraseña, hash ni salt;
+- devuelve códigos de salida explícitos.
+
+Validación manual:
+
+- administrador creado correctamente;
+- grupo `ADMINISTRADOR_GENERAL` asignado;
+- hash de 32 bytes;
+- salt de 32 bytes;
+- 100000 iteraciones;
+- código `0` al crear;
+- código `3` ante usuario existente;
+- segunda ejecución sin duplicados.
+
 ## Commits relevantes
 
 ### Bloque 3
@@ -263,6 +344,14 @@ Resultado final:
 ### Bloque 4
 
 - `a4b631c` — `Agrego esquema SQL de seguridad`
+- `2e567f2` — `Documento persistencia de seguridad`
+
+### Bloque 5
+
+- `cb52c7e` — `Implemento repositorio de autenticación`
+- `514ba5a` — `Agrego inicialización del administrador`
+- `a89c186` — `Agrego herramienta de configuración inicial`
+- `62396ba` — `Pruebo jerarquías persistidas de seguridad`
 
 ## Resultado técnico verificado
 
@@ -270,14 +359,14 @@ Resultado final:
 
 - 0 advertencias.
 - 0 errores.
-- Tiempo registrado: 8,48 segundos.
+- Compilación completa verificada.
 
 ### Pruebas
 
-- Totales: 145.
-- Correctas: 145.
+- Totales: 164.
+- Correctas: 164.
 - Fallidas: 0.
-- Tiempo registrado: 4,2780 segundos.
+- Incluyen pruebas unitarias y pruebas reales contra SQL Server.
 
 Ejecutor:
 
@@ -300,13 +389,16 @@ Implementado:
 
 - servicio de autenticación;
 - verificación segura de contraseña;
-- esquema SQL de credenciales.
+- repositorio ADO.NET;
+- recuperación persistente desde SQL Server;
+- reconstrucción de grupos y permisos;
+- esquema SQL de credenciales;
+- pruebas de integración.
 
 Pendiente:
 
-- repositorio ADO.NET;
-- integración persistente;
-- interfaz de login.
+- interfaz de login;
+- integración con la sesión de WinForms.
 
 ### RF02 — Validar credenciales y habilitar funciones
 
@@ -316,11 +408,13 @@ Implementado:
 
 - autenticación en Application;
 - autorización por permisos;
-- esquema SQL preparado.
+- repositorio concreto;
+- persistencia de Usuario, Grupo y Permiso;
+- reconstrucción del Composite;
+- detección de ciclos persistidos.
 
 Pendiente:
 
-- repositorio concreto;
 - sesión integrada con WinForms;
 - habilitación visual de funciones.
 
@@ -371,11 +465,10 @@ Persistencia preparada mediante:
 
 ## Pendiente inmediato
 
-- Actualizar documentación del Bloque 4.
-- Ejecutar verificación de formato.
-- Crear commit documental.
+- Validar la actualización documental del Bloque 5.
+- Crear el commit documental.
 - Publicar el commit.
-- Generar informe de cierre para MAESTRO.
+- Generar el informe de cierre para MAESTRO.
 
 ## Pendiente de etapas posteriores
 

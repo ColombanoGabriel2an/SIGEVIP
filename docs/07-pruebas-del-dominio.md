@@ -208,8 +208,33 @@ El bloque se considera cerrado técnicamente cuando:
 - toda la documentación esté actualizada;
 - `git diff --check` no informe errores;
 - la solución compile;
-- las 145 pruebas sean correctas;
+- las 164 pruebas sean correctas;
 - exista commit documental;
 - el commit sea publicado;
 - el working tree quede limpio;
 - se informe a MAESTRO el estado y los pendientes.
+
+## Pruebas de integración de seguridad
+
+Además de las pruebas unitarias, se ejecutan pruebas reales contra SQL Server.
+
+Cobertura:
+
+- Usuario inexistente.
+- Recuperación de Usuario y Persona.
+- Recuperación de grupos directos.
+- Recuperación de permisos directos.
+- Usuario inactivo.
+- Contraseña correcta e incorrecta.
+- Creación transaccional del administrador.
+- Persistencia verificable de PBKDF2.
+- Idempotencia.
+- Rollback.
+- Herencia desde grupos hijos.
+- Rechazo de ciclos persistidos.
+
+Resultado consolidado:
+
+- 164 pruebas totales.
+- 164 correctas.
+- 0 fallidas.
