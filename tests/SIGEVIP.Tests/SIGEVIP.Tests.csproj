@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Application\AutenticacionServiceTests.cs" />
     <Compile Include="Application\AutorizacionServiceTests.cs" />
+    <Compile Include="Application\InicializacionSeguridadServiceTests.cs" />
     <Compile Include="Application\SesionActualTests.cs" />
     <Compile Include="ArchitectureTests.cs" />
     <Compile Include="Domain\ClienteTests.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="Domain\ViaticoTests.cs" />
     <Compile Include="Domain\VisitaTests.cs" />
     <Compile Include="Infrastructure\Pbkdf2PasswordHasherTests.cs" />
+    <Compile Include="Integration\InicializacionSeguridadRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioAutenticacionRepositoryIntegrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
