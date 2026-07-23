@@ -38,7 +38,9 @@
 
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
   </ItemGroup>
 
   <ItemGroup>
@@ -55,7 +57,12 @@
     <Compile Include="Domain\ViaticoTests.cs" />
     <Compile Include="Domain\VisitaTests.cs" />
     <Compile Include="Infrastructure\Pbkdf2PasswordHasherTests.cs" />
+    <Compile Include="Integration\UsuarioAutenticacionRepositoryIntegrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="App.config" />
   </ItemGroup>
 
   <ItemGroup>

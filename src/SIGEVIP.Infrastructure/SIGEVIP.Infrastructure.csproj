@@ -46,8 +46,10 @@
     <Compile Include="Class1.cs" />
     <Compile Include="Data\DatabaseHealthCheck.cs" />
     <Compile Include="Data\SqlConnectionFactory.cs" />
+    <Compile Include="Exceptions\PersistenciaException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\Pbkdf2PasswordHasher.cs" />
+    <Compile Include="Security\UsuarioAutenticacionRepository.cs" />
   </ItemGroup>
 
   <ItemGroup>
