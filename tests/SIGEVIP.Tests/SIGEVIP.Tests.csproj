@@ -59,6 +59,7 @@
     <Compile Include="Domain\VisitaTests.cs" />
     <Compile Include="Infrastructure\Pbkdf2PasswordHasherTests.cs" />
     <Compile Include="Integration\InicializacionSeguridadRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\JerarquiaGruposRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioAutenticacionRepositoryIntegrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
