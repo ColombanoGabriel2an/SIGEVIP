@@ -1,4 +1,10 @@
 using System;
+using System.Configuration;
+using System.Windows.Forms;
+using SIGEVIP.Application.Security;
+using SIGEVIP.Infrastructure.Data;
+using SIGEVIP.Infrastructure.Security;
+using SIGEVIP.WinForms.Navigation;
 
 namespace SIGEVIP.WinForms
 {
@@ -12,7 +18,71 @@ namespace SIGEVIP.WinForms
             System.Windows.Forms.Application
                 .SetCompatibleTextRenderingDefault(false);
 
-            System.Windows.Forms.Application.Run(new Form1());
+            try
+            {
+                ConnectionStringSettings settings =
+                    ConfigurationManager
+                        .ConnectionStrings["SIGEVIP"];
+
+                if (settings == null ||
+                    string.IsNullOrWhiteSpace(
+                        settings.ConnectionString))
+                {
+                    throw new ConfigurationErrorsException(
+                        "No se encontró la cadena de conexión SIGEVIP.");
+                }
+
+                var connectionFactory =
+                    new SqlConnectionFactory(
+                        settings.ConnectionString);
+
+                var passwordHasher =
+                    new Pbkdf2PasswordHasher();
+
+                var usuarioRepository =
+                    new UsuarioAutenticacionRepository(
+                        connectionFactory);
+
+                var autenticacionService =
+                    new AutenticacionService(
+                        usuarioRepository,
+                        passwordHasher);
+
+                var autorizacionService =
+                    new AutorizacionService();
+
+                ISesionActual sesionActual =
+                    new SesionActual();
+
+                var applicationContext =
+                    new SigevipApplicationContext(
+                        autenticacionService,
+                        autorizacionService,
+                        sesionActual);
+
+                System.Windows.Forms.Application.Run(
+                    applicationContext);
+            }
+            catch (ConfigurationErrorsException exception)
+            {
+                MostrarErrorInicio(exception.Message);
+            }
+            catch (Exception)
+            {
+                MostrarErrorInicio(
+                    "No fue posible iniciar SIGEVIP. " +
+                    "Verifique la configuración de la aplicación.");
+            }
+        }
+
+        private static void MostrarErrorInicio(
+            string mensaje)
+        {
+            MessageBox.Show(
+                mensaje,
+                "Error de inicio",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
         }
     }
 }

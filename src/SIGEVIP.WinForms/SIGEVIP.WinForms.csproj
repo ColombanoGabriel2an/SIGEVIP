@@ -1,104 +1,156 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
-          Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project
+  ToolsVersion="15.0"
+  xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2D564931-901F-4787-8DE1-729E7DE4E22D}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
-    <RootNamespace>SIGEVIP.WinForms</RootNamespace>
-    <AssemblyName>SIGEVIP.WinForms</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
+	<Import
+	  Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
+	  Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
 
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Configuration
+		  Condition=" '$(Configuration)' == '' ">
+			Debug
+		</Configuration>
 
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+		<Platform
+		  Condition=" '$(Platform)' == '' ">
+			AnyCPU
+		</Platform>
 
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-  </ItemGroup>
+		<ProjectGuid>
+			{2D564931-901F-4787-8DE1-729E7DE4E22D}
+		</ProjectGuid>
 
-  <ItemGroup>
-    <Compile Include="Form1.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+		<OutputType>WinExe</OutputType>
+		<RootNamespace>SIGEVIP.WinForms</RootNamespace>
+		<AssemblyName>SIGEVIP.WinForms</AssemblyName>
+		<TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+		<FileAlignment>512</FileAlignment>
+		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+		<Deterministic>true</Deterministic>
+	</PropertyGroup>
 
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
+	<PropertyGroup
+	  Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
 
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-  </ItemGroup>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>full</DebugType>
+		<Optimize>false</Optimize>
+		<OutputPath>bin\Debug\</OutputPath>
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
+	<PropertyGroup
+	  Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
 
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+		<DebugType>pdbonly</DebugType>
+		<Optimize>true</Optimize>
+		<OutputPath>bin\Release\</OutputPath>
+		<DefineConstants>TRACE</DefineConstants>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
+	</PropertyGroup>
 
-    <None Include="App.config" />
-  </ItemGroup>
+	<ItemGroup>
+		<Reference Include="System" />
+		<Reference Include="System.Core" />
+		<Reference Include="System.Configuration" />
+		<Reference Include="System.Data" />
+		<Reference Include="System.Drawing" />
+		<Reference Include="System.Windows.Forms" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SIGEVIP.Domain\SIGEVIP.Domain.csproj">
-      <Project>{6C25FAB5-B307-4BBB-B6AF-9D8BFE89E8FC}</Project>
-      <Name>SIGEVIP.Domain</Name>
-    </ProjectReference>
+	<ItemGroup>
+		<Compile Include="Form1.cs">
+			<SubType>Form</SubType>
+		</Compile>
 
-    <ProjectReference Include="..\SIGEVIP.Application\SIGEVIP.Application.csproj">
-      <Project>{987888AF-A3F7-4831-8453-0FFF7464FDE5}</Project>
-      <Name>SIGEVIP.Application</Name>
-    </ProjectReference>
+		<Compile Include="Form1.Designer.cs">
+			<DependentUpon>Form1.cs</DependentUpon>
+		</Compile>
 
-    <ProjectReference Include="..\SIGEVIP.Infrastructure\SIGEVIP.Infrastructure.csproj">
-      <Project>{02FBE796-1C26-411C-9875-FC8D9C2EE485}</Project>
-      <Name>SIGEVIP.Infrastructure</Name>
-    </ProjectReference>
-  </ItemGroup>
+		<Compile Include="Forms\LoginForm.cs">
+			<SubType>Form</SubType>
+		</Compile>
 
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+		<Compile Include="Forms\LoginForm.Designer.cs">
+			<DependentUpon>LoginForm.cs</DependentUpon>
+		</Compile>
+
+		<Compile Include="Navigation\SigevipApplicationContext.cs" />
+
+		<Compile Include="Program.cs" />
+
+		<Compile Include="Properties\AssemblyInfo.cs" />
+
+		<Compile Include="Properties\Resources.Designer.cs">
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+
+		<Compile Include="Properties\Settings.Designer.cs">
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Settings.settings</DependentUpon>
+			<DesignTimeSharedInput>True</DesignTimeSharedInput>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Forms\LoginForm.resx">
+			<DependentUpon>LoginForm.cs</DependentUpon>
+		</EmbeddedResource>
+
+		<EmbeddedResource Include="Properties\Resources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+			<SubType>Designer</SubType>
+		</EmbeddedResource>
+
+		<None Include="Properties\Settings.settings">
+			<Generator>SettingsSingleFileGenerator</Generator>
+			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
+		</None>
+
+		<None Include="App.config" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference
+		  Include="..\SIGEVIP.Domain\SIGEVIP.Domain.csproj">
+
+			<Project>
+				{6C25FAB5-B307-4BBB-B6AF-9D8BFE89E8FC}
+			</Project>
+
+			<Name>SIGEVIP.Domain</Name>
+		</ProjectReference>
+
+		<ProjectReference
+		  Include="..\SIGEVIP.Application\SIGEVIP.Application.csproj">
+
+			<Project>
+				{987888AF-A3F7-4831-8453-0FFF7464FDE5}
+			</Project>
+
+			<Name>SIGEVIP.Application</Name>
+		</ProjectReference>
+
+		<ProjectReference
+		  Include="..\SIGEVIP.Infrastructure\SIGEVIP.Infrastructure.csproj">
+
+			<Project>
+				{02FBE796-1C26-411C-9875-FC8D9C2EE485}
+			</Project>
+
+			<Name>SIGEVIP.Infrastructure</Name>
+		</ProjectReference>
+	</ItemGroup>
+
+	<Import
+	  Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
