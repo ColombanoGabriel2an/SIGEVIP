@@ -42,6 +42,11 @@
 
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="Clientes\ClienteFiltro.cs" />
+    <Compile Include="Clientes\ClienteListadoDto.cs" />
+    <Compile Include="Clientes\ClienteService.cs" />
+    <Compile Include="Clientes\IClienteRepository.cs" />
+    <Compile Include="Exceptions\AccesoDenegadoException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\AutenticacionService.cs" />
     <Compile Include="Security\AutorizacionService.cs" />

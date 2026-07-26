@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Application\AutenticacionServiceTests.cs" />
     <Compile Include="Application\AutorizacionServiceTests.cs" />
+    <Compile Include="Application\ClienteServiceTests.cs" />
     <Compile Include="Application\InicializacionSeguridadServiceTests.cs" />
     <Compile Include="Application\PerfilSesionServiceTests.cs" />
     <Compile Include="Application\SesionActualTests.cs" />
