@@ -14,6 +14,9 @@ namespace SIGEVIP.WinForms.Navigation
         private readonly AutorizacionService
             _autorizacionService;
 
+        private readonly PerfilSesionService
+            _perfilSesionService;
+
         private readonly ISesionActual
             _sesionActual;
 
@@ -24,6 +27,7 @@ namespace SIGEVIP.WinForms.Navigation
         public SigevipApplicationContext(
             AutenticacionService autenticacionService,
             AutorizacionService autorizacionService,
+            PerfilSesionService perfilSesionService,
             ISesionActual sesionActual)
         {
             _autenticacionService =
@@ -35,6 +39,11 @@ namespace SIGEVIP.WinForms.Navigation
                 autorizacionService
                 ?? throw new ArgumentNullException(
                     nameof(autorizacionService));
+
+            _perfilSesionService =
+                perfilSesionService
+                ?? throw new ArgumentNullException(
+                    nameof(perfilSesionService));
 
             _sesionActual =
                 sesionActual
@@ -67,16 +76,53 @@ namespace SIGEVIP.WinForms.Navigation
             if (!_sesionActual.HayUsuarioAutenticado)
             {
                 MessageBox.Show(
-                    "No fue posible establecer la sesion.",
-                    "Error de sesion",
+                    "No fue posible establecer la sesión.",
+                    "Error de sesión",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
 
                 return;
             }
 
+            PerfilSesion perfil;
+
+            try
+            {
+                perfil =
+                    _perfilSesionService
+                        .ObtenerPorIdPersona(
+                            _sesionActual
+                                .UsuarioActual
+                                .IdPersona);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show(
+                    "No fue posible recuperar los datos " +
+                    "de la persona autenticada.",
+                    "Error de sesión",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                _sesionActual.Cerrar();
+                return;
+            }
+
+            if (perfil == null)
+            {
+                MessageBox.Show(
+                    "No se encontró la persona asociada " +
+                    "al usuario autenticado.",
+                    "Error de sesión",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                _sesionActual.Cerrar();
+                return;
+            }
+
             CerrarLoginSinFinalizarAplicacion();
-            MostrarMenuPrincipal();
+            MostrarMenuPrincipal(perfil);
         }
 
         private void LoginForm_FormClosed(
@@ -91,12 +137,14 @@ namespace SIGEVIP.WinForms.Navigation
             FinalizarAplicacion();
         }
 
-        private void MostrarMenuPrincipal()
+        private void MostrarMenuPrincipal(
+            PerfilSesion perfil)
         {
             _mainForm =
                 new MainForm(
                     _sesionActual,
-                    _autorizacionService);
+                    _autorizacionService,
+                    perfil);
 
             _mainForm.CerrarSesionSolicitada +=
                 MainForm_CerrarSesionSolicitada;

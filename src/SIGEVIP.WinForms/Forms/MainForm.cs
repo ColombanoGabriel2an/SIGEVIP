@@ -61,6 +61,7 @@ namespace SIGEVIP.WinForms.Forms
 
         private readonly ISesionActual _sesionActual;
         private readonly AutorizacionService _autorizacionService;
+        private readonly PerfilSesion _perfilSesion;
 
         private Label _lblUsuario;
         private Label _lblEstado;
@@ -75,7 +76,8 @@ namespace SIGEVIP.WinForms.Forms
 
         public MainForm(
             ISesionActual sesionActual,
-            AutorizacionService autorizacionService)
+            AutorizacionService autorizacionService,
+            PerfilSesion perfilSesion)
         {
             _sesionActual =
                 sesionActual
@@ -86,6 +88,11 @@ namespace SIGEVIP.WinForms.Forms
                 autorizacionService
                 ?? throw new ArgumentNullException(
                     nameof(autorizacionService));
+
+            _perfilSesion =
+                perfilSesion
+                ?? throw new ArgumentNullException(
+                    nameof(perfilSesion));
 
             if (!_sesionActual.HayUsuarioAutenticado)
             {
@@ -497,6 +504,8 @@ namespace SIGEVIP.WinForms.Forms
         private void ConfigurarUsuario()
         {
             _lblUsuario.Text =
+                _perfilSesion.NombreCompleto +
+                Environment.NewLine +
                 "Usuario: " +
                 UsuarioActual.NombreUsuario;
         }

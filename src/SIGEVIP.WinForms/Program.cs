@@ -13,7 +13,8 @@ namespace SIGEVIP.WinForms
         [STAThread]
         private static void Main()
         {
-            System.Windows.Forms.Application.EnableVisualStyles();
+            System.Windows.Forms.Application
+                .EnableVisualStyles();
 
             System.Windows.Forms.Application
                 .SetCompatibleTextRenderingDefault(false);
@@ -29,7 +30,7 @@ namespace SIGEVIP.WinForms
                         settings.ConnectionString))
                 {
                     throw new ConfigurationErrorsException(
-                        "No se encontró la cadena de conexión SIGEVIP.");
+                        "No se encontrÃ³ la cadena de conexiÃ³n SIGEVIP.");
                 }
 
                 var connectionFactory =
@@ -43,10 +44,18 @@ namespace SIGEVIP.WinForms
                     new UsuarioAutenticacionRepository(
                         connectionFactory);
 
+                var perfilSesionRepository =
+                    new PerfilSesionRepository(
+                        connectionFactory);
+
                 var autenticacionService =
                     new AutenticacionService(
                         usuarioRepository,
                         passwordHasher);
+
+                var perfilSesionService =
+                    new PerfilSesionService(
+                        perfilSesionRepository);
 
                 var autorizacionService =
                     new AutorizacionService();
@@ -58,6 +67,7 @@ namespace SIGEVIP.WinForms
                     new SigevipApplicationContext(
                         autenticacionService,
                         autorizacionService,
+                        perfilSesionService,
                         sesionActual);
 
                 System.Windows.Forms.Application.Run(
@@ -71,7 +81,7 @@ namespace SIGEVIP.WinForms
             {
                 MostrarErrorInicio(
                     "No fue posible iniciar SIGEVIP. " +
-                    "Verifique la configuración de la aplicación.");
+                    "Verifique la configuraciÃ³n de la aplicaciÃ³n.");
             }
         }
 

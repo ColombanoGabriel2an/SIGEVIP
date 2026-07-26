@@ -48,6 +48,9 @@
     <Compile Include="Security\IInicializacionSeguridadRepository.cs" />
     <Compile Include="Security\InicializacionSeguridadService.cs" />
     <Compile Include="Security\IPasswordHasher.cs" />
+    <Compile Include="Security\IPerfilSesionRepository.cs" />
+    <Compile Include="Security\PerfilSesion.cs" />
+    <Compile Include="Security\PerfilSesionService.cs" />
     <Compile Include="Security\ISesionActual.cs" />
     <Compile Include="Security\IUsuarioAutenticacionRepository.cs" />
     <Compile Include="Security\PasswordHashResult.cs" />
