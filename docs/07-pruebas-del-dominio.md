@@ -28,6 +28,7 @@
 - `Domain/PersonaTests.cs`
 - `Domain/UsuarioTests.cs`
 - `Domain/ViajeTests.cs`
+- `Domain/ViajeParticipanteTests.cs`
 - `Domain/ViajeVisitaTests.cs`
 - `Domain/ViaticoTests.cs`
 - `Domain/VisitaTests.cs`
@@ -37,6 +38,7 @@
 - `Application/AutenticacionServiceTests.cs`
 - `Application/AutorizacionServiceTests.cs`
 - `Application/ClienteServiceTests.cs`
+- `Application/ViajeServiceTests.cs`
 - `Application/SesionActualTests.cs`
 
 ### Infrastructure
@@ -46,6 +48,7 @@
 ### Integración SQL
 
 - `Integration/ClienteRepositoryIntegrationTests.cs`
+- `Integration/ViajeRepositoryIntegrationTests.cs`
 - `Integration/InicializacionSeguridadRepositoryIntegrationTests.cs`
 - `Integration/UsuarioAutenticacionRepositoryIntegrationTests.cs`
 
@@ -55,8 +58,8 @@ El total definitivo se toma del ejecutor VSTest.
 
 Último resultado consolidado:
 
-- 197 pruebas totales;
-- 197 correctas;
+- 246 pruebas totales;
+- 246 correctas;
 - 0 fallidas.
 
 El conjunto incluye pruebas:
@@ -209,8 +212,8 @@ Compilación:
 
 Pruebas:
 
-- Totales: 197.
-- Correctas: 197.
+- Totales: 246.
+- Correctas: 246.
 - Fallidas: 0.
 - Omitidas: 0.
 
@@ -311,3 +314,68 @@ Se verifica:
 - filtro por estado;
 - restricción única de CUIT;
 - exclusión del identificador actual.
+
+## Cobertura específica del módulo Viajes
+
+### Domain
+
+Se verifica:
+
+- descripción obligatoria;
+- fechas válidas;
+- monto anticipado no negativo;
+- tipo válido;
+- al menos un participante;
+- rechazo de participantes nulos;
+- rechazo de participantes duplicados;
+- reemplazo de participantes;
+- modificación únicamente en Abierto;
+- conservación de participantes inactivos;
+- reconstrucción del agregado;
+- validación del período respecto de Visitas y Viáticos.
+
+### Application
+
+Se verifica:
+
+- sesión requerida;
+- Usuario activo;
+- permiso de consulta;
+- permiso de creación;
+- permiso de cancelación;
+- listado;
+- obtención;
+- alta;
+- modificación;
+- cancelación;
+- identificadores inválidos;
+- Viaje inexistente;
+- participantes inexistentes;
+- participantes inactivos;
+- participantes duplicados;
+- transferencia de filtros.
+
+### Integración SQL
+
+Se verifica:
+
+- consulta de Personas activas;
+- recuperación de Personas inactivas;
+- inserción y recuperación de Viaje;
+- persistencia de varios participantes;
+- actualización de datos;
+- reemplazo de participantes;
+- persistencia de monto y tipo;
+- persistencia de cancelación;
+- filtros por fechas;
+- filtros por estado;
+- filtro por participante;
+- restricción de asociaciones duplicadas;
+- rollback ante participante inexistente.
+
+### Resultado consolidado
+
+- 246 pruebas totales;
+- 246 correctas;
+- 0 fallidas;
+- compilación con 0 advertencias y 0 errores.

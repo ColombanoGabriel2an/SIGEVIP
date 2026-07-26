@@ -5,7 +5,7 @@
 | Aplicación de escritorio | Windows Forms | SIGEVIP.WinForms | Login y menú ejecutados manualmente | Implementado |
 | Lenguaje C# | .NET Framework 4.8 | Todos | 0 advertencias y 0 errores | Implementado |
 | Arquitectura en capas | Domain, Application, Infrastructure y WinForms | Todos | ArchitectureTests | Implementado |
-| Persistencia local | SQL Server y ADO.NET | Infrastructure / database | Base SIGEVIP operativa | Implementado para seguridad |
+| Persistencia local | SQL Server y ADO.NET | Infrastructure / database | Base SIGEVIP operativa | Implementado para seguridad, Clientes y Viajes |
 | RF01: iniciar sesión | `LoginForm`, `AutenticacionService`, PBKDF2 y `UsuarioAutenticacionRepository` | WinForms / Application / Infrastructure / database | Autenticación manual y pruebas automatizadas | Implementado |
 | RF02: validar credenciales y habilitar funciones | `SesionActual`, `SigevipApplicationContext`, `AutorizacionService` y `MainForm` | Application / Infrastructure / WinForms | Inicio de sesión, menú y permisos visuales | Implementado para menú principal |
 | RF03: gestionar usuarios | Entidad Usuario, tablas Persona-Usuario y acceso visual Usuarios | Domain / database / WinForms | Dominio y persistencia base | Parcialmente implementado |
@@ -15,11 +15,12 @@
 | RF07: activar o desactivar clientes | Entidad, servicio, repositorio, campo `Activo` y acciones de `ClientesForm` | Domain / Application / Infrastructure / database / WinForms | Pruebas unitarias, integración SQL y validación manual | Implementado |
 | RF08: listado filtrable de clientes | `ClienteFiltro`, `ClienteListadoDto`, `ClienteService.Listar`, consulta ADO.NET y `ClientesForm` | Application / Infrastructure / database / WinForms | Filtros por texto, CUIT, localidad, provincia y estado | Implementado |
 | RF09: historial del cliente | Relaciones históricas preservadas | Domain / Application / Infrastructure | Pendiente | Parcialmente implementado |
-| RF11: monto anticipado | `Viaje.MontoAnticipado` | Domain | Pruebas de cálculo | Implementado |
-| RF12: modificar solo en Abierto | Patrón State | Domain | Bloqueos por estado | Implementado |
-| RF13: cancelar viaje | Cancelación condicionada | Domain | Pruebas de transición | Implementado |
-| RF14: total y saldo | `TotalGastado` y `SaldoPendiente` | Domain | Saldos positivo, negativo y cero | Implementado |
-| RF15: registrar visitas | `Viaje.AgregarVisita()` | Domain | Alta y bloqueos | Implementado en dominio |
+| RF10: registrar viaje | `Viaje`, participantes, `ViajeService.Registrar`, `ViajeRepository.Insertar` y `ViajeEditForm` | Domain / Application / Infrastructure / database / WinForms | Pruebas unitarias, integración SQL y validación manual | Implementado |
+| RF11: modificar viaje | `Viaje.ActualizarDatos`, `ViajeService.Modificar`, `ViajeRepository.Actualizar` y `ViajeEditForm` | Domain / Application / Infrastructure / database / WinForms | Pruebas unitarias, integración SQL y validación manual | Implementado |
+| RF12: consultar viajes | `ViajeFiltro`, `ViajeListadoDto`, `ViajeService.Listar`, consulta ADO.NET y `ViajesForm` | Application / Infrastructure / database / WinForms | Filtros por fechas, estado y participante | Implementado |
+| RF13: cancelar viaje | `Viaje.Cancelar`, `ViajeService.Cancelar`, `ViajeRepository.Cancelar` y `ViajesForm` | Domain / Application / Infrastructure / database / WinForms | Pruebas unitarias, integración SQL y validación manual | Implementado para Viajes sin Visitas persistidas |
+| RF14: consultar detalle del viaje | `ViajeService.Obtener`, reconstrucción del agregado y `ViajeDetalleForm` | Domain / Application / Infrastructure / WinForms | Detalle manual y pruebas de persistencia | Parcial: datos generales y participantes; viáticos pendientes |
+| RF15: filtrar viajes | `ViajeFiltro`, `ViajeRepository.Listar` y controles de `ViajesForm` | Application / Infrastructure / WinForms | Filtros por fecha desde, fecha hasta, estado y participante | Parcial según alcance documentado |
 | RF16: datos de visita | Fecha, observación y localidad | Domain | Validaciones | Implementado |
 | RF17: uno o más clientes | Colección de Cliente | Domain | Uno, varios y duplicados | Implementado |
 | RF18: historial de visitas | Relaciones preservadas | Domain / Application / Infrastructure | Pendiente | Parcialmente implementado |
@@ -57,4 +58,4 @@
 | State en Viaje | `IEstadoViaje` y estados concretos | Domain | Transiciones | Implementado |
 | Composite en seguridad | `IPermisoComponente`, Grupo y Permiso | Domain | Anidamiento y ciclos | Implementado |
 | Auditoría básica | Persistencia y servicios | Infrastructure / Application | Pendiente | Pendiente |
-| SQL reproducible | Migraciones, seeds y validaciones de seguridad y Clientes | database | Migraciones `001`, `002`, `003`, seeds reejecutables y validaciones correctas | Implementado para seguridad y Clientes |
+| SQL reproducible | Migraciones, seeds y validaciones de seguridad, Clientes y Viajes | database | Migraciones `001`, `002`, `003`, `004`, seeds reejecutables y validaciones correctas | Implementado para seguridad, Clientes y Viajes |

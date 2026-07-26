@@ -612,3 +612,141 @@ Se verificó:
 Resultado:
 
 `VALIDACIÓN CORRECTA`
+
+## Modelo relacional de Viajes
+
+### Script de migración
+
+`database/migrations/004_crear_viajes.sql`
+
+Responsabilidades:
+
+- crear `dbo.Viaje`;
+- crear `dbo.ViajeParticipante`;
+- crear restricciones;
+- crear índices;
+- ejecutar en una transacción;
+- registrar la versión `004`;
+- permitir reejecución segura.
+
+### Tabla Viaje
+
+Nombre:
+
+`dbo.Viaje`
+
+| Columna | Tipo | Nulo | Descripción |
+|---|---|---:|---|
+| IdViaje | INT IDENTITY | No | Clave primaria |
+| FechaInicio | DATE | No | Inicio del período |
+| FechaFin | DATE | No | Fin del período |
+| Descripcion | NVARCHAR(500) | No | Descripción funcional |
+| TipoViaje | TINYINT | No | Tipo persistible |
+| MontoAnticipado | DECIMAL(18,2) | No | Anticipo |
+| EstadoViaje | TINYINT | No | Estado persistible |
+
+Restricciones:
+
+- `PK_Viaje`
+- `CK_Viaje_Descripcion_NoVacia`
+- `CK_Viaje_Periodo`
+- `CK_Viaje_TipoViaje`
+- `CK_Viaje_MontoAnticipado`
+- `CK_Viaje_EstadoViaje`
+- `DF_Viaje_MontoAnticipado`
+- `DF_Viaje_EstadoViaje`
+
+Índices:
+
+- `IX_Viaje_FechaInicio`
+- `IX_Viaje_EstadoViaje`
+
+### Correspondencia de TipoViaje
+
+| Valor | Tipo |
+|---:|---|
+| 1 | Desplazamiento |
+| 2 | EnOficina |
+| 3 | EventoFeria |
+
+### Correspondencia de EstadoViaje
+
+| Valor | Estado |
+|---:|---|
+| 1 | Abierto |
+| 2 | EnRendicion |
+| 3 | Aprobado |
+| 4 | Cancelado |
+
+### Tabla ViajeParticipante
+
+Nombre:
+
+`dbo.ViajeParticipante`
+
+| Columna | Tipo | Nulo | Descripción |
+|---|---|---:|---|
+| IdViaje | INT | No | Viaje asociado |
+| IdPersona | INT | No | Persona participante |
+
+Claves:
+
+- `PK_ViajeParticipante`
+- `FK_ViajeParticipante_Viaje`
+- `FK_ViajeParticipante_Persona`
+
+Índice:
+
+- `IX_ViajeParticipante_IdPersona`
+
+Cardinalidad:
+
+    Viaje N -------- N Persona
+
+La clave primaria compuesta impide asociaciones duplicadas.
+
+No se utiliza `ON DELETE CASCADE`.
+
+### Seed del módulo
+
+Script:
+
+`database/seed/003_permisos_modulo_viajes.sql`
+
+Responsabilidades:
+
+- asignar `VIAJE_CREAR` a `ADMINISTRADOR_GENERAL`;
+- asignar `VIAJE_CANCELAR` a `ADMINISTRADOR_GENERAL`;
+- conservar `VIAJE_CONSULTAR`;
+- impedir asociaciones duplicadas;
+- permitir reejecución segura.
+
+### Validación
+
+Script:
+
+`database/migrations/004_validar_viajes.sql`
+
+Se verificó:
+
+- versión `004`;
+- existencia de ambas tablas;
+- columnas;
+- tipos;
+- longitudes;
+- precisión y escala;
+- claves primarias;
+- claves foráneas;
+- índices;
+- restricciones CHECK;
+- restricciones DEFAULT;
+- ausencia de participantes duplicados;
+- ausencia de períodos inválidos;
+- ausencia de montos negativos;
+- ausencia de tipos inválidos;
+- ausencia de estados inválidos;
+- permisos del administrador.
+
+Resultado:
+
+`VALIDACIÓN CORRECTA`

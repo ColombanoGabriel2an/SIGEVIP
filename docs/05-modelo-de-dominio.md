@@ -23,7 +23,7 @@ Incluye:
 
 No incluye todavía:
 
-- persistencia de viajes, visitas y viáticos;
+- persistencia de visitas y viáticos;
 - gestión funcional de usuarios, grupos y permisos;
 - recuperación de contraseña;
 - reportes;
@@ -56,6 +56,7 @@ No incluye todavía:
 - `EstadoActual`
 - `Viaticos`
 - `Visitas`
+- `Participantes`
 
 ### Propiedades calculadas
 
@@ -77,6 +78,11 @@ No incluye todavía:
 - `EnviarARendicion`
 - `Aprobar`
 - `Cancelar`
+- `AgregarParticipante`
+- `QuitarParticipante`
+- `ReemplazarParticipantes`
+- `ActualizarDatos`
+- `Reconstruir`
 
 ## 3. Entidad Viatico
 
@@ -314,6 +320,21 @@ Un componente puede ser:
 
 La persistencia deberá representar la estructura sin introducir ciclos.
 
+
+### Viaje y Persona
+
+    Viaje N -------- N Persona
+
+La relación representa los participantes del Viaje.
+
+Reglas:
+
+- todo Viaje persistido debe conservar al menos un participante;
+- no se admiten participantes duplicados;
+- para altas y modificaciones solo pueden seleccionarse Personas activas;
+- una Persona inactiva se conserva al reconstruir Viajes históricos;
+- la tabla asociativa es `ViajeParticipante`.
+
 ### Viaje y Visita
 
     Viaje 1 -------- 0..N Visita
@@ -413,7 +434,9 @@ Se encuentran persistidos:
 - UsuarioGrupo;
 - GrupoPermiso;
 - GrupoGrupo;
-- Cliente.
+- Cliente;
+- Viaje;
+- ViajeParticipante.
 
 La entidad Cliente se reconstruye mediante:
 
@@ -435,7 +458,6 @@ Los objetos de comportamiento State no se almacenan directamente.
 
 ## 17. Pendientes
 
-- Persistencia de Viaje.
 - Persistencia de Viático.
 - Persistencia de Visita.
 - Persistencia de VisitaCliente.

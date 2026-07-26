@@ -84,14 +84,20 @@ Se encuentran implementados:
 - persistencia SQL de Clientes;
 - alta y modificación de Clientes;
 - activación y desactivación lógica;
-- listado y filtros;
+- listado y filtros de Clientes;
 - validación de CUIT duplicado;
-- 197 pruebas automatizadas correctas.
+- módulo funcional de Viajes;
+- persistencia SQL de Viajes y participantes;
+- alta, modificación, consulta y cancelación de Viajes;
+- filtros por fechas, estado y participante;
+- selección múltiple de participantes;
+- validación SQL de las migraciones `003` y `004`;
+- 246 pruebas automatizadas correctas.
 
 Permanecen pendientes:
 
 - gestión funcional de usuarios, grupos y permisos;
-- persistencia de viajes, visitas y viáticos;
+- persistencia de visitas y viáticos;
 - historial funcional del cliente;
 - auditoría;
 - reportes;

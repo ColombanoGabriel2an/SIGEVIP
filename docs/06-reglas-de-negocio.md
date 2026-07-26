@@ -76,6 +76,55 @@ El saldo se calcula mediante:
 
     TotalGastado - MontoAnticipado
 
+
+### RN-VIA-19
+
+La descripción del Viaje es obligatoria.
+
+### RN-VIA-20
+
+Todo Viaje registrado debe tener al menos un participante.
+
+### RN-VIA-21
+
+No se admiten participantes duplicados.
+
+### RN-VIA-22
+
+Para registrar o modificar un Viaje solo pueden seleccionarse Personas activas.
+
+### RN-VIA-23
+
+Los participantes inactivos se conservan al reconstruir un Viaje histórico.
+
+### RN-VIA-24
+
+La consulta de Viajes requiere `VIAJE_CONSULTAR`.
+
+### RN-VIA-25
+
+El alta y la modificación requieren `VIAJE_CREAR`.
+
+### RN-VIA-26
+
+La cancelación requiere `VIAJE_CANCELAR`.
+
+### RN-VIA-27
+
+Un Usuario sin sesión, inactivo o sin permiso no puede ejecutar operaciones de Viajes.
+
+### RN-VIA-28
+
+La inserción y actualización del Viaje y sus participantes son transaccionales.
+
+### RN-VIA-29
+
+La relación Viaje-Persona no admite asociaciones duplicadas.
+
+### RN-VIA-30
+
+Un nuevo período no puede dejar Visitas o Viáticos cargados fuera de las fechas del Viaje.
+
 ## 2. Cliente y Visita
 
 ### RN-CLI-01
@@ -468,7 +517,7 @@ La exclusión de Viáticos debe registrar motivo, Usuario y fecha.
 
 Los casos de uso del módulo Clientes consultan `AutorizacionService`.
 
-Los módulos funcionales posteriores deberán aplicar el mismo criterio.
+El módulo Viajes aplica el mismo criterio mediante `ViajeService`.
 
 ### RN-PEN-05
 

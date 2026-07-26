@@ -4,7 +4,7 @@
 
 Etapa 4: módulos funcionales documentados.
 
-Bloque actual: cierre técnico y documental del módulo Clientes.
+Bloque actual: cierre técnico y documental del módulo Viajes.
 
 ## Rama de trabajo
 
@@ -12,8 +12,8 @@ Bloque actual: cierre técnico y documental del módulo Clientes.
 
 ## Último commit técnico publicado
 
-- Commit: `8f45694`
-- Mensaje: `Agrego interfaz de gestion de clientes`
+- Commit: `88fbd13`
+- Mensaje: `Agrego interfaz de gestion de viajes`
 
 La rama local se encuentra sincronizada con:
 
@@ -242,8 +242,8 @@ Ese formulario solo servía para comprobar la conexión inicial y ya no particip
 
 ### Pruebas
 
-- Totales: 197.
-- Correctas: 197.
+- Totales: 246.
+- Correctas: 246.
 - Fallidas: 0.
 
 Incluyen:
@@ -511,3 +511,137 @@ La interfaz permite:
 - `0994a78` — `Agrego casos de uso de clientes`
 - `c8a36e3` — `Implemento persistencia de clientes`
 - `8f45694` — `Agrego interfaz de gestion de clientes`
+
+## Módulo funcional de Viajes
+
+El módulo Viajes se encuentra implementado de extremo a extremo dentro del alcance aprobado.
+
+### Domain
+
+Se implementó:
+
+- descripción obligatoria;
+- período válido;
+- tipo de viaje válido;
+- monto anticipado no negativo;
+- participantes obligatorios;
+- rechazo de participantes duplicados;
+- relación muchos a muchos Viaje-Persona;
+- modificación únicamente en estado Abierto;
+- cancelación condicionada por reglas de estado;
+- reconstrucción desde persistencia;
+- preservación histórica de participantes inactivos.
+
+### Application
+
+Se implementaron:
+
+- `ViajeFiltro`;
+- `ViajeListadoDto`;
+- `PersonaSeleccionDto`;
+- `IViajeRepository`;
+- `IPersonaConsultaRepository`;
+- `ViajeService`.
+
+Casos de uso disponibles:
+
+- listar viajes;
+- obtener un viaje;
+- listar participantes activos;
+- registrar viaje;
+- modificar viaje;
+- cancelar viaje.
+
+Cada operación valida:
+
+- sesión autenticada;
+- Usuario activo;
+- permiso requerido;
+- identificadores;
+- existencia del Viaje;
+- existencia y actividad de participantes;
+- reglas de estado.
+
+### Infrastructure
+
+Se implementaron:
+
+- `PersonaConsultaRepository`;
+- `ViajeRepository`.
+
+Responsabilidades:
+
+- consultar Personas activas;
+- recuperar Personas activas o inactivas por identificador;
+- insertar Viaje y participantes dentro de una transacción;
+- obtener el agregado;
+- actualizar datos y participantes;
+- cancelar;
+- listar con filtros;
+- generar resumen de participantes;
+- traducir errores técnicos;
+- revertir operaciones incompletas.
+
+### Base de datos
+
+Tablas:
+
+- `dbo.Viaje`;
+- `dbo.ViajeParticipante`.
+
+Scripts:
+
+- `database/migrations/004_crear_viajes.sql`;
+- `database/seed/003_permisos_modulo_viajes.sql`;
+- `database/migrations/004_validar_viajes.sql`.
+
+Validación ejecutada:
+
+`VALIDACIÓN CORRECTA`
+
+### WinForms
+
+Se implementaron:
+
+- `ViajesForm`;
+- `ViajeEditForm`;
+- `ViajeDetalleForm`;
+- navegación desde `MainForm`;
+- coordinación desde `SigevipApplicationContext`;
+- composición en `Program`.
+
+La interfaz permite:
+
+- listar;
+- filtrar;
+- registrar;
+- modificar;
+- consultar detalle;
+- cancelar;
+- seleccionar varios participantes;
+- visualizar participantes inactivos históricos;
+- aplicar permisos visuales;
+- mostrar mensajes de validación y errores controlados.
+
+### Commits del módulo
+
+- `8226625` — `Agrego casos de uso de viajes`
+- `6914a1d` — `Implemento persistencia de viajes`
+- `88fbd13` — `Agrego interfaz de gestion de viajes`
+
+### Alcance parcial
+
+Permanece pendiente:
+
+- persistencia de Visitas;
+- persistencia de Viáticos;
+- total gastado y saldo persistidos;
+- bloqueo de cancelación por Visitas persistidas;
+- historial completo del Viaje.
+
+## Pendiente inmediato
+
+- completar el cierre documental del módulo Viajes;
+- ejecutar regresión final;
+- publicar el commit documental;
+- preparar informe de transferencia a MAESTRO.
