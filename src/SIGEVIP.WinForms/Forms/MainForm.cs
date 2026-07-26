@@ -121,6 +121,8 @@ namespace SIGEVIP.WinForms.Forms
         public event EventHandler
             ViajesSolicitados;
 
+        public event EventHandler
+            VisitasSolicitadas;
 
         public event EventHandler
             CerrarSesionSolicitada;
@@ -661,8 +663,12 @@ namespace SIGEVIP.WinForms.Forms
             object sender,
             EventArgs e)
         {
-            MostrarModuloPendiente(
-                "Visitas");
+            EventHandler handler =
+                VisitasSolicitadas;
+
+            handler?.Invoke(
+                this,
+                EventArgs.Empty);
         }
 
         private void BtnViaticos_Click(
