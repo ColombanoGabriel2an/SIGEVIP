@@ -59,19 +59,29 @@ namespace SIGEVIP.WinForms.Forms
         private const string AuditoriaConsultar =
             "AUDITORIA_CONSULTAR";
 
-        private readonly ISesionActual _sesionActual;
-        private readonly AutorizacionService _autorizacionService;
-        private readonly PerfilSesion _perfilSesion;
+        private readonly ISesionActual
+            _sesionActual;
+
+        private readonly AutorizacionService
+            _autorizacionService;
+
+        private readonly PerfilSesion
+            _perfilSesion;
 
         private Label _lblUsuario;
         private Label _lblEstado;
+
         private Button _btnClientes;
         private Button _btnViajes;
         private Button _btnVisitas;
         private Button _btnViaticos;
-        private Button _btnSeguridad;
+        private Button _btnUsuarios;
+        private Button _btnGrupos;
+        private Button _btnPermisos;
+        private Button _btnAuditoria;
         private Button _btnCerrarSesion;
         private Button _btnSalir;
+
         private bool _cerrandoControladamente;
 
         public MainForm(
@@ -105,24 +115,135 @@ namespace SIGEVIP.WinForms.Forms
             ConfigurarPermisos();
         }
 
-        public event EventHandler CerrarSesionSolicitada;
+        public event EventHandler
+            CerrarSesionSolicitada;
 
-        public event EventHandler SalirSolicitado;
+        public event EventHandler
+            SalirSolicitado;
 
         private Usuario UsuarioActual
         {
-            get { return _sesionActual.UsuarioActual; }
+            get
+            {
+                return _sesionActual.UsuarioActual;
+            }
         }
 
         private void InicializarFormulario()
         {
             Text = "SIGEVIP - Menu principal";
-            StartPosition = FormStartPosition.CenterScreen;
-            MinimumSize = new Size(920, 600);
-            Size = new Size(1020, 680);
-            Font = new Font("Segoe UI", 9F);
-            BackColor = Color.WhiteSmoke;
+            StartPosition =
+                FormStartPosition.CenterScreen;
 
+            MinimumSize =
+                new Size(920, 620);
+
+            Size =
+                new Size(1080, 720);
+
+            Font =
+                new Font(
+                    "Segoe UI",
+                    9F);
+
+            BackColor =
+                Color.WhiteSmoke;
+
+            var panelEncabezado =
+                CrearPanelEncabezado();
+
+            var lblModulos =
+                new Label
+                {
+                    AutoSize = true,
+                    Font = new Font(
+                        "Segoe UI",
+                        14F,
+                        FontStyle.Bold),
+                    Location =
+                        new Point(31, 113),
+                    Text =
+                        "Modulos disponibles"
+                };
+
+            var panelModulos =
+                new FlowLayoutPanel
+                {
+                    Anchor =
+                        AnchorStyles.Top |
+                        AnchorStyles.Bottom |
+                        AnchorStyles.Left |
+                        AnchorStyles.Right,
+                    AutoScroll = true,
+                    BackColor =
+                        Color.Transparent,
+                    FlowDirection =
+                        FlowDirection.LeftToRight,
+                    Location =
+                        new Point(23, 150),
+                    Padding =
+                        new Padding(0),
+                    Size =
+                        new Size(1018, 410),
+                    WrapContents = true
+                };
+
+            CrearBotonesModulos();
+
+            panelModulos.Controls.Add(
+                _btnClientes);
+
+            panelModulos.Controls.Add(
+                _btnViajes);
+
+            panelModulos.Controls.Add(
+                _btnVisitas);
+
+            panelModulos.Controls.Add(
+                _btnViaticos);
+
+            panelModulos.Controls.Add(
+                _btnUsuarios);
+
+            panelModulos.Controls.Add(
+                _btnGrupos);
+
+            panelModulos.Controls.Add(
+                _btnPermisos);
+
+            panelModulos.Controls.Add(
+                _btnAuditoria);
+
+            _lblEstado =
+                new Label
+                {
+                    Anchor =
+                        AnchorStyles.Left |
+                        AnchorStyles.Right |
+                        AnchorStyles.Bottom,
+                    BorderStyle =
+                        BorderStyle.FixedSingle,
+                    Location =
+                        new Point(31, 585),
+                    Padding =
+                        new Padding(12),
+                    Size =
+                        new Size(994, 70),
+                    TextAlign =
+                        ContentAlignment.MiddleLeft
+                };
+
+            Controls.Add(_lblEstado);
+            Controls.Add(panelModulos);
+            Controls.Add(lblModulos);
+            Controls.Add(panelEncabezado);
+
+            FormClosing +=
+                MainForm_FormClosing;
+        }
+
+        private Panel CrearPanelEncabezado()
+        {
             var panelEncabezado =
                 new Panel
                 {
@@ -139,7 +260,8 @@ namespace SIGEVIP.WinForms.Forms
                         "Segoe UI",
                         20F,
                         FontStyle.Bold),
-                    Location = new Point(28, 16),
+                    Location =
+                        new Point(28, 16),
                     Text = "SIGEVIP"
                 };
 
@@ -150,244 +272,124 @@ namespace SIGEVIP.WinForms.Forms
                     Font = new Font(
                         "Segoe UI",
                         10F),
-                    Location = new Point(31, 56),
+                    Location =
+                        new Point(31, 56),
                     Text =
                         "Sistema de Gestion de Viajes y Viaticos"
                 };
 
             var panelAcciones =
-    new TableLayoutPanel
-    {
-        Dock = DockStyle.Right,
-        Width = 390,
-        ColumnCount = 2,
-        RowCount = 2,
-        Padding = new Padding(10, 10, 20, 8),
-        BackColor = Color.White
-    };
-
-
-
-            panelAcciones.ColumnStyles.Add(
-
-                new ColumnStyle(
-
-                    SizeType.Percent,
-
-                    50F));
-
-
-
-            panelAcciones.ColumnStyles.Add(
-
-                new ColumnStyle(
-
-                    SizeType.Percent,
-
-                    50F));
-
-
-
-            panelAcciones.RowStyles.Add(
-
-                new RowStyle(
-
-                    SizeType.Percent,
-
-                    50F));
-
-
-
-            panelAcciones.RowStyles.Add(
-
-                new RowStyle(
-
-                    SizeType.Percent,
-
-                    50F));
-
-
-
-            _lblUsuario =
-
-                new Label
-
-                {
-
-                    Dock = DockStyle.Fill,
-
-                    AutoSize = false,
-
-                    Font = new Font(
-
-                        "Segoe UI",
-
-                        10F,
-
-                        FontStyle.Bold),
-
-                    TextAlign =
-
-                        ContentAlignment.MiddleRight
-
-                };
-
-
-
-            _btnCerrarSesion =
-
-                new Button
-
-                {
-
-                    Dock = DockStyle.Fill,
-
-                    Margin = new Padding(4),
-
-                    Text = "Cerrar sesión",
-
-                    UseVisualStyleBackColor = true
-
-                };
-
-
-
-            _btnSalir =
-
-                new Button
-
-                {
-
-                    Dock = DockStyle.Fill,
-
-                    Margin = new Padding(4),
-
-                    Text = "Salir",
-
-                    UseVisualStyleBackColor = true
-
-                };
-
-
-
-            _btnCerrarSesion.Click +=
-
-                BtnCerrarSesion_Click;
-
-
-
-            _btnSalir.Click +=
-
-                BtnSalir_Click;
-
-
-
-            panelAcciones.Controls.Add(
-
-                _lblUsuario,
-
-                0,
-
-                0);
-
-
-
-            panelAcciones.SetColumnSpan(
-
-                _lblUsuario,
-
-                2);
-
-
-
-            panelAcciones.Controls.Add(
-
-                _btnCerrarSesion,
-
-                0,
-
-                1);
-
-
-
-            panelAcciones.Controls.Add(
-
-                _btnSalir,
-
-                1,
-
-                1);
-
-
-
-            panelEncabezado.Controls.Add(
-
-                panelAcciones);
-
-
-
-            panelEncabezado.Controls.Add(
-
-                lblTitulo);
-
-
-
-            panelEncabezado.Controls.Add(
-
-                lblSubtitulo);
-
-            var lblModulos =
-                new Label
-                {
-                    AutoSize = true,
-                    Font = new Font(
-                        "Segoe UI",
-                        14F,
-                        FontStyle.Bold),
-                    Location = new Point(31, 113),
-                    Text = "Modulos disponibles"
-                };
-
-            var tablaModulos =
                 new TableLayoutPanel
                 {
-                    Anchor =
-                        AnchorStyles.Top |
-                        AnchorStyles.Left |
-                        AnchorStyles.Right,
-                    ColumnCount = 3,
+                    Dock = DockStyle.Right,
+                    Width = 390,
+                    ColumnCount = 2,
                     RowCount = 2,
-                    Location = new Point(31, 158),
-                    Size = new Size(944, 310),
-                    Padding = new Padding(0),
-                    BackColor = Color.Transparent
+                    Padding =
+                        new Padding(
+                            10,
+                            10,
+                            20,
+                            8),
+                    BackColor = Color.White
                 };
 
-            tablaModulos.ColumnStyles.Add(
+            panelAcciones.ColumnStyles.Add(
                 new ColumnStyle(
                     SizeType.Percent,
-                    33.333F));
+                    50F));
 
-            tablaModulos.ColumnStyles.Add(
+            panelAcciones.ColumnStyles.Add(
                 new ColumnStyle(
                     SizeType.Percent,
-                    33.333F));
+                    50F));
 
-            tablaModulos.ColumnStyles.Add(
-                new ColumnStyle(
-                    SizeType.Percent,
-                    33.333F));
-
-            tablaModulos.RowStyles.Add(
+            panelAcciones.RowStyles.Add(
                 new RowStyle(
                     SizeType.Percent,
                     50F));
 
-            tablaModulos.RowStyles.Add(
+            panelAcciones.RowStyles.Add(
                 new RowStyle(
                     SizeType.Percent,
                     50F));
 
+            _lblUsuario =
+                new Label
+                {
+                    Dock = DockStyle.Fill,
+                    AutoSize = false,
+                    Font = new Font(
+                        "Segoe UI",
+                        10F,
+                        FontStyle.Bold),
+                    TextAlign =
+                        ContentAlignment.MiddleRight
+                };
+
+            _btnCerrarSesion =
+                new Button
+                {
+                    Dock = DockStyle.Fill,
+                    Margin =
+                        new Padding(4),
+                    Text =
+                        "Cerrar sesion",
+                    UseVisualStyleBackColor =
+                        true
+                };
+
+            _btnSalir =
+                new Button
+                {
+                    Dock = DockStyle.Fill,
+                    Margin =
+                        new Padding(4),
+                    Text =
+                        "Salir",
+                    UseVisualStyleBackColor =
+                        true
+                };
+
+            _btnCerrarSesion.Click +=
+                BtnCerrarSesion_Click;
+
+            _btnSalir.Click +=
+                BtnSalir_Click;
+
+            panelAcciones.Controls.Add(
+                _lblUsuario,
+                0,
+                0);
+
+            panelAcciones.SetColumnSpan(
+                _lblUsuario,
+                2);
+
+            panelAcciones.Controls.Add(
+                _btnCerrarSesion,
+                0,
+                1);
+
+            panelAcciones.Controls.Add(
+                _btnSalir,
+                1,
+                1);
+
+            panelEncabezado.Controls.Add(
+                panelAcciones);
+
+            panelEncabezado.Controls.Add(
+                lblTitulo);
+
+            panelEncabezado.Controls.Add(
+                lblSubtitulo);
+
+            return panelEncabezado;
+        }
+
+        private void CrearBotonesModulos()
+        {
             _btnClientes =
                 CrearBotonModulo(
                     "Clientes",
@@ -408,10 +410,25 @@ namespace SIGEVIP.WinForms.Forms
                     "Viaticos y rendiciones",
                     "Carga y revision de gastos.");
 
-            _btnSeguridad =
+            _btnUsuarios =
                 CrearBotonModulo(
-                    "Usuarios y seguridad",
-                    "Usuarios, grupos, permisos y auditoria.");
+                    "Usuarios",
+                    "Gestion de usuarios y asignacion de grupos.");
+
+            _btnGrupos =
+                CrearBotonModulo(
+                    "Grupos",
+                    "Gestion de grupos de acceso.");
+
+            _btnPermisos =
+                CrearBotonModulo(
+                    "Permisos",
+                    "Gestion de permisos del sistema.");
+
+            _btnAuditoria =
+                CrearBotonModulo(
+                    "Auditoria",
+                    "Consulta de registros de auditoria.");
 
             _btnClientes.Click +=
                 BtnClientes_Click;
@@ -425,57 +442,17 @@ namespace SIGEVIP.WinForms.Forms
             _btnViaticos.Click +=
                 BtnViaticos_Click;
 
-            _btnSeguridad.Click +=
-                BtnSeguridad_Click;
+            _btnUsuarios.Click +=
+                BtnUsuarios_Click;
 
-            tablaModulos.Controls.Add(
-                _btnClientes,
-                0,
-                0);
+            _btnGrupos.Click +=
+                BtnGrupos_Click;
 
-            tablaModulos.Controls.Add(
-                _btnViajes,
-                1,
-                0);
+            _btnPermisos.Click +=
+                BtnPermisos_Click;
 
-            tablaModulos.Controls.Add(
-                _btnVisitas,
-                2,
-                0);
-
-            tablaModulos.Controls.Add(
-                _btnViaticos,
-                0,
-                1);
-
-            tablaModulos.Controls.Add(
-                _btnSeguridad,
-                1,
-                1);
-
-            _lblEstado =
-                new Label
-                {
-                    Anchor =
-                        AnchorStyles.Left |
-                        AnchorStyles.Right |
-                        AnchorStyles.Bottom,
-                    BorderStyle =
-                        BorderStyle.FixedSingle,
-                    Location = new Point(31, 510),
-                    Size = new Size(944, 84),
-                    Padding = new Padding(12),
-                    TextAlign =
-                        ContentAlignment.MiddleLeft
-                };
-
-            Controls.Add(_lblEstado);
-            Controls.Add(tablaModulos);
-            Controls.Add(lblModulos);
-            Controls.Add(panelEncabezado);
-
-            FormClosing +=
-                MainForm_FormClosing;
+            _btnAuditoria.Click +=
+                BtnAuditoria_Click;
         }
 
         private static Button CrearBotonModulo(
@@ -484,8 +461,10 @@ namespace SIGEVIP.WinForms.Forms
         {
             return new Button
             {
-                Dock = DockStyle.Fill,
-                Margin = new Padding(8),
+                Margin =
+                    new Padding(8),
+                Size =
+                    new Size(310, 135),
                 Font = new Font(
                     "Segoe UI",
                     11F,
@@ -497,7 +476,8 @@ namespace SIGEVIP.WinForms.Forms
                     descripcion,
                 TextAlign =
                     ContentAlignment.MiddleCenter,
-                UseVisualStyleBackColor = true
+                UseVisualStyleBackColor =
+                    true
             };
         }
 
@@ -537,68 +517,72 @@ namespace SIGEVIP.WinForms.Forms
                     ViaticoReactivar,
                     RendicionRevisar);
 
-            bool puedeSeguridad =
+            bool puedeUsuarios =
                 TieneAlgunPermiso(
-                    UsuarioGestionar,
-                    GrupoGestionar,
-                    PermisoGestionar,
+                    UsuarioGestionar);
+
+            bool puedeGrupos =
+                TieneAlgunPermiso(
+                    GrupoGestionar);
+
+            bool puedePermisos =
+                TieneAlgunPermiso(
+                    PermisoGestionar);
+
+            bool puedeAuditoria =
+                TieneAlgunPermiso(
                     AuditoriaConsultar);
 
-            ConfigurarBoton(
+            ConfigurarVisibilidad(
                 _btnClientes,
                 puedeClientes);
 
-            ConfigurarBoton(
+            ConfigurarVisibilidad(
                 _btnViajes,
                 puedeViajes);
 
-            ConfigurarBoton(
+            ConfigurarVisibilidad(
                 _btnVisitas,
                 puedeVisitas);
 
-            ConfigurarBoton(
+            ConfigurarVisibilidad(
                 _btnViaticos,
                 puedeViaticos);
 
-            ConfigurarBoton(
-                _btnSeguridad,
-                puedeSeguridad);
+            ConfigurarVisibilidad(
+                _btnUsuarios,
+                puedeUsuarios);
 
-            int cantidadDisponibles = 0;
+            ConfigurarVisibilidad(
+                _btnGrupos,
+                puedeGrupos);
 
-            if (puedeClientes)
-            {
-                cantidadDisponibles++;
-            }
+            ConfigurarVisibilidad(
+                _btnPermisos,
+                puedePermisos);
 
-            if (puedeViajes)
-            {
-                cantidadDisponibles++;
-            }
+            ConfigurarVisibilidad(
+                _btnAuditoria,
+                puedeAuditoria);
 
-            if (puedeVisitas)
-            {
-                cantidadDisponibles++;
-            }
-
-            if (puedeViaticos)
-            {
-                cantidadDisponibles++;
-            }
-
-            if (puedeSeguridad)
-            {
-                cantidadDisponibles++;
-            }
+            int cantidadDisponibles =
+                ContarOpcionesDisponibles(
+                    puedeClientes,
+                    puedeViajes,
+                    puedeVisitas,
+                    puedeViaticos,
+                    puedeUsuarios,
+                    puedeGrupos,
+                    puedePermisos,
+                    puedeAuditoria);
 
             _lblEstado.Text =
                 "Sesion iniciada correctamente. " +
-                "Modulos habilitados segun permisos: " +
+                "Opciones visibles segun permisos: " +
                 cantidadDisponibles +
                 "." +
                 Environment.NewLine +
-                "Las pantallas operativas se implementaran " +
-                "en los siguientes incrementos.";
+                "Las opciones no autorizadas permanecen ocultas.";
         }
 
         private bool TieneAlgunPermiso(
@@ -606,9 +590,10 @@ namespace SIGEVIP.WinForms.Forms
         {
             foreach (string codigo in codigos)
             {
-                if (_autorizacionService.TienePermiso(
-                    UsuarioActual,
-                    codigo))
+                if (_autorizacionService
+                    .TienePermiso(
+                        UsuarioActual,
+                        codigo))
                 {
                     return true;
                 }
@@ -617,19 +602,28 @@ namespace SIGEVIP.WinForms.Forms
             return false;
         }
 
-        private static void ConfigurarBoton(
+        private static void ConfigurarVisibilidad(
             Button boton,
-            bool habilitado)
+            bool visible)
         {
-            boton.Enabled = habilitado;
+            boton.Visible = visible;
+            boton.Enabled = visible;
+        }
 
-            if (!habilitado)
+        private static int ContarOpcionesDisponibles(
+            params bool[] opciones)
+        {
+            int cantidad = 0;
+
+            foreach (bool opcion in opciones)
             {
-                boton.Text +=
-                    Environment.NewLine +
-                    Environment.NewLine +
-                    "Sin permiso";
+                if (opcion)
+                {
+                    cantidad++;
+                }
             }
+
+            return cantidad;
         }
 
         private void BtnClientes_Click(
@@ -664,12 +658,36 @@ namespace SIGEVIP.WinForms.Forms
                 "Viaticos y rendiciones");
         }
 
-        private void BtnSeguridad_Click(
+        private void BtnUsuarios_Click(
             object sender,
             EventArgs e)
         {
             MostrarModuloPendiente(
-                "Usuarios y seguridad");
+                "Usuarios");
+        }
+
+        private void BtnGrupos_Click(
+            object sender,
+            EventArgs e)
+        {
+            MostrarModuloPendiente(
+                "Grupos");
+        }
+
+        private void BtnPermisos_Click(
+            object sender,
+            EventArgs e)
+        {
+            MostrarModuloPendiente(
+                "Permisos");
+        }
+
+        private void BtnAuditoria_Click(
+            object sender,
+            EventArgs e)
+        {
+            MostrarModuloPendiente(
+                "Auditoria");
         }
 
         private static void MostrarModuloPendiente(
@@ -692,7 +710,7 @@ namespace SIGEVIP.WinForms.Forms
         {
             DialogResult resultado =
                 MessageBox.Show(
-                    "¿Desea cerrar la sesion actual?",
+                    "Desea cerrar la sesion actual?",
                     "Cerrar sesion",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -712,7 +730,7 @@ namespace SIGEVIP.WinForms.Forms
         {
             DialogResult resultado =
                 MessageBox.Show(
-                    "¿Desea salir de SIGEVIP?",
+                    "Desea salir de SIGEVIP?",
                     "Salir",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -727,115 +745,62 @@ namespace SIGEVIP.WinForms.Forms
         }
 
         private void MainForm_FormClosing(
-
             object sender,
-
             FormClosingEventArgs e)
-
         {
-
             if (_cerrandoControladamente)
-
             {
-
                 return;
-
             }
-
-
 
             if (e.CloseReason !=
-
                 CloseReason.UserClosing)
-
             {
-
                 return;
-
             }
-
-
 
             DialogResult resultado =
-
                 MessageBox.Show(
-
-                    "¿Desea salir de SIGEVIP?",
-
+                    "Desea salir de SIGEVIP?",
                     "Salir",
-
                     MessageBoxButtons.YesNo,
-
                     MessageBoxIcon.Question,
-
                     MessageBoxDefaultButton.Button2);
 
-
-
             if (resultado != DialogResult.Yes)
-
             {
-
                 e.Cancel = true;
-
                 return;
-
             }
 
-
-
             e.Cancel = true;
-
             _cerrandoControladamente = true;
 
-
-
             OnSalirSolicitado();
-
         }
 
         private void OnCerrarSesionSolicitada()
-
         {
-
             _cerrandoControladamente = true;
 
-
-
             EventHandler handler =
-
                 CerrarSesionSolicitada;
 
-
-
             handler?.Invoke(
-
                 this,
-
                 EventArgs.Empty);
-
         }
 
         private void OnSalirSolicitado()
-
         {
-
             _cerrandoControladamente = true;
 
-
-
             EventHandler handler =
-
                 SalirSolicitado;
 
-
-
             handler?.Invoke(
-
                 this,
-
                 EventArgs.Empty);
-
         }
     }
 }
