@@ -52,6 +52,11 @@
     <Compile Include="Viajes\ViajeFiltro.cs" />
     <Compile Include="Viajes\ViajeListadoDto.cs" />
     <Compile Include="Viajes\ViajeService.cs" />
+    <Compile Include="Visitas\ClienteSeleccionVisitaDto.cs" />
+    <Compile Include="Visitas\IClienteConsultaVisitaRepository.cs" />
+    <Compile Include="Visitas\IVisitaRepository.cs" />
+    <Compile Include="Visitas\VisitaListadoDto.cs" />
+    <Compile Include="Visitas\VisitaService.cs" />
     <Compile Include="Exceptions\AccesoDenegadoException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\AutenticacionService.cs" />

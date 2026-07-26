@@ -50,6 +50,7 @@
     <Compile Include="Application\InicializacionSeguridadServiceTests.cs" />
     <Compile Include="Application\PerfilSesionServiceTests.cs" />
     <Compile Include="Application\ViajeServiceTests.cs" />
+    <Compile Include="Application\VisitaServiceTests.cs" />
     <Compile Include="Application\SesionActualTests.cs" />
     <Compile Include="ArchitectureTests.cs" />
     <Compile Include="Domain\ClienteTests.cs" />
@@ -59,8 +60,10 @@
     <Compile Include="Domain\ViajeTests.cs" />
     <Compile Include="Domain\ViajeParticipanteTests.cs" />
     <Compile Include="Domain\ViajeVisitaTests.cs" />
+    <Compile Include="Domain\ViajeReconstruccionVisitasTests.cs" />
     <Compile Include="Domain\ViaticoTests.cs" />
     <Compile Include="Domain\VisitaTests.cs" />
+    <Compile Include="Domain\VisitaReconstruccionTests.cs" />
     <Compile Include="Infrastructure\Pbkdf2PasswordHasherTests.cs" />
     <Compile Include="Integration\ClienteRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\InicializacionSeguridadRepositoryIntegrationTests.cs" />

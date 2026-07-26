@@ -56,9 +56,14 @@ namespace SIGEVIP.Domain.Entities
             TipoViaje = tipoViaje;
             MontoAnticipado = montoAnticipado;
 
-            _viaticos = new List<Viatico>();
-            _visitas = new List<Visita>();
-            _participantes = new List<Persona>();
+            _viaticos =
+                new List<Viatico>();
+
+            _visitas =
+                new List<Visita>();
+
+            _participantes =
+                new List<Persona>();
 
             _estadoActual =
                 EstadoViajeFactory.Crear(
@@ -146,6 +151,35 @@ namespace SIGEVIP.Domain.Entities
             EstadoViaje estado,
             IEnumerable<Persona> participantes)
         {
+            return Reconstruir(
+                idViaje,
+                fechaInicio,
+                fechaFin,
+                descripcion,
+                tipoViaje,
+                montoAnticipado,
+                estado,
+                participantes,
+                Enumerable.Empty<Visita>());
+        }
+
+        public static Viaje Reconstruir(
+            int idViaje,
+            DateTime fechaInicio,
+            DateTime fechaFin,
+            string descripcion,
+            TipoViaje tipoViaje,
+            decimal montoAnticipado,
+            EstadoViaje estado,
+            IEnumerable<Persona> participantes,
+            IEnumerable<Visita> visitas)
+        {
+            if (idViaje <= 0)
+            {
+                throw new ReglaNegocioException(
+                    "El identificador persistido del viaje debe ser válido.");
+            }
+
             var viaje =
                 new Viaje(
                     idViaje,
@@ -159,6 +193,9 @@ namespace SIGEVIP.Domain.Entities
             viaje.CargarParticipantes(
                 participantes,
                 true);
+
+            viaje.CargarVisitasReconstruidas(
+                visitas);
 
             return viaje;
         }
@@ -276,6 +313,7 @@ namespace SIGEVIP.Domain.Entities
             }
 
             _estadoActual.ValidarModificacion();
+
             ValidarFechaViatico(
                 viatico.Fecha);
 
@@ -306,6 +344,7 @@ namespace SIGEVIP.Domain.Entities
             }
 
             _estadoActual.ValidarModificacion();
+
             ValidarFechaVisita(
                 visita.Fecha);
 
@@ -406,6 +445,68 @@ namespace SIGEVIP.Domain.Entities
             _participantes.Clear();
             _participantes.AddRange(
                 materializados);
+        }
+
+        private void CargarVisitasReconstruidas(
+            IEnumerable<Visita> visitas)
+        {
+            if (visitas == null)
+            {
+                throw new ReglaNegocioException(
+                    "Debe indicar las visitas persistidas del viaje.");
+            }
+
+            List<Visita> materializadas =
+                visitas.ToList();
+
+            var resultado =
+                new List<Visita>();
+
+            foreach (
+                Visita visita
+                in materializadas)
+            {
+                if (visita == null)
+                {
+                    throw new ReglaNegocioException(
+                        "Las visitas persistidas del viaje deben ser válidas.");
+                }
+
+                if (visita.IdVisita <= 0)
+                {
+                    throw new ReglaNegocioException(
+                        "Las visitas persistidas deben tener un identificador válido.");
+                }
+
+                ValidarFechaVisita(
+                    visita.Fecha);
+
+                if (!visita.TieneClientes)
+                {
+                    throw new ReglaNegocioException(
+                        "La visita persistida debe tener al menos un cliente asociado.");
+                }
+
+                if (resultado.Any(
+                    existente =>
+                        SonLaMismaVisita(
+                            existente,
+                            visita)))
+                {
+                    throw new ReglaNegocioException(
+                        "No se permiten visitas persistidas duplicadas en el viaje.");
+                }
+
+                visita.AsociarAViaje(
+                    IdViaje);
+
+                resultado.Add(
+                    visita);
+            }
+
+            _visitas.Clear();
+            _visitas.AddRange(
+                resultado);
         }
 
         private static List<Persona>
