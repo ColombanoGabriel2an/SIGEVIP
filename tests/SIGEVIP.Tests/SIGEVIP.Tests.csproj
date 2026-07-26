@@ -65,6 +65,7 @@
     <Compile Include="Integration\ClienteRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\InicializacionSeguridadRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\JerarquiaGruposRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\ViajeRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioAutenticacionRepositoryIntegrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

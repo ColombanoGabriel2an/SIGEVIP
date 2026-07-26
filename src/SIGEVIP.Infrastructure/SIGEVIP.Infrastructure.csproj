@@ -47,6 +47,8 @@
     <Compile Include="Clientes\ClienteRepository.cs" />
     <Compile Include="Data\DatabaseHealthCheck.cs" />
     <Compile Include="Data\SqlConnectionFactory.cs" />
+    <Compile Include="Viajes\PersonaConsultaRepository.cs" />
+    <Compile Include="Viajes\ViajeRepository.cs" />
     <Compile Include="Exceptions\PersistenciaException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\InicializacionSeguridadRepository.cs" />
