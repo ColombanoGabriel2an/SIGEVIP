@@ -44,6 +44,7 @@
 
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="Clientes\ClienteRepository.cs" />
     <Compile Include="Data\DatabaseHealthCheck.cs" />
     <Compile Include="Data\SqlConnectionFactory.cs" />
     <Compile Include="Exceptions\PersistenciaException.cs" />
