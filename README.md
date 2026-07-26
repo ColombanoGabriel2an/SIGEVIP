@@ -91,14 +91,22 @@ Se encuentran implementados:
 - alta, modificación, consulta y cancelación de Viajes;
 - filtros por fechas, estado y participante;
 - selección múltiple de participantes;
-- validación SQL de las migraciones `003` y `004`;
-- 246 pruebas automatizadas correctas.
+- módulo funcional de Visitas;
+- persistencia SQL de Visitas y asociaciones con Clientes;
+- alta y consulta de Visitas por Viaje;
+- selección múltiple de Clientes activos;
+- reconstrucción histórica de Clientes inactivos;
+- bloqueo de cancelación de Viajes con Visitas;
+- validación SQL de las migraciones `003`, `004` y `005`;
+- 291 pruebas automatizadas correctas;
+- compilación con 0 advertencias y 0 errores;
+- validación manual de Clientes, Viajes y Visitas.
 
 Permanecen pendientes:
 
 - gestión funcional de usuarios, grupos y permisos;
-- persistencia de visitas y viáticos;
-- historial funcional del cliente;
+- persistencia funcional de viáticos y rendiciones;
+- historial funcional completo del cliente;
 - auditoría;
 - reportes;
 - mapa y geolocalización;

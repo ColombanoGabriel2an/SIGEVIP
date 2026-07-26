@@ -219,7 +219,7 @@ namespace SIGEVIP.Application.Visitas
                     idCliente <= 0))
             {
                 throw new ReglaNegocioException(
-                    "Los clientes seleccionados no son válidos.");
+                    "Los clientes seleccionados no son vï¿½lidos.");
             }
 
             if (ids.Distinct().Count() !=
@@ -237,7 +237,7 @@ namespace SIGEVIP.Application.Visitas
                 clientes.Count != ids.Count)
             {
                 throw new ReglaNegocioException(
-                    "Uno o más clientes seleccionados no existen.");
+                    "Uno o mï¿½s clientes seleccionados no existen.");
             }
 
             Dictionary<int, Cliente> porId =
@@ -259,13 +259,13 @@ namespace SIGEVIP.Application.Visitas
                     out cliente))
                 {
                     throw new ReglaNegocioException(
-                        "Uno o más clientes seleccionados no existen.");
+                        "Uno o mï¿½s clientes seleccionados no existen.");
                 }
 
                 if (!cliente.Activo)
                 {
                     throw new ReglaNegocioException(
-                        "Uno o más clientes seleccionados se encuentran inactivos.");
+                        "Uno o mï¿½s clientes seleccionados se encuentran inactivos.");
                 }
 
                 ordenados.Add(
@@ -282,7 +282,7 @@ namespace SIGEVIP.Application.Visitas
                 _sesionActual.UsuarioActual == null)
             {
                 throw new AccesoDenegadoException(
-                    "Debe iniciar sesión para realizar esta operación.");
+                    "Debe iniciar sesiï¿½n para realizar esta operaciï¿½n.");
             }
 
             if (!_sesionActual.UsuarioActual.Activo)
@@ -296,7 +296,7 @@ namespace SIGEVIP.Application.Visitas
                 codigoPermiso))
             {
                 throw new AccesoDenegadoException(
-                    "No posee permisos para realizar esta operación.");
+                    "No posee permisos para realizar esta operaciï¿½n.");
             }
         }
 

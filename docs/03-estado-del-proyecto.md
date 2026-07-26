@@ -4,7 +4,7 @@
 
 Etapa 4: módulos funcionales documentados.
 
-Bloque actual: cierre técnico y documental del módulo Viajes.
+Bloque actual: cierre técnico y documental del módulo Visitas.
 
 ## Rama de trabajo
 
@@ -12,8 +12,8 @@ Bloque actual: cierre técnico y documental del módulo Viajes.
 
 ## Último commit técnico publicado
 
-- Commit: `88fbd13`
-- Mensaje: `Agrego interfaz de gestion de viajes`
+- Commit: `3b13f58`
+- Mensaje: `Conecto modulo de visitas al menu`
 
 La rama local se encuentra sincronizada con:
 
@@ -211,10 +211,13 @@ Para el administrador actual se verificaron como visibles:
 - Permisos.
 - Auditoría.
 
-Se verificaron como ocultas:
+Se verificó que la visibilidad se determina mediante permisos efectivos.
 
-- Visitas.
-- Viáticos y rendiciones.
+El módulo Visitas se muestra a los usuarios que poseen:
+
+- `VISITA_REGISTRAR`
+
+Viáticos y rendiciones permanece pendiente de implementación funcional.
 
 ### Eliminación del formulario técnico
 
@@ -242,8 +245,8 @@ Ese formulario solo servía para comprobar la conexión inicial y ya no particip
 
 ### Pruebas
 
-- Totales: 246.
-- Correctas: 246.
+- Totales: 291.
+- Correctas: 291.
 - Fallidas: 0.
 
 Incluyen:
@@ -633,15 +636,138 @@ La interfaz permite:
 
 Permanece pendiente:
 
-- persistencia de Visitas;
 - persistencia de Viáticos;
 - total gastado y saldo persistidos;
-- bloqueo de cancelación por Visitas persistidas;
-- historial completo del Viaje.
+- historial completo de Viáticos del Viaje.
+
+La reconstrucción de Visitas y el bloqueo de cancelación por Visitas persistidas ya se encuentran implementados.
+
+## Módulo funcional de Visitas
+
+El módulo Visitas se encuentra implementado de extremo a extremo dentro del alcance aprobado.
+
+### Domain
+
+Se implementó:
+
+- fecha de Visita obligatoriamente comprendida dentro del período del Viaje;
+- observación obligatoria;
+- localidad del encuentro obligatoria;
+- asociación de una Visita con un único Viaje;
+- asociación de uno o varios Clientes;
+- rechazo de Clientes duplicados;
+- preservación histórica de Clientes inactivos;
+- reconstrucción desde persistencia;
+- bloqueo de cancelación de Viajes con Visitas.
+
+### Application
+
+Se implementaron:
+
+- `VisitaListadoDto`;
+- `ClienteSeleccionVisitaDto`;
+- `IVisitaRepository`;
+- `IClienteConsultaVisitaRepository`;
+- `VisitaService`.
+
+Casos de uso disponibles:
+
+- listar Clientes activos disponibles;
+- registrar una Visita;
+- listar Visitas por Viaje;
+- listar Visitas por Cliente.
+
+Las operaciones validan:
+
+- sesión autenticada;
+- Usuario activo;
+- permisos requeridos;
+- existencia del Viaje;
+- existencia y actividad de Clientes;
+- selección de al menos un Cliente;
+- ausencia de duplicados;
+- reglas temporales del Viaje.
+
+### Infrastructure
+
+Se implementaron:
+
+- `VisitaRepository`;
+- `ClienteConsultaVisitaRepository`;
+- reconstrucción de Visitas desde `ViajeRepository`.
+
+Responsabilidades:
+
+- insertar Visitas y asociaciones dentro de una transacción;
+- consultar Visitas por Viaje;
+- consultar Visitas por Cliente;
+- consultar Clientes activos;
+- recuperar Clientes históricos activos o inactivos;
+- reconstruir el agregado Viaje con sus Visitas;
+- impedir en SQL la cancelación de Viajes con Visitas;
+- revertir operaciones incompletas;
+- traducir errores técnicos.
+
+### Base de datos
+
+Tablas:
+
+- `dbo.Visita`;
+- `dbo.VisitaCliente`.
+
+Scripts:
+
+- `database/migrations/005_crear_visitas.sql`;
+- `database/seed/004_permisos_modulo_visitas.sql`;
+- `database/migrations/005_validar_visitas.sql`.
+
+Validación ejecutada:
+
+`VALIDACIÓN CORRECTA`
+
+### WinForms
+
+Se implementaron:
+
+- `VisitasForm`;
+- `VisitaEditForm`;
+- navegación desde `MainForm`;
+- coordinación desde `SigevipApplicationContext`;
+- composición de dependencias en `Program`.
+
+La interfaz permite:
+
+- seleccionar un Viaje;
+- consultar sus Visitas;
+- registrar una nueva Visita;
+- limitar la fecha al período del Viaje;
+- seleccionar uno o varios Clientes activos;
+- visualizar fecha, localidad, observación y Clientes;
+- actualizar el listado después del alta;
+- mostrar validaciones y errores controlados.
+
+### Commits del módulo
+
+- `430761e` — `Agrego casos de uso de visitas`
+- `c76a96e` — `Creo esquema SQL de visitas`
+- `c6ab260` — `Implemento persistencia de visitas`
+- `d45fb75` — `Reconstruyo viajes con visitas persistidas`
+- `67d3df2` — `Agrego formularios de visitas`
+- `3b13f58` — `Conecto modulo de visitas al menu`
+
+### Validación técnica
+
+- compilación con 0 advertencias y 0 errores;
+- 291 pruebas correctas;
+- 0 pruebas fallidas;
+- prueba manual completa del ejecutable;
+- alta y consulta de Visitas verificadas;
+- selección múltiple de Clientes verificada;
+- bloqueo de cancelación verificado.
 
 ## Pendiente inmediato
 
-- completar el cierre documental del módulo Viajes;
+- completar el cierre documental del módulo Visitas;
 - ejecutar regresión final;
 - publicar el commit documental;
 - preparar informe de transferencia a MAESTRO.

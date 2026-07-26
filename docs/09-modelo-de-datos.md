@@ -24,10 +24,18 @@ No incluye todavía:
 
 - procedimientos almacenados;
 - auditoría;
-- persistencia de viajes;
-- persistencia de visitas;
 - persistencia de viáticos;
-- persistencia del historial completo del cliente.
+- persistencia del historial completo de Viáticos;
+- reportes y geolocalización.
+
+El documento incorpora actualmente:
+
+- seguridad;
+- Clientes;
+- Viajes;
+- participantes;
+- Visitas;
+- asociación Visita-Cliente.
 
 ## 2. Scripts
 
@@ -746,6 +754,170 @@ Se verificó:
 - ausencia de tipos inválidos;
 - ausencia de estados inválidos;
 - permisos del administrador.
+
+Resultado:
+
+`VALIDACIÓN CORRECTA`
+
+## Modelo relacional de Visitas
+
+### Script de migración
+
+`database/migrations/005_crear_visitas.sql`
+
+Responsabilidades:
+
+- crear `dbo.Visita`;
+- crear `dbo.VisitaCliente`;
+- definir claves y restricciones;
+- crear índices;
+- ejecutar dentro de una transacción;
+- registrar la versión `005`;
+- permitir reejecución segura.
+
+### Tabla Visita
+
+Nombre:
+
+`dbo.Visita`
+
+| Columna | Tipo | Nulo | Descripción |
+|---|---|---:|---|
+| IdVisita | INT IDENTITY | No | Clave primaria |
+| IdViaje | INT | No | Viaje asociado |
+| Fecha | DATE | No | Fecha de la visita |
+| Observacion | NVARCHAR(1000) | No | Resultado u observación |
+| LocalidadEncuentro | NVARCHAR(150) | No | Localidad del encuentro |
+
+Claves:
+
+- `PK_Visita`
+- `FK_Visita_Viaje`
+
+Restricciones:
+
+- observación no vacía;
+- localidad no vacía.
+
+Índices:
+
+- `IX_Visita_IdViaje_Fecha`;
+- `IX_Visita_Fecha`.
+
+Cardinalidad:
+
+    Viaje 1 -------- N Visita
+
+Una Visita pertenece a un único Viaje.
+
+No se utiliza `ON DELETE CASCADE`.
+
+La regla que exige que la fecha esté dentro del período del Viaje se valida en Domain y Application. La validación SQL comprueba que los datos existentes respeten esa regla.
+
+### Tabla VisitaCliente
+
+Nombre:
+
+`dbo.VisitaCliente`
+
+| Columna | Tipo | Nulo | Descripción |
+|---|---|---:|---|
+| IdVisita | INT | No | Visita asociada |
+| IdCliente | INT | No | Cliente visitado |
+
+Claves:
+
+- `PK_VisitaCliente`;
+- `FK_VisitaCliente_Visita`;
+- `FK_VisitaCliente_Cliente`.
+
+Índice:
+
+- `IX_VisitaCliente_IdCliente`.
+
+Cardinalidad:
+
+    Visita N -------- N Cliente
+
+La clave primaria compuesta:
+
+`(IdVisita, IdCliente)`
+
+impide asociaciones duplicadas.
+
+No se utiliza `ON DELETE CASCADE`.
+
+Los Clientes pueden desactivarse sin perder su participación histórica en Visitas.
+
+### Persistencia transaccional
+
+`VisitaRepository.Insertar` realiza dentro de una misma transacción:
+
+1. inserción de `dbo.Visita`;
+2. recuperación de `IdVisita`;
+3. inserción de asociaciones en `dbo.VisitaCliente`;
+4. commit únicamente cuando toda la operación finaliza correctamente.
+
+Ante un error se ejecuta rollback.
+
+### Reconstrucción histórica
+
+`ViajeRepository.ObtenerPorId` recupera:
+
+- datos del Viaje;
+- participantes;
+- Visitas;
+- Clientes de cada Visita;
+- estado activo o inactivo de cada Cliente.
+
+Esto permite reconstruir el agregado completo y conservar relaciones históricas.
+
+### Bloqueo de cancelación
+
+La cancelación se protege en dos niveles:
+
+- Domain rechaza cancelar un Viaje que contiene Visitas;
+- SQL utiliza `NOT EXISTS` sobre `dbo.Visita`.
+
+La validación SQL evita que un agregado desactualizado cancele un Viaje después de que otra operación haya registrado una Visita.
+
+### Seed del módulo
+
+Script:
+
+`database/seed/004_permisos_modulo_visitas.sql`
+
+Responsabilidades:
+
+- asignar `VISITA_REGISTRAR` a `ADMINISTRADOR_GENERAL`;
+- conservar la asignación del grupo `COMERCIAL`;
+- impedir asociaciones duplicadas;
+- permitir reejecución segura.
+
+### Validación
+
+Script:
+
+`database/migrations/005_validar_visitas.sql`
+
+Se verificó:
+
+- versión `005`;
+- existencia de `dbo.Visita`;
+- existencia de `dbo.VisitaCliente`;
+- columnas;
+- tipos;
+- longitudes;
+- nulabilidad;
+- identity;
+- claves primarias;
+- claves foráneas;
+- índices;
+- restricciones;
+- ausencia de asociaciones duplicadas;
+- integridad de Viajes y Clientes;
+- fechas dentro de los períodos;
+- asignación del permiso.
 
 Resultado:
 

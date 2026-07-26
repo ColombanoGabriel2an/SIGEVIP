@@ -39,6 +39,7 @@
 - `Application/AutorizacionServiceTests.cs`
 - `Application/ClienteServiceTests.cs`
 - `Application/ViajeServiceTests.cs`
+- `Application/VisitaServiceTests.cs`
 - `Application/SesionActualTests.cs`
 
 ### Infrastructure
@@ -49,6 +50,8 @@
 
 - `Integration/ClienteRepositoryIntegrationTests.cs`
 - `Integration/ViajeRepositoryIntegrationTests.cs`
+- `Integration/VisitaRepositoryIntegrationTests.cs`
+- `Integration/ViajeVisitaRepositoryIntegrationTests.cs`
 - `Integration/InicializacionSeguridadRepositoryIntegrationTests.cs`
 - `Integration/UsuarioAutenticacionRepositoryIntegrationTests.cs`
 
@@ -58,8 +61,8 @@ El total definitivo se toma del ejecutor VSTest.
 
 Último resultado consolidado:
 
-- 246 pruebas totales;
-- 246 correctas;
+- 291 pruebas totales;
+- 291 correctas;
 - 0 fallidas.
 
 El conjunto incluye pruebas:
@@ -212,8 +215,8 @@ Compilación:
 
 Pruebas:
 
-- Totales: 246.
-- Correctas: 246.
+- Totales: 291.
+- Correctas: 291.
 - Fallidas: 0.
 - Omitidas: 0.
 
@@ -375,7 +378,85 @@ Se verifica:
 
 ### Resultado consolidado
 
-- 246 pruebas totales;
-- 246 correctas;
+- 291 pruebas totales;
+- 291 correctas;
 - 0 fallidas;
 - compilación con 0 advertencias y 0 errores.
+
+## Cobertura específica del módulo Visitas
+
+### Domain
+
+Se verifica:
+
+- creación válida;
+- fecha válida;
+- observación obligatoria;
+- localidad obligatoria;
+- asociación con Viaje;
+- fecha dentro del período del Viaje;
+- uno o varios Clientes;
+- rechazo de Cliente nulo;
+- rechazo de Cliente duplicado;
+- reconstrucción desde persistencia;
+- preservación de Clientes históricos.
+
+### Application
+
+Se verifica:
+
+- sesión requerida;
+- Usuario activo;
+- permiso `VISITA_REGISTRAR`;
+- permiso `VIAJE_CONSULTAR`;
+- permiso `CLIENTE_CONSULTAR`;
+- registro válido;
+- Viaje inexistente;
+- identificadores inválidos;
+- selección vacía;
+- Clientes inexistentes;
+- Clientes inactivos;
+- Clientes duplicados;
+- listado por Viaje;
+- listado por Cliente.
+
+### Integración SQL
+
+Se verifica:
+
+- consulta de Clientes activos;
+- exclusión de Clientes inactivos del selector;
+- recuperación histórica de Cliente inactivo;
+- inserción de Visita;
+- asociación con un Cliente;
+- asociación con varios Clientes;
+- consulta por Viaje;
+- consulta por Cliente;
+- rollback ante Cliente inexistente;
+- reconstrucción de Visitas dentro de Viaje;
+- reconstrucción de sus Clientes;
+- bloqueo de cancelación con agregado desactualizado;
+- persistencia del estado Abierto cuando se rechaza la cancelación.
+
+### Interfaz
+
+Se verificó manualmente:
+
+- acceso desde el menú;
+- visibilidad según permiso;
+- selección de Viaje;
+- consulta de Visitas;
+- fecha limitada al período del Viaje;
+- selección múltiple de Clientes activos;
+- registro correcto;
+- actualización de la grilla;
+- rechazo de cancelación del Viaje.
+
+### Resultado consolidado del cierre de Visitas
+
+- 291 pruebas totales;
+- 291 correctas;
+- 0 fallidas;
+- compilación con 0 advertencias;
+- compilación con 0 errores;
+- validación manual satisfactoria.
