@@ -1,5 +1,6 @@
 using System;
 using System.Windows.Forms;
+using SIGEVIP.Application.Clientes;
 using SIGEVIP.Application.Security;
 using SIGEVIP.WinForms.Forms;
 
@@ -17,6 +18,9 @@ namespace SIGEVIP.WinForms.Navigation
         private readonly PerfilSesionService
             _perfilSesionService;
 
+        private readonly ClienteService
+            _clienteService;
+
         private readonly ISesionActual
             _sesionActual;
 
@@ -28,6 +32,7 @@ namespace SIGEVIP.WinForms.Navigation
             AutenticacionService autenticacionService,
             AutorizacionService autorizacionService,
             PerfilSesionService perfilSesionService,
+            ClienteService clienteService,
             ISesionActual sesionActual)
         {
             _autenticacionService =
@@ -44,6 +49,11 @@ namespace SIGEVIP.WinForms.Navigation
                 perfilSesionService
                 ?? throw new ArgumentNullException(
                     nameof(perfilSesionService));
+
+            _clienteService =
+                clienteService
+                ?? throw new ArgumentNullException(
+                    nameof(clienteService));
 
             _sesionActual =
                 sesionActual
@@ -146,6 +156,9 @@ namespace SIGEVIP.WinForms.Navigation
                     _autorizacionService,
                     perfil);
 
+            _mainForm.ClientesSolicitados +=
+                MainForm_ClientesSolicitados;
+
             _mainForm.CerrarSesionSolicitada +=
                 MainForm_CerrarSesionSolicitada;
 
@@ -156,6 +169,27 @@ namespace SIGEVIP.WinForms.Navigation
                 MainForm_FormClosed;
 
             _mainForm.Show();
+        }
+
+        private void MainForm_ClientesSolicitados(
+            object sender,
+            EventArgs e)
+        {
+            if (_mainForm == null)
+            {
+                return;
+            }
+
+            using (
+                var clientesForm =
+                    new ClientesForm(
+                        _clienteService,
+                        _sesionActual,
+                        _autorizacionService))
+            {
+                clientesForm.ShowDialog(
+                    _mainForm);
+            }
         }
 
         private void MainForm_CerrarSesionSolicitada(
@@ -212,6 +246,9 @@ namespace SIGEVIP.WinForms.Navigation
             {
                 return;
             }
+
+            _mainForm.ClientesSolicitados -=
+                MainForm_ClientesSolicitados;
 
             _mainForm.CerrarSesionSolicitada -=
                 MainForm_CerrarSesionSolicitada;

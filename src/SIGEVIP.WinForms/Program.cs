@@ -1,7 +1,9 @@
 using System;
 using System.Configuration;
 using System.Windows.Forms;
+using SIGEVIP.Application.Clientes;
 using SIGEVIP.Application.Security;
+using SIGEVIP.Infrastructure.Clientes;
 using SIGEVIP.Infrastructure.Data;
 using SIGEVIP.Infrastructure.Security;
 using SIGEVIP.WinForms.Navigation;
@@ -48,6 +50,10 @@ namespace SIGEVIP.WinForms
                     new PerfilSesionRepository(
                         connectionFactory);
 
+                var clienteRepository =
+                    new ClienteRepository(
+                        connectionFactory);
+
                 var autenticacionService =
                     new AutenticacionService(
                         usuarioRepository,
@@ -63,11 +69,18 @@ namespace SIGEVIP.WinForms
                 ISesionActual sesionActual =
                     new SesionActual();
 
+                var clienteService =
+                    new ClienteService(
+                        clienteRepository,
+                        sesionActual,
+                        autorizacionService);
+
                 var applicationContext =
                     new SigevipApplicationContext(
                         autenticacionService,
                         autorizacionService,
                         perfilSesionService,
+                        clienteService,
                         sesionActual);
 
                 System.Windows.Forms.Application.Run(
@@ -75,7 +88,8 @@ namespace SIGEVIP.WinForms
             }
             catch (ConfigurationErrorsException exception)
             {
-                MostrarErrorInicio(exception.Message);
+                MostrarErrorInicio(
+                    exception.Message);
             }
             catch (Exception)
             {
