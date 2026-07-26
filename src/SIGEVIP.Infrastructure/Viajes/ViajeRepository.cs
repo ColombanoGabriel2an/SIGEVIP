@@ -91,6 +91,12 @@ WHERE v.IdViaje = @IdViaje;";
                                 connection,
                                 idViaje);
 
+                    IReadOnlyCollection<Visita>
+                        visitas =
+                            ObtenerVisitas(
+                                connection,
+                                idViaje);
+
                     return Viaje.Reconstruir(
                         datos.IdViaje,
                         datos.FechaInicio,
@@ -99,7 +105,8 @@ WHERE v.IdViaje = @IdViaje;";
                         datos.TipoViaje,
                         datos.MontoAnticipado,
                         datos.EstadoViaje,
-                        participantes);
+                        participantes,
+                        visitas);
                 }
             }
             catch (PersistenciaException)
@@ -535,7 +542,14 @@ UPDATE dbo.Viaje
 SET EstadoViaje = @EstadoViaje
 WHERE
     IdViaje = @IdViaje
-    AND EstadoViaje IN (1, 2);";
+    AND EstadoViaje IN (1, 2)
+    AND NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.Visita AS visita
+        WHERE visita.IdViaje =
+            dbo.Viaje.IdViaje
+    );";
 
             try
             {
@@ -651,6 +665,168 @@ ORDER BY
 
                 return participantes.AsReadOnly();
             }
+        }
+
+        private static IReadOnlyCollection<Visita>
+            ObtenerVisitas(
+                SqlConnection connection,
+                int idViaje)
+        {
+            const string sqlVisitas = @"
+SELECT
+    visita.IdVisita,
+    visita.IdViaje,
+    visita.Fecha,
+    visita.Observacion,
+    visita.LocalidadEncuentro
+FROM dbo.Visita AS visita
+WHERE visita.IdViaje = @IdViaje
+ORDER BY
+    visita.Fecha,
+    visita.IdVisita;";
+
+            var datosVisitas =
+                new List<DatosVisitaPersistida>();
+
+            using (
+                SqlCommand command =
+                    new SqlCommand(
+                        sqlVisitas,
+                        connection))
+            {
+                command.Parameters.Add(
+                    "@IdViaje",
+                    SqlDbType.Int).Value =
+                        idViaje;
+
+                using (
+                    SqlDataReader reader =
+                        command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        datosVisitas.Add(
+                            new DatosVisitaPersistida(
+                                reader.GetInt32(
+                                    reader.GetOrdinal(
+                                        "IdVisita")),
+                                reader.GetInt32(
+                                    reader.GetOrdinal(
+                                        "IdViaje")),
+                                reader.GetDateTime(
+                                    reader.GetOrdinal(
+                                        "Fecha")),
+                                LeerTextoObligatorio(
+                                    reader,
+                                    "Observacion"),
+                                LeerTextoObligatorio(
+                                    reader,
+                                    "LocalidadEncuentro")));
+                    }
+                }
+            }
+
+            var visitas =
+                new List<Visita>();
+
+            foreach (
+                DatosVisitaPersistida datos
+                in datosVisitas)
+            {
+                IReadOnlyCollection<Cliente>
+                    clientes =
+                        ObtenerClientesVisita(
+                            connection,
+                            datos.IdVisita);
+
+                visitas.Add(
+                    Visita.Reconstruir(
+                        datos.IdVisita,
+                        datos.IdViaje,
+                        datos.Fecha,
+                        datos.Observacion,
+                        datos.LocalidadEncuentro,
+                        clientes));
+            }
+
+            return visitas.AsReadOnly();
+        }
+
+        private static IReadOnlyCollection<Cliente>
+            ObtenerClientesVisita(
+                SqlConnection connection,
+                int idVisita)
+        {
+            const string sql = @"
+SELECT
+    cliente.IdCliente,
+    cliente.RazonSocial,
+    cliente.Cuit,
+    cliente.Email,
+    cliente.Telefono,
+    cliente.Localidad,
+    cliente.Provincia,
+    cliente.Activo
+FROM dbo.VisitaCliente AS relacion
+INNER JOIN dbo.Cliente AS cliente
+    ON cliente.IdCliente =
+        relacion.IdCliente
+WHERE relacion.IdVisita = @IdVisita
+ORDER BY
+    cliente.RazonSocial,
+    cliente.IdCliente;";
+
+            var clientes =
+                new List<Cliente>();
+
+            using (
+                SqlCommand command =
+                    new SqlCommand(
+                        sql,
+                        connection))
+            {
+                command.Parameters.Add(
+                    "@IdVisita",
+                    SqlDbType.Int).Value =
+                        idVisita;
+
+                using (
+                    SqlDataReader reader =
+                        command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        clientes.Add(
+                            Cliente.Reconstruir(
+                                reader.GetInt32(
+                                    reader.GetOrdinal(
+                                        "IdCliente")),
+                                LeerTextoObligatorio(
+                                    reader,
+                                    "RazonSocial"),
+                                LeerTextoObligatorio(
+                                    reader,
+                                    "Cuit"),
+                                LeerTextoOpcional(
+                                    reader,
+                                    "Email"),
+                                LeerTextoOpcional(
+                                    reader,
+                                    "Telefono"),
+                                LeerTextoOpcional(
+                                    reader,
+                                    "Localidad"),
+                                LeerTextoOpcional(
+                                    reader,
+                                    "Provincia"),
+                                reader.GetBoolean(
+                                    reader.GetOrdinal(
+                                        "Activo"))));
+                    }
+                }
+            }
+
+            return clientes.AsReadOnly();
         }
 
         private static void InsertarParticipantes(
@@ -916,6 +1092,38 @@ VALUES
             return new PersistenciaException(
                 mensaje,
                 exception);
+        }
+
+        private sealed class DatosVisitaPersistida
+        {
+            public DatosVisitaPersistida(
+                int idVisita,
+                int idViaje,
+                DateTime fecha,
+                string observacion,
+                string localidadEncuentro)
+            {
+                IdVisita = idVisita;
+                IdViaje = idViaje;
+                Fecha = fecha;
+                Observacion = observacion;
+                LocalidadEncuentro =
+                    localidadEncuentro;
+            }
+
+            public int IdVisita { get; private set; }
+
+            public int IdViaje { get; private set; }
+
+            public DateTime Fecha { get; private set; }
+
+            public string Observacion { get; private set; }
+
+            public string LocalidadEncuentro
+            {
+                get;
+                private set;
+            }
         }
 
         private sealed class DatosViaje
