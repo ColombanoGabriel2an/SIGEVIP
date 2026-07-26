@@ -2,10 +2,12 @@ using System;
 using System.Configuration;
 using System.Windows.Forms;
 using SIGEVIP.Application.Clientes;
+using SIGEVIP.Application.Viajes;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Infrastructure.Clientes;
 using SIGEVIP.Infrastructure.Data;
 using SIGEVIP.Infrastructure.Security;
+using SIGEVIP.Infrastructure.Viajes;
 using SIGEVIP.WinForms.Navigation;
 
 namespace SIGEVIP.WinForms
@@ -54,6 +56,14 @@ namespace SIGEVIP.WinForms
                     new ClienteRepository(
                         connectionFactory);
 
+                var personaConsultaRepository =
+                    new PersonaConsultaRepository(
+                        connectionFactory);
+
+                var viajeRepository =
+                    new ViajeRepository(
+                        connectionFactory);
+
                 var autenticacionService =
                     new AutenticacionService(
                         usuarioRepository,
@@ -75,12 +85,20 @@ namespace SIGEVIP.WinForms
                         sesionActual,
                         autorizacionService);
 
+                var viajeService =
+                    new ViajeService(
+                        viajeRepository,
+                        personaConsultaRepository,
+                        sesionActual,
+                        autorizacionService);
+
                 var applicationContext =
                     new SigevipApplicationContext(
                         autenticacionService,
                         autorizacionService,
                         perfilSesionService,
                         clienteService,
+                        viajeService,
                         sesionActual);
 
                 System.Windows.Forms.Application.Run(

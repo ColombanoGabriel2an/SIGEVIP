@@ -86,6 +86,19 @@
                         <SubType>Form</SubType>
                 </Compile>
 
+                <Compile Include="Forms\ViajeDetalleForm.cs">
+                        <SubType>Form</SubType>
+                </Compile>
+
+                <Compile Include="Forms\ViajeEditForm.cs">
+                        <SubType>Form</SubType>
+                </Compile>
+
+                <Compile Include="Forms\ViajesForm.cs">
+                        <SubType>Form</SubType>
+                </Compile>
+
+
 		<Compile Include="Navigation\SigevipApplicationContext.cs" />
 
 		<Compile Include="Program.cs" />

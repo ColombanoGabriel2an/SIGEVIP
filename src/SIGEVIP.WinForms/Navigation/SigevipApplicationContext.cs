@@ -1,6 +1,7 @@
 using System;
 using System.Windows.Forms;
 using SIGEVIP.Application.Clientes;
+using SIGEVIP.Application.Viajes;
 using SIGEVIP.Application.Security;
 using SIGEVIP.WinForms.Forms;
 
@@ -21,6 +22,10 @@ namespace SIGEVIP.WinForms.Navigation
         private readonly ClienteService
             _clienteService;
 
+        private readonly ViajeService
+            _viajeService;
+
+
         private readonly ISesionActual
             _sesionActual;
 
@@ -33,6 +38,7 @@ namespace SIGEVIP.WinForms.Navigation
             AutorizacionService autorizacionService,
             PerfilSesionService perfilSesionService,
             ClienteService clienteService,
+            ViajeService viajeService,
             ISesionActual sesionActual)
         {
             _autenticacionService =
@@ -54,6 +60,11 @@ namespace SIGEVIP.WinForms.Navigation
                 clienteService
                 ?? throw new ArgumentNullException(
                     nameof(clienteService));
+
+            _viajeService =
+                viajeService
+                ?? throw new ArgumentNullException(
+                    nameof(viajeService));
 
             _sesionActual =
                 sesionActual
@@ -159,6 +170,9 @@ namespace SIGEVIP.WinForms.Navigation
             _mainForm.ClientesSolicitados +=
                 MainForm_ClientesSolicitados;
 
+            _mainForm.ViajesSolicitados +=
+                MainForm_ViajesSolicitados;
+
             _mainForm.CerrarSesionSolicitada +=
                 MainForm_CerrarSesionSolicitada;
 
@@ -188,6 +202,27 @@ namespace SIGEVIP.WinForms.Navigation
                         _autorizacionService))
             {
                 clientesForm.ShowDialog(
+                    _mainForm);
+            }
+        }
+
+        private void MainForm_ViajesSolicitados(
+            object sender,
+            EventArgs e)
+        {
+            if (_mainForm == null)
+            {
+                return;
+            }
+
+            using (
+                var viajesForm =
+                    new ViajesForm(
+                        _viajeService,
+                        _sesionActual,
+                        _autorizacionService))
+            {
+                viajesForm.ShowDialog(
                     _mainForm);
             }
         }
@@ -249,6 +284,9 @@ namespace SIGEVIP.WinForms.Navigation
 
             _mainForm.ClientesSolicitados -=
                 MainForm_ClientesSolicitados;
+
+            _mainForm.ViajesSolicitados -=
+                MainForm_ViajesSolicitados;
 
             _mainForm.CerrarSesionSolicitada -=
                 MainForm_CerrarSesionSolicitada;
