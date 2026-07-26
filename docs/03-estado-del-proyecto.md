@@ -4,146 +4,77 @@
 
 Etapa 3: autenticación, usuarios, grupos, permisos y seguridad.
 
-Bloque actual: cierre técnico y documental de la persistencia de seguridad.
+Bloque actual: cierre técnico y documental de autenticación e interfaz principal.
 
 ## Rama de trabajo
 
-`desarrollo/dominio-viajes-viaticos`
+`desarrollo/interfaz-funcional`
 
 ## Último commit técnico publicado
 
-- Commit: `62396ba`
-- Mensaje: `Pruebo jerarquías persistidas de seguridad`
+- Commit: `cc6e19e`
+- Mensaje: `Aplico permisos visuales y retiro formulario tecnico`
 
 La rama local se encuentra sincronizada con:
 
-`origin/desarrollo/dominio-viajes-viaticos`
+`origin/desarrollo/interfaz-funcional`
 
-## Completado previamente
+## Arquitectura vigente
 
-- Repositorio Git configurado.
-- Remoto GitHub verificado.
-- Solución ubicada en la raíz.
-- Proyectos Domain, Application, Infrastructure, WinForms y Tests.
+La solución utiliza:
+
+- C#.
 - .NET Framework 4.8.
+- Windows Forms.
+- SQL Server.
+- ADO.NET.
 - MSTest.
-- SQL Server local.
-- Base `SIGEVIP`.
-- Conexión integrada comprobada.
-- Aplicación WinForms mínima.
-- Dominio de Viaje y Viático.
-- Patrón State.
+- Arquitectura por capas:
+  - Domain.
+  - Application.
+  - Infrastructure.
+  - WinForms.
+  - Tests.
+
+No se utiliza Entity Framework.
+
+Los proyectos utilizan archivos `.csproj` clásicos con inclusiones explícitas.
+
+## Funcionalidades completadas
+
+### Dominio general
+
 - Cliente.
+- Viaje.
 - Visita.
+- Viático.
 - Relación Viaje-Visita.
 - Relación muchos a muchos Visita-Cliente.
+- Patrón State aplicado a Viaje.
+- Reglas de modificación según estado.
+- Cálculo de total gastado y saldo pendiente.
+- Baja lógica de viáticos.
 
-## Completado en el Bloque 3
+### Seguridad
 
-### Persona
-
-- Entidad separada de Usuario.
-- Nombre obligatorio.
-- Apellido obligatorio.
-- Email obligatorio.
-- Estado activo inicial.
-- Activación y desactivación lógica.
-
-### Usuario
-
-- Asociación obligatoria con Persona.
-- Nombre de usuario normalizado.
-- Hash, salt e iteraciones.
-- Copias defensivas de datos criptográficos.
-- Activación y desactivación.
-- Asociación con uno o varios grupos.
-- Prevención de grupos nulos y duplicados.
-
-### Permiso
-
-- Código obligatorio y normalizado.
-- Nombre obligatorio.
-- Descripción opcional.
-- Estado activo.
-- Activación y desactivación.
-- Componente hoja del patrón Composite.
-
-### Grupo
-
-- Código obligatorio y normalizado.
-- Nombre obligatorio.
-- Descripción opcional.
-- Estado activo.
-- Activación y desactivación.
-- Componente compuesto.
-- Permisos directos.
-- Grupos anidados.
-- Prevención de duplicados.
-- Prevención de ciclos directos e indirectos.
-- Obtención de permisos efectivos.
-- Eliminación de permisos repetidos.
-
-### Autenticación
-
-- Contrato `IUsuarioAutenticacionRepository`.
-- Contrato `IPasswordHasher`.
-- Servicio `AutenticacionService`.
-- Resultado explícito de autenticación.
-- Rechazo de entradas vacías.
-- Rechazo de usuario inexistente.
-- Rechazo de usuario inactivo.
-- Rechazo de contraseña incorrecta.
-- Mensaje público genérico.
-- Normalización del nombre de usuario.
-
-### Autorización
-
-- Servicio `AutorizacionService`.
-- Consulta por código de permiso.
-- Normalización de código.
-- Unión de permisos de múltiples grupos.
-- Soporte de permisos anidados.
-- Rechazo de usuario nulo o inactivo.
-
-### Sesión
-
-- Contrato `ISesionActual`.
-- Implementación `SesionActual`.
-- Sesión no estática.
-- Inicio con usuario activo.
-- Cierre de sesión.
-- Rechazo de usuario nulo o inactivo.
-
-### Hash seguro
-
-- Implementación `Pbkdf2PasswordHasher`.
+- Persona.
+- Usuario.
+- Grupo.
+- Permiso.
+- Patrón Composite.
+- Autenticación.
+- Autorización.
+- Sesión actual.
 - PBKDF2-HMAC-SHA256.
-- Salt aleatorio de 32 bytes.
-- Hash de 32 bytes.
-- 100000 iteraciones.
-- Comparación en tiempo constante.
-- Sin dependencias externas.
+- Persistencia SQL del modelo de seguridad.
+- Reconstrucción de grupos y permisos desde SQL Server.
+- Detección de ciclos persistidos.
+- Inicialización del administrador.
+- Herramienta `SIGEVIP.Setup`.
 
-## Completado en el Bloque 4
+### Base de datos de seguridad
 
-### Migración de seguridad
-
-Se creó:
-
-`database/migrations/002_crear_seguridad.sql`
-
-La migración:
-
-- utiliza la base `SIGEVIP`;
-- se ejecuta dentro de una transacción;
-- utiliza `TRY/CATCH`;
-- revierte los cambios ante errores;
-- no elimina tablas;
-- no recrea la base;
-- registra la versión `002` en `dbo.VersionBaseDatos`;
-- evita registrar la versión más de una vez.
-
-### Tablas creadas
+Tablas:
 
 - `dbo.Persona`
 - `dbo.Usuario`
@@ -153,205 +84,153 @@ La migración:
 - `dbo.GrupoPermiso`
 - `dbo.GrupoGrupo`
 
-### Relaciones persistidas
+Migración:
 
-- Persona 1 a 0..1 Usuario.
-- Usuario N a N Grupo.
-- Grupo N a N Permiso.
-- Grupo N a N Grupo mediante relación padre-hijo.
+`database/migrations/002_crear_seguridad.sql`
 
-### Integridad
-
-Se incorporaron:
-
-- claves primarias simples;
-- claves primarias compuestas;
-- claves foráneas;
-- restricciones `CHECK`;
-- valores predeterminados;
-- índices únicos;
-- índices auxiliares;
-- acciones de eliminación `NO_ACTION`;
-- prevención de relaciones duplicadas;
-- prevención de autorreferencia directa entre grupos.
-
-### Credenciales
-
-La tabla `Usuario` persiste:
-
-- hash de 32 bytes;
-- salt de 32 bytes;
-- cantidad de iteraciones;
-- estado lógico.
-
-No persiste:
-
-- contraseña en texto plano;
-- contraseña reversible;
-- contraseña temporal;
-- rol como texto.
-
-### Catálogos iniciales
-
-Se creó:
+Seed:
 
 `database/seed/001_catalogos_seguridad.sql`
 
-Grupos iniciales:
-
-- `COMERCIAL`
-- `ADMINISTRATIVO`
-- `GERENTE`
-- `ADMINISTRADOR_GENERAL`
-
-Permisos iniciales:
-
-- 17 permisos funcionales.
-
-Asociaciones iniciales:
-
-- 22 asociaciones `GrupoPermiso`.
-
-El seed:
-
-- puede ejecutarse nuevamente;
-- no duplica grupos;
-- no duplica permisos;
-- no duplica asociaciones;
-- no crea usuarios;
-- no crea contraseñas;
-- no crea relaciones `GrupoGrupo` sin justificación funcional.
-
-### Validación SQL
-
-Se creó:
+Validación:
 
 `database/migrations/002_validar_seguridad.sql`
 
-La validación comprobó:
-
-- migración `002` registrada;
-- existencia de las siete tablas;
-- 4 grupos;
-- 17 permisos;
-- 22 asociaciones `GrupoPermiso`;
-- 0 usuarios;
-- 0 asociaciones `UsuarioGrupo`;
-- 0 relaciones `GrupoGrupo`;
-- índices únicos;
-- índices auxiliares;
-- siete claves foráneas;
-- acciones de eliminación `NO_ACTION`;
-- restricciones `CHECK` habilitadas;
-- restricciones confiables;
-- ausencia de duplicados.
-
-Resultado final:
+Resultado verificado:
 
 `VALIDACIÓN CORRECTA`
 
-## Completado en el Bloque 5
-
-### Repositorio de autenticación
+### Interfaz de autenticación
 
 Se implementó:
 
-`SIGEVIP.Infrastructure.Security.UsuarioAutenticacionRepository`
+`src/SIGEVIP.WinForms/Forms/LoginForm.cs`
 
-La implementación:
+La pantalla permite:
 
-- utiliza ADO.NET y `System.Data.SqlClient`;
-- implementa `IUsuarioAutenticacionRepository`;
-- utiliza consultas parametrizadas;
-- no utiliza `SELECT *`;
-- evita consultas N+1;
-- recupera Usuario y datos obligatorios de Persona;
-- recupera grupos directos;
-- recupera permisos y asociaciones `GrupoPermiso`;
-- recupera grupos hijos y asociaciones `GrupoGrupo`;
-- reconstruye el patrón Composite;
-- conserva estados activos e inactivos;
-- detecta jerarquías persistidas inválidas;
-- transforma fallas técnicas en `PersistenciaException`.
+- ingresar nombre de usuario;
+- ingresar contraseña oculta;
+- autenticar contra SQL Server;
+- mostrar un mensaje público genérico ante credenciales inválidas;
+- iniciar la sesión en memoria;
+- abrir el menú principal después de autenticar;
+- cerrar la aplicación desde el login.
 
-### Reconstrucción del Composite
+### Navegación principal
 
-Se verificó mediante integración real con SQL Server:
+Se implementó:
 
-- recuperación de grupos directos;
-- recuperación de permisos directos;
-- herencia de permisos desde un grupo hijo;
-- detección y rechazo de ciclos persistidos;
-- limpieza de los datos temporales de prueba.
+`src/SIGEVIP.WinForms/Navigation/SigevipApplicationContext.cs`
 
-### Inicialización del administrador
+Responsabilidades:
+
+- mostrar el login;
+- reaccionar ante autenticación correcta;
+- cerrar el login sin finalizar el proceso;
+- mostrar el menú principal;
+- cerrar sesión;
+- volver al login;
+- finalizar la aplicación;
+- limpiar la sesión al salir.
+
+No se utiliza la propiedad `ApplicationContext.MainForm`, porque el cambio entre formularios provocaba el cierre prematuro del ciclo de mensajes.
+
+### Perfil de la persona autenticada
 
 Se implementaron:
 
-- `IInicializacionSeguridadRepository`;
-- `InicializacionSeguridadService`;
-- `ResultadoInicializacionSeguridad`;
-- `InicializacionSeguridadRepository`.
+- `PerfilSesion`;
+- `IPerfilSesionRepository`;
+- `PerfilSesionService`;
+- `PerfilSesionRepository`.
 
-La creación inicial:
+La interfaz muestra:
 
-- valida campos obligatorios;
-- confirma la contraseña;
-- normaliza el nombre de usuario;
-- genera PBKDF2 mediante `Pbkdf2PasswordHasher`;
-- inserta Persona, Usuario y UsuarioGrupo;
-- asigna `ADMINISTRADOR_GENERAL`;
-- utiliza una única transacción;
-- revierte los cambios ante errores;
-- evita duplicar usuarios.
+- nombre completo de la persona;
+- nombre de usuario.
 
-### Herramienta de configuración
+La separación entre Persona y Usuario se conserva.
 
-Se creó:
+### Menú principal
 
-`tools/SIGEVIP.Setup`
+Se implementó:
 
-La utilidad:
+`src/SIGEVIP.WinForms/Forms/MainForm.cs`
 
-- es una consola .NET Framework 4.8;
-- solicita los datos del administrador;
-- oculta y confirma la contraseña;
-- utiliza la cadena de conexión `SIGEVIP`;
-- no muestra contraseña, hash ni salt;
-- devuelve códigos de salida explícitos.
+El menú:
 
-Validación manual:
+- muestra el nombre completo;
+- muestra el nombre de usuario;
+- permite cerrar sesión;
+- permite salir;
+- presenta únicamente opciones autorizadas;
+- oculta las opciones sin permiso;
+- separa los accesos de seguridad.
 
-- administrador creado correctamente;
-- grupo `ADMINISTRADOR_GENERAL` asignado;
-- hash de 32 bytes;
-- salt de 32 bytes;
-- 100000 iteraciones;
-- código `0` al crear;
-- código `3` ante usuario existente;
-- segunda ejecución sin duplicados.
+Opciones contempladas:
 
-## Commits relevantes
+- Clientes.
+- Viajes.
+- Visitas.
+- Viáticos y rendiciones.
+- Usuarios.
+- Grupos.
+- Permisos.
+- Auditoría.
 
-### Bloque 3
+Cada opción se controla mediante permisos efectivos y no mediante nombres de grupos.
 
-- `09f90eb` — `Agrego dominio de personas y usuarios`
-- `b69fa36` — `Implemento Composite de grupos y permisos`
-- `ea8e92e` — `Agrego autenticación y autorización`
-- `64a2161` — `Incorporo hash seguro de contraseñas`
-- `1464aa9` — `Documento seguridad y cierre del bloque 3`
+### Permisos visuales
 
-### Bloque 4
+Permisos utilizados:
 
-- `a4b631c` — `Agrego esquema SQL de seguridad`
-- `2e567f2` — `Documento persistencia de seguridad`
+- `CLIENTE_CONSULTAR`
+- `CLIENTE_GESTIONAR`
+- `VIAJE_CREAR`
+- `VIAJE_CONSULTAR`
+- `VIAJE_ENVIAR_RENDICION`
+- `VIAJE_APROBAR`
+- `VIAJE_CANCELAR`
+- `VISITA_REGISTRAR`
+- `VIATICO_CARGAR`
+- `VIATICO_MODIFICAR`
+- `VIATICO_EXCLUIR`
+- `VIATICO_REACTIVAR`
+- `RENDICION_REVISAR`
+- `USUARIO_GESTIONAR`
+- `GRUPO_GESTIONAR`
+- `PERMISO_GESTIONAR`
+- `AUDITORIA_CONSULTAR`
 
-### Bloque 5
+Para el administrador actual se verificaron como visibles:
 
-- `cb52c7e` — `Implemento repositorio de autenticación`
-- `514ba5a` — `Agrego inicialización del administrador`
-- `a89c186` — `Agrego herramienta de configuración inicial`
-- `62396ba` — `Pruebo jerarquías persistidas de seguridad`
+- Clientes.
+- Viajes.
+- Usuarios.
+- Grupos.
+- Permisos.
+- Auditoría.
+
+Se verificaron como ocultas:
+
+- Visitas.
+- Viáticos y rendiciones.
+
+### Eliminación del formulario técnico
+
+Se eliminaron:
+
+- `Form1.cs`
+- `Form1.Designer.cs`
+
+Ese formulario solo servía para comprobar la conexión inicial y ya no participaba del flujo funcional.
+
+## Commits relevantes de interfaz
+
+- `bfc8f80` — `Implemento inicio de sesión WinForms`
+- `263f3c7` — `Implemento menu principal y cierre de sesion`
+- `af860a9` — `Incorporo perfil de usuario autenticado`
+- `cc6e19e` — `Aplico permisos visuales y retiro formulario tecnico`
 
 ## Resultado técnico verificado
 
@@ -359,131 +238,169 @@ Validación manual:
 
 - 0 advertencias.
 - 0 errores.
-- Compilación completa verificada.
+- Compilación completa mediante MSBuild de Visual Studio 2022.
 
 ### Pruebas
 
-- Totales: 164.
-- Correctas: 164.
+- Totales: 168.
+- Correctas: 168.
 - Fallidas: 0.
-- Incluyen pruebas unitarias y pruebas reales contra SQL Server.
+
+Incluyen:
+
+- pruebas unitarias;
+- pruebas de dominio;
+- pruebas de Application;
+- pruebas de Infrastructure;
+- pruebas de integración real con SQL Server;
+- pruebas del perfil de sesión.
 
 Ejecutor:
 
 `VSTest 17.13.0 x64`
 
-### Base de datos
+### Validación manual
 
-- Migración `002`: aplicada correctamente.
-- Seed: aplicado correctamente.
-- Seed reejecutado sin duplicados.
-- Validación SQL: correcta.
+Se verificó:
+
+- apertura del login;
+- rechazo de credenciales inválidas;
+- autenticación correcta;
+- apertura del menú principal;
+- visualización del nombre completo;
+- visualización del nombre de usuario;
+- opciones visibles según permisos;
+- opciones no autorizadas ocultas;
+- cierre de sesión;
+- retorno al login;
+- nueva autenticación;
+- salida desde botón;
+- salida desde la cruz;
+- un único mensaje de confirmación al cerrar;
+- maximización y restauración de ventana.
 
 ## Estado de requisitos de seguridad
 
 ### RF01 — Iniciar sesión
 
-Parcialmente cubierto.
+Implementado.
 
-Implementado:
+Incluye:
 
-- servicio de autenticación;
-- verificación segura de contraseña;
-- repositorio ADO.NET;
-- recuperación persistente desde SQL Server;
-- reconstrucción de grupos y permisos;
-- esquema SQL de credenciales;
-- pruebas de integración.
-
-Pendiente:
-
-- interfaz de login;
-- integración con la sesión de WinForms.
+- interfaz gráfica;
+- validación de entradas;
+- autenticación persistente;
+- PBKDF2;
+- mensaje público genérico;
+- inicio de sesión;
+- transición al menú principal.
 
 ### RF02 — Validar credenciales y habilitar funciones
 
-Parcialmente cubierto.
+Implementado para el flujo principal.
 
-Implementado:
+Incluye:
 
-- autenticación en Application;
-- autorización por permisos;
-- repositorio concreto;
-- persistencia de Usuario, Grupo y Permiso;
-- reconstrucción del Composite;
-- detección de ciclos persistidos.
+- recuperación del usuario;
+- reconstrucción de grupos y permisos;
+- inicio de sesión;
+- autorización;
+- habilitación visual por permisos efectivos.
 
-Pendiente:
-
-- sesión integrada con WinForms;
-- habilitación visual de funciones.
+Las operaciones funcionales concretas de cada módulo deberán validar nuevamente los permisos en Application.
 
 ### RF03 — Gestionar usuarios
 
-Parcialmente cubierto.
+Parcialmente implementado.
 
 Implementado:
 
 - entidad Usuario;
-- activación y desactivación;
-- asignación de grupos;
-- tablas Persona, Usuario y UsuarioGrupo.
+- persistencia base;
+- grupos;
+- permisos;
+- acceso visual autorizado.
 
 Pendiente:
 
-- casos de uso;
-- repositorios;
-- interfaz.
+- casos de uso de mantenimiento;
+- repositorios de mantenimiento;
+- formulario funcional.
 
 ### RF04 — Asignar uno o más grupos
 
-Persistencia preparada mediante `dbo.UsuarioGrupo`.
+Parcialmente implementado.
 
-La asignación funcional mediante casos de uso e interfaz permanece pendiente.
+Implementado:
+
+- modelo de dominio;
+- tabla `UsuarioGrupo`;
+- asignación inicial del administrador.
+
+Pendiente:
+
+- mantenimiento desde casos de uso e interfaz.
 
 ### RF37 — Impedir accesos no autorizados
 
-Implementado en Application.
+Implementado en:
 
-La persistencia de grupos y permisos está preparada.
+- Domain;
+- Application;
+- Infrastructure;
+- menú principal WinForms.
 
-La integración con los casos de uso concretos permanece pendiente.
+Pendiente:
+
+- aplicar la misma autorización dentro de cada caso de uso funcional.
 
 ### RF38 — Ocultar opciones no habilitadas
 
-Pendiente de WinForms.
+Implementado en el menú principal.
+
+Los controles no autorizados utilizan:
+
+`Visible = false`
 
 ### RF39 — Acceso mediante grupos y permisos
 
-Implementado en Domain y Application.
+Implementado.
 
-Persistencia preparada mediante:
+El acceso no depende de roles codificados en WinForms.
 
-- `UsuarioGrupo`;
-- `GrupoPermiso`;
-- `GrupoGrupo`.
+Se utilizan:
+
+- Usuario;
+- Grupo;
+- Permiso;
+- GrupoPermiso;
+- GrupoGrupo;
+- permisos efectivos.
 
 ## Pendiente inmediato
 
-- Validar la actualización documental del Bloque 5.
-- Crear el commit documental.
+- Crear el commit documental del cierre de interfaz.
 - Publicar el commit.
-- Generar el informe de cierre para MAESTRO.
+- Generar informe de transferencia a MAESTRO.
+- Iniciar el módulo funcional de Clientes.
 
-## Pendiente de etapas posteriores
+## Etapas posteriores
 
-- Implementación ADO.NET de `IUsuarioAutenticacionRepository`.
-- Repositorios de Usuario, Grupo y Permiso.
-- Reconstrucción persistente del Composite.
-- Usuario administrador inicial generado desde C#.
-- Casos de uso de gestión de usuarios.
-- Interfaz de login.
+- Gestión funcional de clientes.
+- Persistencia de clientes.
+- Listado y filtros.
+- Activación y desactivación.
+- Historial del cliente.
+- Gestión de viajes.
+- Gestión de visitas.
+- Gestión de viáticos y rendiciones.
 - Gestión visual de usuarios.
 - Gestión visual de grupos.
 - Gestión visual de permisos.
 - Cambio de contraseña.
 - Recuperación de contraseña.
 - Auditoría persistente.
-- Aplicación de permisos a casos de uso.
-- Pruebas de integración con SQL Server.
-- Persistencia de viajes, clientes, visitas y viáticos.
+- Reportes.
+- Datos de demostración.
+- Manual técnico.
+- Preparación de la presentación académica.
