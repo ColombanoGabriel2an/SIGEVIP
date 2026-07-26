@@ -100,7 +100,41 @@ Cliente utiliza baja lógica.
 
 ### RN-CLI-06
 
-La unicidad global del CUIT no pertenece a la entidad.
+La unicidad global del CUIT no pertenece exclusivamente a la entidad.
+
+Se controla mediante Application, Infrastructure y SQL Server.
+
+### RN-CLI-07
+
+Al registrar un Cliente no puede existir otro Cliente con el mismo CUIT normalizado.
+
+### RN-CLI-08
+
+Al modificar un Cliente, la verificación de CUIT debe excluir el identificador del Cliente actual.
+
+### RN-CLI-09
+
+La modificación no puede alterar el identificador ni el estado lógico del Cliente.
+
+### RN-CLI-10
+
+Un Cliente persistido debe reconstruirse conservando su estado activo o inactivo.
+
+### RN-CLI-11
+
+Las acciones de consulta requieren el permiso `CLIENTE_CONSULTAR`.
+
+### RN-CLI-12
+
+Las acciones de alta, modificación, activación y desactivación requieren el permiso `CLIENTE_GESTIONAR`.
+
+### RN-CLI-13
+
+Un Usuario sin sesión, inactivo o sin permiso no puede ejecutar operaciones de Clientes.
+
+### RN-CLI-14
+
+La baja de Cliente es lógica y no elimina físicamente el registro.
 
 ### RN-VIS-01
 
@@ -424,7 +458,7 @@ La unicidad de nombre de usuario debe asegurarse mediante servicio, repositorio 
 
 ### RN-PEN-02
 
-La unicidad de CUIT debe asegurarse mediante servicio, repositorio e índice único.
+La unicidad de CUIT fue implementada mediante servicio, repositorio e índice único.
 
 ### RN-PEN-03
 
@@ -432,11 +466,15 @@ La exclusión de Viáticos debe registrar motivo, Usuario y fecha.
 
 ### RN-PEN-04
 
-Los casos de uso funcionales deberán consultar `AutorizacionService`.
+Los casos de uso del módulo Clientes consultan `AutorizacionService`.
+
+Los módulos funcionales posteriores deberán aplicar el mismo criterio.
 
 ### RN-PEN-05
 
-La interfaz deberá ocultar o deshabilitar acciones no autorizadas.
+La interfaz de Clientes oculta las acciones de gestión cuando el Usuario no posee `CLIENTE_GESTIONAR`.
+
+Los módulos posteriores deberán aplicar el mismo criterio.
 
 ### RN-PEN-06
 

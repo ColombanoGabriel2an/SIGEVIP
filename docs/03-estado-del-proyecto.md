@@ -2,9 +2,9 @@
 
 ## Etapa actual
 
-Etapa 3: autenticación, usuarios, grupos, permisos y seguridad.
+Etapa 4: módulos funcionales documentados.
 
-Bloque actual: cierre técnico y documental de autenticación e interfaz principal.
+Bloque actual: cierre técnico y documental del módulo Clientes.
 
 ## Rama de trabajo
 
@@ -12,8 +12,8 @@ Bloque actual: cierre técnico y documental de autenticación e interfaz princip
 
 ## Último commit técnico publicado
 
-- Commit: `cc6e19e`
-- Mensaje: `Aplico permisos visuales y retiro formulario tecnico`
+- Commit: `8f45694`
+- Mensaje: `Agrego interfaz de gestion de clientes`
 
 La rama local se encuentra sincronizada con:
 
@@ -242,8 +242,8 @@ Ese formulario solo servía para comprobar la conexión inicial y ya no particip
 
 ### Pruebas
 
-- Totales: 168.
-- Correctas: 168.
+- Totales: 197.
+- Correctas: 197.
 - Fallidas: 0.
 
 Incluyen:
@@ -379,10 +379,10 @@ Se utilizan:
 
 ## Pendiente inmediato
 
-- Crear el commit documental del cierre de interfaz.
-- Publicar el commit.
-- Generar informe de transferencia a MAESTRO.
-- Iniciar el módulo funcional de Clientes.
+- Completar el cierre documental del módulo Clientes.
+- Ejecutar regresión final.
+- Publicar el commit documental.
+- Preparar informe de transferencia a MAESTRO.
 
 ## Etapas posteriores
 
@@ -404,3 +404,110 @@ Se utilizan:
 - Datos de demostración.
 - Manual técnico.
 - Preparación de la presentación académica.
+
+## Módulo funcional de Clientes
+
+El módulo Clientes se encuentra implementado de extremo a extremo.
+
+### Domain
+
+Se implementó:
+
+- validación de razón social obligatoria;
+- validación de CUIT obligatorio;
+- normalización de CUIT;
+- actualización controlada de datos;
+- reconstrucción desde persistencia;
+- activación y desactivación lógica.
+
+### Application
+
+Se implementaron:
+
+- `ClienteFiltro`;
+- `ClienteListadoDto`;
+- `IClienteRepository`;
+- `ClienteService`;
+- `AccesoDenegadoException`.
+
+Casos de uso disponibles:
+
+- listar clientes;
+- obtener cliente;
+- registrar cliente;
+- modificar cliente;
+- activar cliente;
+- desactivar cliente.
+
+Cada operación valida:
+
+- sesión autenticada;
+- usuario activo;
+- permiso requerido;
+- identificadores;
+- existencia del cliente;
+- unicidad de CUIT.
+
+### Infrastructure
+
+Se implementó:
+
+`src/SIGEVIP.Infrastructure/Clientes/ClienteRepository.cs`
+
+Responsabilidades:
+
+- persistir clientes mediante ADO.NET;
+- obtener por identificador;
+- verificar existencia de CUIT;
+- listar con filtros;
+- insertar;
+- actualizar;
+- activar;
+- desactivar;
+- reconstruir la entidad;
+- traducir errores técnicos;
+- reconocer conflictos por índice único.
+
+### Base de datos
+
+Tabla:
+
+`dbo.Cliente`
+
+Scripts:
+
+- `database/migrations/003_crear_clientes.sql`
+- `database/seed/002_permisos_modulo_clientes.sql`
+- `database/migrations/003_validar_clientes.sql`
+
+Validación ejecutada:
+
+`VALIDACIÓN CORRECTA`
+
+### WinForms
+
+Se implementaron:
+
+- `ClientesForm`;
+- `ClienteEditForm`;
+- navegación desde `MainForm`;
+- coordinación desde `SigevipApplicationContext`;
+- composición de dependencias en `Program`.
+
+La interfaz permite:
+
+- listar;
+- filtrar;
+- registrar;
+- modificar;
+- activar;
+- desactivar;
+- visualizar estados;
+- rechazar CUIT duplicado;
+- conservar datos entre ejecuciones.
+
+### Commits del módulo
+
+- `0994a78` — `Agrego casos de uso de clientes`
+- `c8a36e3` — `Implemento persistencia de clientes`
+- `8f45694` — `Agrego interfaz de gestion de clientes`

@@ -10,10 +10,10 @@
 | RF02: validar credenciales y habilitar funciones | `SesionActual`, `SigevipApplicationContext`, `AutorizacionService` y `MainForm` | Application / Infrastructure / WinForms | Inicio de sesión, menú y permisos visuales | Implementado para menú principal |
 | RF03: gestionar usuarios | Entidad Usuario, tablas Persona-Usuario y acceso visual Usuarios | Domain / database / WinForms | Dominio y persistencia base | Parcialmente implementado |
 | RF04: asignar uno o más grupos | Colección de grupos, `UsuarioGrupo` y alta inicial | Domain / Application / Infrastructure / database | Duplicados impedidos y administrador inicial | Parcialmente implementado |
-| RF05: registrar clientes | Entidad Cliente | Domain | Creación y validaciones | Parcialmente implementado |
-| RF06: modificar clientes | Propiedades encapsuladas | Domain | Pruebas de dominio | Parcialmente implementado |
-| RF07: activar o desactivar clientes | `Cliente.Activar()` y `Cliente.Desactivar()` | Domain | Pruebas de dominio | Implementado en dominio |
-| RF08: listado filtrable de clientes | Requiere repositorio, servicio e interfaz | Application / Infrastructure / WinForms | Pendiente | Pendiente |
+| RF05: registrar clientes | `Cliente`, `ClienteService.Registrar`, `ClienteRepository.Insertar` y `ClienteEditForm` | Domain / Application / Infrastructure / database / WinForms | Pruebas unitarias, integración SQL y validación manual | Implementado |
+| RF06: modificar clientes | `Cliente.ActualizarDatos`, `ClienteService.Modificar`, `ClienteRepository.Actualizar` y `ClienteEditForm` | Domain / Application / Infrastructure / database / WinForms | Pruebas unitarias, integración SQL y validación manual | Implementado |
+| RF07: activar o desactivar clientes | Entidad, servicio, repositorio, campo `Activo` y acciones de `ClientesForm` | Domain / Application / Infrastructure / database / WinForms | Pruebas unitarias, integración SQL y validación manual | Implementado |
+| RF08: listado filtrable de clientes | `ClienteFiltro`, `ClienteListadoDto`, `ClienteService.Listar`, consulta ADO.NET y `ClientesForm` | Application / Infrastructure / database / WinForms | Filtros por texto, CUIT, localidad, provincia y estado | Implementado |
 | RF09: historial del cliente | Relaciones históricas preservadas | Domain / Application / Infrastructure | Pendiente | Parcialmente implementado |
 | RF11: monto anticipado | `Viaje.MontoAnticipado` | Domain | Pruebas de cálculo | Implementado |
 | RF12: modificar solo en Abierto | Patrón State | Domain | Bloqueos por estado | Implementado |
@@ -31,7 +31,7 @@
 | RF29: excluir viáticos | Baja lógica | Domain | Exclusión y reactivación | Implementado |
 | RF30: aprobar viaje | `Viaje.Aprobar()` | Domain | Transición a Aprobado | Implementado |
 | RF32: saldo final | Total vigente menos anticipo | Domain | Pruebas económicas | Implementado |
-| RF37: impedir accesos no autorizados | `AutorizacionService`, permisos efectivos y controles ocultos | Application / Infrastructure / WinForms | Permisos directos, heredados y validación manual | Implementado para navegación principal |
+| RF37: impedir accesos no autorizados | `AutorizacionService`, `ClienteService.ExigirPermiso` y controles visuales | Application / Infrastructure / WinForms | Pruebas de Application y validación manual | Implementado para seguridad y Clientes |
 | RF38: ocultar opciones no habilitadas | `MainForm` configura `Visible` según permiso | WinForms | Visitas y Viáticos ocultos para administrador actual | Implementado |
 | RF39: acceso mediante grupos y permisos | Usuario, Grupo, Permiso y Composite persistido | Domain / Application / Infrastructure / database / WinForms | Pruebas unitarias, integración SQL y menú | Implementado |
 | Perfil del usuario autenticado | `PerfilSesion`, servicio y repositorio ADO.NET | Application / Infrastructure / WinForms | Nombre completo y usuario visibles | Implementado |
@@ -57,4 +57,4 @@
 | State en Viaje | `IEstadoViaje` y estados concretos | Domain | Transiciones | Implementado |
 | Composite en seguridad | `IPermisoComponente`, Grupo y Permiso | Domain | Anidamiento y ciclos | Implementado |
 | Auditoría básica | Persistencia y servicios | Infrastructure / Application | Pendiente | Pendiente |
-| SQL reproducible | Migraciones, seed y validación | database | Ejecución reproducible | Implementado para seguridad |
+| SQL reproducible | Migraciones, seeds y validaciones de seguridad y Clientes | database | Migraciones `001`, `002`, `003`, seeds reejecutables y validaciones correctas | Implementado para seguridad y Clientes |

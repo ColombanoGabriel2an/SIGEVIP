@@ -36,22 +36,37 @@
 
 - `Application/AutenticacionServiceTests.cs`
 - `Application/AutorizacionServiceTests.cs`
+- `Application/ClienteServiceTests.cs`
 - `Application/SesionActualTests.cs`
 
 ### Infrastructure
 
 - `Infrastructure/Pbkdf2PasswordHasherTests.cs`
 
+### Integración SQL
+
+- `Integration/ClienteRepositoryIntegrationTests.cs`
+- `Integration/InicializacionSeguridadRepositoryIntegrationTests.cs`
+- `Integration/UsuarioAutenticacionRepositoryIntegrationTests.cs`
+
 ## 4. Distribución acumulada
 
-- Bloques 1 y 2: 71 pruebas.
-- Persona y Usuario: 17 pruebas.
-- Grupo y Permiso: 26 pruebas nuevas acumuladas con Usuario.
-- Autenticación, autorización y sesión: 19 pruebas.
-- PBKDF2: 12 pruebas.
-- Total ejecutado: 145.
+El total definitivo se toma del ejecutor VSTest.
 
-La suma se expresa por incrementos históricos. El total definitivo se toma del ejecutor VSTest.
+Último resultado consolidado:
+
+- 197 pruebas totales;
+- 197 correctas;
+- 0 fallidas.
+
+El conjunto incluye pruebas:
+
+- de arquitectura;
+- de dominio;
+- de Application;
+- de Infrastructure;
+- de integración real con SQL Server.
+
 
 ## 5. Cobertura de Viaje, Viático, Cliente y Visita
 
@@ -191,28 +206,31 @@ Compilación:
 
 - 0 advertencias.
 - 0 errores.
-- Tiempo: 1,29 segundos.
 
 Pruebas:
 
-- Totales: 145.
-- Correctas: 145.
+- Totales: 197.
+- Correctas: 197.
 - Fallidas: 0.
 - Omitidas: 0.
-- Tiempo: 4,0902 segundos.
 
-## 16. Criterio de cierre del Bloque 3
 
-El bloque se considera cerrado técnicamente cuando:
+## 16. Criterio de cierre del módulo Clientes
 
-- toda la documentación esté actualizada;
+El módulo se considera cerrado técnicamente cuando:
+
+- la documentación se encuentre actualizada;
 - `git diff --check` no informe errores;
 - la solución compile;
-- las 164 pruebas sean correctas;
+- las 197 pruebas sean correctas;
+- la migración `003` esté aplicada;
+- el seed `002` sea reejecutable;
+- la validación SQL indique `VALIDACIÓN CORRECTA`;
+- la validación manual sea satisfactoria;
 - exista commit documental;
 - el commit sea publicado;
-- el working tree quede limpio;
-- se informe a MAESTRO el estado y los pendientes.
+- el working tree quede limpio.
+
 
 ## Pruebas de integración de seguridad
 
@@ -233,8 +251,63 @@ Cobertura:
 - Herencia desde grupos hijos.
 - Rechazo de ciclos persistidos.
 
-Resultado consolidado:
+Resultado consolidado de seguridad y Clientes:
 
-- 164 pruebas totales.
-- 164 correctas.
+- 197 pruebas totales.
+- 197 correctas.
 - 0 fallidas.
+
+## Cobertura específica del módulo Clientes
+
+### Domain
+
+Se verifica:
+
+- creación válida;
+- razón social obligatoria;
+- CUIT obligatorio;
+- normalización de CUIT;
+- estado inicial activo;
+- activación;
+- desactivación;
+- modificación controlada;
+- preservación de identificador;
+- preservación de estado durante la modificación;
+- reconstrucción activa;
+- reconstrucción inactiva.
+
+### Application
+
+Se verifica:
+
+- rechazo sin sesión;
+- rechazo de Usuario inactivo;
+- rechazo sin permiso de consulta;
+- listado autorizado;
+- transferencia de filtros;
+- rechazo sin permiso de gestión;
+- registro válido;
+- rechazo de CUIT duplicado;
+- modificación de Cliente inexistente;
+- exclusión del identificador actual al verificar CUIT;
+- rechazo de CUIT perteneciente a otro Cliente;
+- activación;
+- desactivación;
+- obtención por identificador;
+- rechazo de identificador inválido.
+
+### Integración SQL
+
+Se verifica:
+
+- inserción y recuperación;
+- persistencia de datos;
+- actualización;
+- activación;
+- desactivación;
+- filtro por razón social;
+- filtro por CUIT;
+- filtro por localidad;
+- filtro por estado;
+- restricción única de CUIT;
+- exclusión del identificador actual.

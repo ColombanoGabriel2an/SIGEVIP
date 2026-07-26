@@ -23,10 +23,8 @@ Incluye:
 
 No incluye todavía:
 
-- persistencia completa;
-- repositorios ADO.NET;
-- migraciones de seguridad;
-- formularios funcionales;
+- persistencia de viajes, visitas y viáticos;
+- gestión funcional de usuarios, grupos y permisos;
 - recuperación de contraseña;
 - reportes;
 - mapas;
@@ -122,7 +120,19 @@ No incluye todavía:
 - Admite activación y desactivación lógica.
 - No se elimina físicamente.
 
-La unicidad global del CUIT todavía requiere repositorio e índice único.
+La unicidad global del CUIT se controla mediante:
+
+- `ClienteService`;
+- `IClienteRepository.ExisteCuit`;
+- `ClienteRepository`;
+- índice único `UX_Cliente_Cuit`.
+
+La entidad también permite:
+
+- `ActualizarDatos`;
+- `Reconstruir`;
+- preservar el identificador;
+- reconstruir el estado activo o inactivo desde SQL Server.
 
 ## 5. Entidad Visita
 
@@ -394,30 +404,43 @@ La generación y verificación pertenece a `IPasswordHasher`.
 
 ## 16. Compatibilidad con persistencia
 
-La persistencia futura requerirá:
+Se encuentran persistidos:
 
-- `Persona`
-- `Usuario`
-- `Grupo`
-- `Permiso`
-- `UsuarioGrupo`
-- estructura de componentes de Grupo
-- `Viaje`
-- `Viatico`
-- `Cliente`
-- `Visita`
-- `VisitaCliente`
+- Persona;
+- Usuario;
+- Grupo;
+- Permiso;
+- UsuarioGrupo;
+- GrupoPermiso;
+- GrupoGrupo;
+- Cliente.
 
-Los objetos de comportamiento State no se almacenarán directamente.
+La entidad Cliente se reconstruye mediante:
+
+`Cliente.Reconstruir(...)`
+
+La tabla `dbo.Cliente` conserva:
+
+- identificador;
+- razón social;
+- CUIT;
+- email;
+- teléfono;
+- localidad;
+- provincia;
+- estado lógico.
+
+Los objetos de comportamiento State no se almacenan directamente.
+
 
 ## 17. Pendientes
 
-- Repositorios de seguridad.
-- Reconstrucción de Usuario con Grupos.
-- Persistencia de Composite.
-- Unicidad de nombre de usuario.
-- Unicidad de CUIT.
-- Casos de uso de gestión.
+- Persistencia de Viaje.
+- Persistencia de Viático.
+- Persistencia de Visita.
+- Persistencia de VisitaCliente.
+- Gestión funcional de seguridad.
+- Historial funcional del cliente.
 - Auditoría.
-- Interfaz.
-- Pruebas de integración con SQL Server.
+- Reportes.
+- Mapas y geolocalización.

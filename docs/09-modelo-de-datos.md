@@ -22,14 +22,12 @@ Incluye:
 
 No incluye todavía:
 
-- repositorios ADO.NET;
 - procedimientos almacenados;
 - auditoría;
 - persistencia de viajes;
-- persistencia de clientes;
 - persistencia de visitas;
 - persistencia de viáticos;
-- usuario administrador inicial.
+- persistencia del historial completo del cliente.
 
 ## 2. Scripts
 
@@ -509,3 +507,108 @@ Integración persistente:
 - `514ba5a` — `Agrego inicialización del administrador`
 - `a89c186` — `Agrego herramienta de configuración inicial`
 - `62396ba` — `Pruebo jerarquías persistidas de seguridad`
+
+## Modelo relacional de Clientes
+
+### Script de migración
+
+`database/migrations/003_crear_clientes.sql`
+
+Responsabilidades:
+
+- crear `dbo.Cliente`;
+- crear restricciones;
+- crear índices;
+- ejecutar en transacción;
+- registrar la versión `003`;
+- permitir reejecución.
+
+### Tabla Cliente
+
+Nombre:
+
+`dbo.Cliente`
+
+| Columna | Tipo | Nulo | Descripción |
+|---|---|---:|---|
+| IdCliente | INT IDENTITY | No | Clave primaria |
+| RazonSocial | NVARCHAR(150) | No | Denominación del cliente |
+| Cuit | NVARCHAR(20) | No | CUIT normalizado |
+| Email | NVARCHAR(150) | Sí | Correo electrónico |
+| Telefono | NVARCHAR(50) | Sí | Teléfono |
+| Localidad | NVARCHAR(100) | Sí | Localidad |
+| Provincia | NVARCHAR(100) | Sí | Provincia |
+| Activo | BIT | No | Estado lógico |
+
+Restricciones:
+
+- `PK_Cliente`
+- `CK_Cliente_RazonSocial_NoVacia`
+- `CK_Cliente_Cuit_NoVacio`
+- `DF_Cliente_Activo`
+
+Índices:
+
+- `UX_Cliente_Cuit`
+- `IX_Cliente_RazonSocial`
+- `IX_Cliente_Activo`
+
+### Unicidad de CUIT
+
+El índice:
+
+`UX_Cliente_Cuit`
+
+impide duplicados incluso ante concurrencia o acceso directo a la base.
+
+Application realiza una validación anticipada para ofrecer un mensaje funcional.
+
+Infrastructure reconoce los errores SQL `2601` y `2627` y los traduce a una excepción de negocio.
+
+### Baja lógica
+
+Cliente utiliza:
+
+`Activo BIT NOT NULL DEFAULT 1`
+
+La activación y desactivación se realizan mediante `UPDATE`.
+
+No se elimina físicamente el registro.
+
+### Seed del módulo
+
+Script:
+
+`database/seed/002_permisos_modulo_clientes.sql`
+
+Responsabilidad:
+
+- asignar `CLIENTE_GESTIONAR` a `ADMINISTRADOR_GENERAL`;
+- evitar asociaciones duplicadas;
+- permitir reejecución segura.
+
+### Validación
+
+Script:
+
+`database/migrations/003_validar_clientes.sql`
+
+Se verificó:
+
+- versión `003`;
+- existencia de `dbo.Cliente`;
+- columnas;
+- tipos;
+- longitudes;
+- nulabilidad;
+- identity;
+- clave primaria;
+- índices;
+- restricciones CHECK;
+- DEFAULT;
+- ausencia de CUIT duplicados;
+- asignación de `CLIENTE_GESTIONAR`.
+
+Resultado:
+
+`VALIDACIÓN CORRECTA`

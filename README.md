@@ -69,22 +69,32 @@ MSYS2_ARG_CONV_EXCL='*' "/c/Program Files/Microsoft Visual Studio/2022/Community
 
 Se encuentran implementados:
 
-- arquitectura base;
+- arquitectura base por capas;
 - dominio de clientes, viajes, visitas y viáticos;
-- autenticación y autorización;
+- autenticación, sesión y autorización;
 - PBKDF2-HMAC-SHA256;
-- persistencia SQL de seguridad;
-- repositorio ADO.NET de autenticación;
+- persistencia SQL del modelo de seguridad;
+- repositorios ADO.NET de autenticación y perfil;
 - reconstrucción de grupos, permisos y jerarquías;
 - creación transaccional del administrador;
 - utilidad `SIGEVIP.Setup`;
-- 164 pruebas automatizadas correctas.
+- login y menú principal WinForms;
+- permisos visuales por autorización efectiva;
+- módulo funcional de Clientes;
+- persistencia SQL de Clientes;
+- alta y modificación de Clientes;
+- activación y desactivación lógica;
+- listado y filtros;
+- validación de CUIT duplicado;
+- 197 pruebas automatizadas correctas.
 
 Permanecen pendientes:
 
-- formulario de login;
-- integración de sesión con WinForms;
-- gestión visual de usuarios, grupos y permisos;
-- persistencia de módulos funcionales;
+- gestión funcional de usuarios, grupos y permisos;
+- persistencia de viajes, visitas y viáticos;
+- historial funcional del cliente;
 - auditoría;
-- reportes y mapa.
+- reportes;
+- mapa y geolocalización;
+- datos de demostración finales;
+- manual técnico y preparación de la presentación académica.

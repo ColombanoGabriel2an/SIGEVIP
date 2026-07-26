@@ -50,8 +50,8 @@ Comando:
 
 Resultado verificado:
 
-- 168 pruebas totales.
-- 168 correctas.
+- 197 pruebas totales.
+- 197 correctas.
 - 0 fallidas.
 
 ## 5. Inicio de la aplicación
@@ -187,6 +187,103 @@ Resultado esperado:
 ## 15. Resultado final
 
 El flujo básico de seguridad e interfaz fue validado correctamente.
+
+Estado:
+
+`APROBADO`
+
+## 16. Validación del módulo Clientes
+
+### Apertura
+
+Procedimiento:
+
+1. Autenticarse con un Usuario autorizado.
+2. Presionar **Clientes**.
+
+Resultado verificado:
+
+- se abre `ClientesForm`;
+- la grilla se carga;
+- no aparece el mensaje de módulo pendiente.
+
+### Alta
+
+Procedimiento:
+
+1. Presionar **Nuevo**.
+2. Ingresar razón social y CUIT.
+3. Completar datos opcionales.
+4. Guardar.
+
+Resultado verificado:
+
+- el Cliente se registra;
+- aparece en la grilla;
+- permanece después de reiniciar la aplicación.
+
+### CUIT duplicado
+
+Procedimiento:
+
+1. Intentar registrar otro Cliente con el mismo CUIT.
+
+Resultado verificado:
+
+- la operación se rechaza;
+- se muestra un mensaje comprensible;
+- no se duplica el registro.
+
+### Modificación
+
+Procedimiento:
+
+1. Seleccionar un Cliente.
+2. Presionar **Modificar**.
+3. Cambiar datos.
+4. Guardar.
+
+Resultado verificado:
+
+- los datos se actualizan;
+- el identificador se conserva;
+- el estado lógico se conserva.
+
+### Desactivación y activación
+
+Resultado verificado:
+
+- la desactivación es lógica;
+- el Cliente aparece al filtrar Inactivos;
+- puede reactivarse;
+- no se elimina físicamente.
+
+### Filtros
+
+Se validaron:
+
+- búsqueda general;
+- CUIT;
+- localidad;
+- provincia;
+- activos;
+- inactivos;
+- todos.
+
+### Permisos visuales
+
+Un Usuario con `CLIENTE_GESTIONAR` visualiza:
+
+- Nuevo;
+- Modificar;
+- Activar;
+- Desactivar.
+
+Las operaciones también vuelven a validar permisos en Application.
+
+## 17. Resultado integral actualizado
+
+El flujo de seguridad, navegación principal y módulo Clientes fue validado correctamente.
 
 Estado:
 

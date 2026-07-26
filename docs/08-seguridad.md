@@ -331,8 +331,8 @@ Características:
 
 ### Pruebas automatizadas
 
-- 168 pruebas totales;
-- 168 correctas;
+- 197 pruebas totales;
+- 197 correctas;
 - 0 fallidas.
 
 ### Interfaz
