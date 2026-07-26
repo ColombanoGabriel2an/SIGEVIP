@@ -18,6 +18,8 @@ namespace SIGEVIP.WinForms.Navigation
             _sesionActual;
 
         private LoginForm _loginForm;
+        private MainForm _mainForm;
+        private bool _finalizandoAplicacion;
 
         public SigevipApplicationContext(
             AutenticacionService autenticacionService,
@@ -55,8 +57,6 @@ namespace SIGEVIP.WinForms.Navigation
             _loginForm.FormClosed +=
                 LoginForm_FormClosed;
 
-            MainForm = _loginForm;
-
             _loginForm.Show();
         }
 
@@ -67,39 +67,80 @@ namespace SIGEVIP.WinForms.Navigation
             if (!_sesionActual.HayUsuarioAutenticado)
             {
                 MessageBox.Show(
-                    "No fue posible establecer la sesión.",
-                    "Error de sesión",
+                    "No fue posible establecer la sesion.",
+                    "Error de sesion",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
 
                 return;
             }
 
-            MessageBox.Show(
-                "Autenticación correcta. " +
-                "El menú principal se incorporará " +
-                "en el siguiente incremento.",
-                "SIGEVIP",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-
-            CerrarLoginSinProcesarCierre();
-
-            _sesionActual.Cerrar();
-
-            ExitThread();
+            CerrarLoginSinFinalizarAplicacion();
+            MostrarMenuPrincipal();
         }
 
         private void LoginForm_FormClosed(
             object sender,
             FormClosedEventArgs e)
         {
-            _sesionActual.Cerrar();
+            if (_finalizandoAplicacion)
+            {
+                return;
+            }
 
-            ExitThread();
+            FinalizarAplicacion();
         }
 
-        private void CerrarLoginSinProcesarCierre()
+        private void MostrarMenuPrincipal()
+        {
+            _mainForm =
+                new MainForm(
+                    _sesionActual,
+                    _autorizacionService);
+
+            _mainForm.CerrarSesionSolicitada +=
+                MainForm_CerrarSesionSolicitada;
+
+            _mainForm.SalirSolicitado +=
+                MainForm_SalirSolicitado;
+
+            _mainForm.FormClosed +=
+                MainForm_FormClosed;
+
+            _mainForm.Show();
+        }
+
+        private void MainForm_CerrarSesionSolicitada(
+            object sender,
+            EventArgs e)
+        {
+            CerrarMenuSinFinalizarAplicacion();
+
+            _sesionActual.Cerrar();
+
+            MostrarLogin();
+        }
+
+        private void MainForm_SalirSolicitado(
+            object sender,
+            EventArgs e)
+        {
+            FinalizarAplicacion();
+        }
+
+        private void MainForm_FormClosed(
+            object sender,
+            FormClosedEventArgs e)
+        {
+            if (_finalizandoAplicacion)
+            {
+                return;
+            }
+
+            FinalizarAplicacion();
+        }
+
+        private void CerrarLoginSinFinalizarAplicacion()
         {
             if (_loginForm == null)
             {
@@ -115,7 +156,44 @@ namespace SIGEVIP.WinForms.Navigation
             _loginForm.Close();
             _loginForm.Dispose();
             _loginForm = null;
-            MainForm = null;
+        }
+
+        private void CerrarMenuSinFinalizarAplicacion()
+        {
+            if (_mainForm == null)
+            {
+                return;
+            }
+
+            _mainForm.CerrarSesionSolicitada -=
+                MainForm_CerrarSesionSolicitada;
+
+            _mainForm.SalirSolicitado -=
+                MainForm_SalirSolicitado;
+
+            _mainForm.FormClosed -=
+                MainForm_FormClosed;
+
+            _mainForm.Close();
+            _mainForm.Dispose();
+            _mainForm = null;
+        }
+
+        private void FinalizarAplicacion()
+        {
+            if (_finalizandoAplicacion)
+            {
+                return;
+            }
+
+            _finalizandoAplicacion = true;
+
+            CerrarLoginSinFinalizarAplicacion();
+            CerrarMenuSinFinalizarAplicacion();
+
+            _sesionActual.Cerrar();
+
+            ExitThread();
         }
 
         protected override void ExitThreadCore()
