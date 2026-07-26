@@ -12,6 +12,7 @@ namespace SIGEVIP.Domain.Entities
     {
         private readonly List<Viatico> _viaticos;
         private readonly List<Visita> _visitas;
+        private readonly List<Persona> _participantes;
         private IEstadoViaje _estadoActual;
 
         public Viaje(
@@ -41,34 +42,27 @@ namespace SIGEVIP.Domain.Entities
             decimal montoAnticipado,
             EstadoViaje estado)
         {
-            if (fechaInicio.Date > fechaFin.Date)
-            {
-                throw new ReglaNegocioException(
-                    "La fecha de inicio del viaje no puede ser posterior a la fecha de fin.");
-            }
-
-            if (montoAnticipado < 0m)
-            {
-                throw new ReglaNegocioException(
-                    "El monto anticipado del viaje no puede ser negativo.");
-            }
-
-            if (!Enum.IsDefined(typeof(TipoViaje), tipoViaje))
-            {
-                throw new ReglaNegocioException(
-                    "El tipo de viaje indicado no es válido.");
-            }
+            ValidarDatosGenerales(
+                fechaInicio,
+                fechaFin,
+                descripcion,
+                tipoViaje,
+                montoAnticipado);
 
             IdViaje = idViaje;
             FechaInicio = fechaInicio.Date;
             FechaFin = fechaFin.Date;
-            Descripcion = descripcion ?? string.Empty;
+            Descripcion = descripcion.Trim();
             TipoViaje = tipoViaje;
             MontoAnticipado = montoAnticipado;
 
             _viaticos = new List<Viatico>();
             _visitas = new List<Visita>();
-            _estadoActual = EstadoViajeFactory.Crear(estado);
+            _participantes = new List<Persona>();
+
+            _estadoActual =
+                EstadoViajeFactory.Crear(
+                    estado);
         }
 
         public int IdViaje { get; private set; }
@@ -85,7 +79,10 @@ namespace SIGEVIP.Domain.Entities
 
         public EstadoViaje EstadoActual
         {
-            get { return _estadoActual.Estado; }
+            get
+            {
+                return _estadoActual.Estado;
+            }
         }
 
         public IReadOnlyCollection<Viatico> Viaticos
@@ -106,6 +103,15 @@ namespace SIGEVIP.Domain.Entities
             }
         }
 
+        public IReadOnlyCollection<Persona> Participantes
+        {
+            get
+            {
+                return new ReadOnlyCollection<Persona>(
+                    _participantes);
+            }
+        }
+
         public decimal TotalGastado
         {
             get
@@ -115,16 +121,153 @@ namespace SIGEVIP.Domain.Entities
                         viatico =>
                             viatico.Estado ==
                             EstadoViatico.Vigente)
-                    .Sum(viatico => viatico.Monto);
+                    .Sum(
+                        viatico =>
+                            viatico.Monto);
             }
         }
 
         public decimal SaldoPendiente
         {
-            get { return TotalGastado - MontoAnticipado; }
+            get
+            {
+                return TotalGastado -
+                       MontoAnticipado;
+            }
         }
 
-        public void AgregarViatico(Viatico viatico)
+        public static Viaje Reconstruir(
+            int idViaje,
+            DateTime fechaInicio,
+            DateTime fechaFin,
+            string descripcion,
+            TipoViaje tipoViaje,
+            decimal montoAnticipado,
+            EstadoViaje estado,
+            IEnumerable<Persona> participantes)
+        {
+            var viaje =
+                new Viaje(
+                    idViaje,
+                    fechaInicio,
+                    fechaFin,
+                    descripcion,
+                    tipoViaje,
+                    montoAnticipado,
+                    estado);
+
+            viaje.CargarParticipantes(
+                participantes,
+                true);
+
+            return viaje;
+        }
+
+        public void AgregarParticipante(
+            Persona participante)
+        {
+            _estadoActual.ValidarModificacion();
+
+            ValidarParticipante(
+                participante);
+
+            if (_participantes.Any(
+                existente =>
+                    SonLaMismaPersona(
+                        existente,
+                        participante)))
+            {
+                throw new ReglaNegocioException(
+                    "La persona ya participa del viaje.");
+            }
+
+            _participantes.Add(
+                participante);
+        }
+
+        public void QuitarParticipante(
+            Persona participante)
+        {
+            _estadoActual.ValidarModificacion();
+
+            if (participante == null)
+            {
+                throw new ReglaNegocioException(
+                    "Debe indicar un participante válido.");
+            }
+
+            Persona existente =
+                _participantes.FirstOrDefault(
+                    item =>
+                        SonLaMismaPersona(
+                            item,
+                            participante));
+
+            if (existente == null)
+            {
+                throw new ReglaNegocioException(
+                    "La persona indicada no participa del viaje.");
+            }
+
+            if (_participantes.Count == 1)
+            {
+                throw new ReglaNegocioException(
+                    "El viaje debe conservar al menos un participante.");
+            }
+
+            _participantes.Remove(
+                existente);
+        }
+
+        public void ReemplazarParticipantes(
+            IEnumerable<Persona> participantes)
+        {
+            _estadoActual.ValidarModificacion();
+
+            CargarParticipantes(
+                participantes,
+                true);
+        }
+
+        public void ActualizarDatos(
+            DateTime fechaInicio,
+            DateTime fechaFin,
+            string descripcion,
+            TipoViaje tipoViaje,
+            decimal montoAnticipado,
+            IEnumerable<Persona> participantes)
+        {
+            _estadoActual.ValidarModificacion();
+
+            ValidarDatosGenerales(
+                fechaInicio,
+                fechaFin,
+                descripcion,
+                tipoViaje,
+                montoAnticipado);
+
+            ValidarElementosDentroDelPeriodo(
+                fechaInicio.Date,
+                fechaFin.Date);
+
+            List<Persona> participantesValidados =
+                ValidarYMaterializarParticipantes(
+                    participantes,
+                    true);
+
+            FechaInicio = fechaInicio.Date;
+            FechaFin = fechaFin.Date;
+            Descripcion = descripcion.Trim();
+            TipoViaje = tipoViaje;
+            MontoAnticipado = montoAnticipado;
+
+            _participantes.Clear();
+            _participantes.AddRange(
+                participantesValidados);
+        }
+
+        public void AgregarViatico(
+            Viatico viatico)
         {
             if (viatico == null)
             {
@@ -133,20 +276,28 @@ namespace SIGEVIP.Domain.Entities
             }
 
             _estadoActual.ValidarModificacion();
-            ValidarFechaViatico(viatico.Fecha);
+            ValidarFechaViatico(
+                viatico.Fecha);
 
             if (_viaticos.Any(
-                item => ReferenceEquals(item, viatico)))
+                item =>
+                    ReferenceEquals(
+                        item,
+                        viatico)))
             {
                 throw new ReglaNegocioException(
                     "El viático ya fue agregado al viaje.");
             }
 
-            viatico.AsociarAViaje(IdViaje);
-            _viaticos.Add(viatico);
+            viatico.AsociarAViaje(
+                IdViaje);
+
+            _viaticos.Add(
+                viatico);
         }
 
-        public void AgregarVisita(Visita visita)
+        public void AgregarVisita(
+            Visita visita)
         {
             if (visita == null)
             {
@@ -155,7 +306,8 @@ namespace SIGEVIP.Domain.Entities
             }
 
             _estadoActual.ValidarModificacion();
-            ValidarFechaVisita(visita.Fecha);
+            ValidarFechaVisita(
+                visita.Fecha);
 
             if (!visita.TieneClientes)
             {
@@ -164,21 +316,30 @@ namespace SIGEVIP.Domain.Entities
             }
 
             if (_visitas.Any(
-                item => SonLaMismaVisita(item, visita)))
+                item =>
+                    SonLaMismaVisita(
+                        item,
+                        visita)))
             {
                 throw new ReglaNegocioException(
                     "La visita ya fue agregada al viaje.");
             }
 
-            visita.AsociarAViaje(IdViaje);
-            _visitas.Add(visita);
+            visita.AsociarAViaje(
+                IdViaje);
+
+            _visitas.Add(
+                visita);
         }
 
-        public void ExcluirViatico(Viatico viatico)
+        public void ExcluirViatico(
+            Viatico viatico)
         {
-            ValidarViaticoPerteneciente(viatico);
+            ValidarViaticoPerteneciente(
+                viatico);
 
-            if (EstadoActual != EstadoViaje.EnRendicion)
+            if (EstadoActual !=
+                EstadoViaje.EnRendicion)
             {
                 throw new ReglaNegocioException(
                     "Los viáticos solo pueden excluirse mientras el viaje está EnRendicion.");
@@ -187,11 +348,14 @@ namespace SIGEVIP.Domain.Entities
             viatico.Excluir();
         }
 
-        public void ReactivarViatico(Viatico viatico)
+        public void ReactivarViatico(
+            Viatico viatico)
         {
-            ValidarViaticoPerteneciente(viatico);
+            ValidarViaticoPerteneciente(
+                viatico);
 
-            if (EstadoActual != EstadoViaje.EnRendicion)
+            if (EstadoActual !=
+                EstadoViaje.EnRendicion)
             {
                 throw new ReglaNegocioException(
                     "Los viáticos solo pueden reactivarse mientras el viaje está EnRendicion.");
@@ -208,7 +372,8 @@ namespace SIGEVIP.Domain.Entities
         public void EnviarARendicion()
         {
             _estadoActual =
-                _estadoActual.EnviarARendicion();
+                _estadoActual
+                    .EnviarARendicion();
         }
 
         public void Aprobar()
@@ -229,10 +394,163 @@ namespace SIGEVIP.Domain.Entities
                 _estadoActual.Cancelar();
         }
 
+        private void CargarParticipantes(
+            IEnumerable<Persona> participantes,
+            bool exigirAlMenosUno)
+        {
+            List<Persona> materializados =
+                ValidarYMaterializarParticipantes(
+                    participantes,
+                    exigirAlMenosUno);
+
+            _participantes.Clear();
+            _participantes.AddRange(
+                materializados);
+        }
+
+        private static List<Persona>
+            ValidarYMaterializarParticipantes(
+                IEnumerable<Persona> participantes,
+                bool exigirAlMenosUno)
+        {
+            if (participantes == null)
+            {
+                throw new ReglaNegocioException(
+                    "Debe indicar los participantes del viaje.");
+            }
+
+            List<Persona> materializados =
+                participantes.ToList();
+
+            if (exigirAlMenosUno &&
+                materializados.Count == 0)
+            {
+                throw new ReglaNegocioException(
+                    "El viaje debe tener al menos un participante.");
+            }
+
+            var resultado =
+                new List<Persona>();
+
+            foreach (
+                Persona participante
+                in materializados)
+            {
+                ValidarParticipante(
+                    participante);
+
+                if (resultado.Any(
+                    existente =>
+                        SonLaMismaPersona(
+                            existente,
+                            participante)))
+                {
+                    throw new ReglaNegocioException(
+                        "No se permiten participantes duplicados en el viaje.");
+                }
+
+                resultado.Add(
+                    participante);
+            }
+
+            return resultado;
+        }
+
+        private static void ValidarParticipante(
+            Persona participante)
+        {
+            if (participante == null)
+            {
+                throw new ReglaNegocioException(
+                    "Debe indicar un participante válido.");
+            }
+        }
+
+        private static bool SonLaMismaPersona(
+            Persona existente,
+            Persona candidata)
+        {
+            if (ReferenceEquals(
+                existente,
+                candidata))
+            {
+                return true;
+            }
+
+            return existente.IdPersona > 0 &&
+                   candidata.IdPersona > 0 &&
+                   existente.IdPersona ==
+                   candidata.IdPersona;
+        }
+
+        private static void ValidarDatosGenerales(
+            DateTime fechaInicio,
+            DateTime fechaFin,
+            string descripcion,
+            TipoViaje tipoViaje,
+            decimal montoAnticipado)
+        {
+            if (fechaInicio.Date >
+                fechaFin.Date)
+            {
+                throw new ReglaNegocioException(
+                    "La fecha de inicio del viaje no puede ser posterior a la fecha de fin.");
+            }
+
+            if (string.IsNullOrWhiteSpace(
+                descripcion))
+            {
+                throw new ReglaNegocioException(
+                    "La descripción del viaje es obligatoria.");
+            }
+
+            if (!Enum.IsDefined(
+                typeof(TipoViaje),
+                tipoViaje))
+            {
+                throw new ReglaNegocioException(
+                    "El tipo de viaje indicado no es válido.");
+            }
+
+            if (montoAnticipado < 0m)
+            {
+                throw new ReglaNegocioException(
+                    "El monto anticipado del viaje no puede ser negativo.");
+            }
+        }
+
+        private void ValidarElementosDentroDelPeriodo(
+            DateTime nuevaFechaInicio,
+            DateTime nuevaFechaFin)
+        {
+            if (_visitas.Any(
+                visita =>
+                    visita.Fecha.Date <
+                        nuevaFechaInicio ||
+                    visita.Fecha.Date >
+                        nuevaFechaFin))
+            {
+                throw new ReglaNegocioException(
+                    "El nuevo período dejaría visitas fuera de las fechas del viaje.");
+            }
+
+            if (_viaticos.Any(
+                viatico =>
+                    viatico.Fecha.Date <
+                        nuevaFechaInicio ||
+                    viatico.Fecha.Date >
+                        nuevaFechaFin))
+            {
+                throw new ReglaNegocioException(
+                    "El nuevo período dejaría viáticos fuera de las fechas del viaje.");
+            }
+        }
+
         private void ValidarFechaViatico(
             DateTime fechaViatico)
         {
-            DateTime fecha = fechaViatico.Date;
+            DateTime fecha =
+                fechaViatico.Date;
 
             if (fecha < FechaInicio ||
                 fecha > FechaFin)
@@ -245,7 +563,8 @@ namespace SIGEVIP.Domain.Entities
         private void ValidarFechaVisita(
             DateTime fechaVisita)
         {
-            DateTime fecha = fechaVisita.Date;
+            DateTime fecha =
+                fechaVisita.Date;
 
             if (fecha < FechaInicio ||
                 fecha > FechaFin)
@@ -259,7 +578,8 @@ namespace SIGEVIP.Domain.Entities
             Viatico viatico)
         {
             if (viatico == null ||
-                !_viaticos.Contains(viatico))
+                !_viaticos.Contains(
+                    viatico))
             {
                 throw new ReglaNegocioException(
                     "El viático indicado no pertenece al viaje.");
