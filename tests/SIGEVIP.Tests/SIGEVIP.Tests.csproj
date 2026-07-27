@@ -49,6 +49,10 @@
     <Compile Include="Application\ClienteServiceTests.cs" />
     <Compile Include="Application\InicializacionSeguridadServiceTests.cs" />
     <Compile Include="Application\PerfilSesionServiceTests.cs" />
+    <Compile Include="Application\RendicionApplicationModelTests.cs" />
+    <Compile Include="Application\RendicionServiceTests.cs" />
+    <Compile Include="Application\ViaticoApplicationModelTests.cs" />
+    <Compile Include="Application\ViaticoServiceTests.cs" />
     <Compile Include="Application\ViajeServiceTests.cs" />
     <Compile Include="Application\VisitaServiceTests.cs" />
     <Compile Include="Application\SesionActualTests.cs" />
