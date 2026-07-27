@@ -50,6 +50,11 @@
     <Compile Include="Entities\Viaje.cs" />
     <Compile Include="Entities\Viatico.cs" />
     <Compile Include="Entities\Visita.cs" />
+    <Compile Include="Entities\Comprobante.cs" />
+    <Compile Include="Enums\CategoriaGasto.cs" />
+    <Compile Include="Enums\MetodoPago.cs" />
+    <Compile Include="Enums\SituacionFiscal.cs" />
+    <Compile Include="Enums\TipoComprobante.cs" />
     <Compile Include="Enums\EstadoViaje.cs" />
     <Compile Include="Enums\EstadoViatico.cs" />
     <Compile Include="Enums\TipoViaje.cs" />
