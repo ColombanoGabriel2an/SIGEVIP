@@ -52,6 +52,7 @@
     <Compile Include="Visitas\ClienteConsultaVisitaRepository.cs" />
     <Compile Include="Visitas\VisitaRepository.cs" />
     <Compile Include="Viaticos\PersonaConsultaViaticoRepository.cs" />
+    <Compile Include="Viaticos\ViaticoRepository.cs" />
     <Compile Include="Exceptions\PersistenciaException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\InicializacionSeguridadRepository.cs" />
