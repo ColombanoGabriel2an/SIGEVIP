@@ -264,6 +264,21 @@ Accesos separados:
 - Permisos.
 - Auditoría.
 
+Dentro de Viáticos y Rendiciones se aplican permisos específicos para:
+
+- consultar Viáticos;
+- registrar Viáticos;
+- modificar Viáticos;
+- enviar Viajes a rendición;
+- revisar Rendiciones;
+- excluir Viáticos;
+- reactivar Viáticos;
+- ajustar anticipos;
+- aprobar Rendiciones;
+- cancelar Rendiciones.
+
+La autorización se vuelve a validar en `ViaticoService` y `RendicionService`.
+
 ## 14. Cierre de sesión
 
 Al cerrar sesión:
@@ -331,9 +346,11 @@ Características:
 
 ### Pruebas automatizadas
 
-- 197 pruebas totales;
-- 197 correctas;
+- 415 pruebas totales;
+- 415 correctas;
 - 0 fallidas.
+
+La regresión incluye seguridad, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
 
 ### Interfaz
 

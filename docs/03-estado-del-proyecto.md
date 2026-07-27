@@ -4,16 +4,16 @@
 
 Etapa 4: módulos funcionales documentados.
 
-Bloque actual: cierre técnico y documental del módulo Visitas.
+Bloque actual: cierre técnico y documental del módulo Viáticos y Rendiciones.
 
 ## Rama de trabajo
 
 `desarrollo/interfaz-funcional`
 
-## Último commit técnico publicado
+## Último cierre específico del módulo publicado
 
-- Commit: `3b13f58`
-- Mensaje: `Conecto modulo de visitas al menu`
+- Commit: `54f16d4`
+- Mensaje: `Documento modulo de viaticos y rendiciones`
 
 La rama local se encuentra sincronizada con:
 
@@ -217,7 +217,21 @@ El módulo Visitas se muestra a los usuarios que poseen:
 
 - `VISITA_REGISTRAR`
 
-Viáticos y rendiciones permanece pendiente de implementación funcional.
+El módulo Viáticos y Rendiciones se encuentra implementado de extremo a extremo.
+
+Incluye:
+
+- carga y modificación de Viáticos;
+- Comprobantes opcionales;
+- Personas pagadoras;
+- consulta y filtros;
+- envío a rendición;
+- revisión de Rendiciones pendientes;
+- exclusión y reactivación lógica;
+- ajuste de anticipos;
+- aprobación;
+- cancelación;
+- permisos visuales y autorización en Application.
 
 ### Eliminación del formulario técnico
 
@@ -245,8 +259,8 @@ Ese formulario solo servía para comprobar la conexión inicial y ya no particip
 
 ### Pruebas
 
-- Totales: 291.
-- Correctas: 291.
+- Totales: 415.
+- Correctas: 415.
 - Fallidas: 0.
 
 Incluyen:
@@ -382,28 +396,22 @@ Se utilizan:
 
 ## Pendiente inmediato
 
-- Completar el cierre documental del módulo Clientes.
+- Actualizar la documentación transversal del proyecto.
 - Ejecutar regresión final.
-- Publicar el commit documental.
-- Preparar informe de transferencia a MAESTRO.
+- Publicar el cierre documental de Viáticos y Rendiciones.
+- Preparar el siguiente incremento funcional.
 
 ## Etapas posteriores
 
-- Gestión funcional de clientes.
-- Persistencia de clientes.
-- Listado y filtros.
-- Activación y desactivación.
-- Historial del cliente.
-- Gestión de viajes.
-- Gestión de visitas.
-- Gestión de viáticos y rendiciones.
 - Gestión visual de usuarios.
 - Gestión visual de grupos.
 - Gestión visual de permisos.
 - Cambio de contraseña.
 - Recuperación de contraseña.
-- Auditoría persistente.
+- Historial funcional completo del Cliente.
+- Auditoría general consultable.
 - Reportes.
+- Mapa y geolocalización.
 - Datos de demostración.
 - Manual técnico.
 - Preparación de la presentación académica.
@@ -758,16 +766,25 @@ La interfaz permite:
 ### Validación técnica
 
 - compilación con 0 advertencias y 0 errores;
-- 291 pruebas correctas;
+- 415 pruebas de regresión general correctas;
 - 0 pruebas fallidas;
 - prueba manual completa del ejecutable;
 - alta y consulta de Visitas verificadas;
 - selección múltiple de Clientes verificada;
 - bloqueo de cancelación verificado.
 
-## Pendiente inmediato
+## Cierre posterior del módulo Viáticos y Rendiciones
 
-- completar el cierre documental del módulo Visitas;
-- ejecutar regresión final;
-- publicar el commit documental;
-- preparar informe de transferencia a MAESTRO.
+Después del cierre de Visitas se completaron:
+
+- dominio de Viáticos y Rendiciones;
+- casos de uso de Application;
+- migración y validación SQL;
+- persistencia ADO.NET;
+- reconstrucción completa del Viaje;
+- gestión de Viáticos y Comprobantes;
+- envío y revisión de Rendiciones;
+- interfaz funcional;
+- 415 pruebas automatizadas correctas;
+- validación manual aprobada;
+- documentación específica del módulo.

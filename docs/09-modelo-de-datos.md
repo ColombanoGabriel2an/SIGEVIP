@@ -23,10 +23,9 @@ Incluye:
 No incluye todavía:
 
 - procedimientos almacenados;
-- auditoría;
-- persistencia de viáticos;
-- persistencia del historial completo de Viáticos;
-- reportes y geolocalización.
+- auditoría general consultable;
+- reportes;
+- geolocalización.
 
 El documento incorpora actualmente:
 
@@ -35,7 +34,13 @@ El documento incorpora actualmente:
 - Viajes;
 - participantes;
 - Visitas;
-- asociación Visita-Cliente.
+- asociación Visita-Cliente;
+- Viáticos;
+- Comprobantes;
+- Personas pagadoras;
+- auditoría operativa de Rendiciones;
+- exclusión y reactivación lógica;
+- aprobación y cancelación de Rendiciones.
 
 ## 2. Scripts
 
@@ -918,6 +923,141 @@ Se verificó:
 - integridad de Viajes y Clientes;
 - fechas dentro de los períodos;
 - asignación del permiso.
+
+Resultado:
+
+`VALIDACIÓN CORRECTA`
+
+## Modelo relacional de Viáticos y Rendiciones
+
+### Script de migración
+
+`database/migrations/006_crear_viaticos_rendiciones.sql`
+
+Responsabilidades:
+
+- crear `dbo.Viatico`;
+- crear `dbo.Comprobante`;
+- ampliar `dbo.Viaje` con datos de auditoría;
+- crear claves y restricciones;
+- crear índices;
+- ejecutar dentro de una transacción;
+- registrar la versión `006`;
+- permitir reejecución segura.
+
+### Tabla Viatico
+
+Nombre:
+
+`dbo.Viatico`
+
+Representa un gasto asociado a un Viaje.
+
+Datos principales:
+
+- Viaje asociado;
+- fecha;
+- categoría;
+- método de pago;
+- Persona pagadora opcional;
+- monto;
+- descripción;
+- estado;
+- motivo de exclusión;
+- Usuario y fecha de exclusión;
+- Usuario y fecha de reactivación.
+
+Cardinalidad:
+
+    Viaje 1 -------- N Viatico
+
+La eliminación funcional es lógica.
+
+Solo los Viáticos Vigentes intervienen en el total gastado.
+
+### Tabla Comprobante
+
+Nombre:
+
+`dbo.Comprobante`
+
+Representa el documento fiscal opcional de un Viático.
+
+Datos principales:
+
+- tipo;
+- CUIT del proveedor;
+- razón social;
+- situación fiscal;
+- sucursal;
+- número;
+- monto gravado;
+- impuestos;
+- total.
+
+Cardinalidad:
+
+    Viatico 1 -------- 0..1 Comprobante
+
+La relación se protege mediante una clave foránea y unicidad por Viático.
+
+### Auditoría de Rendiciones
+
+`dbo.Viaje` conserva:
+
+- Usuario que envió a rendición;
+- fecha de envío;
+- Usuario que aprobó;
+- fecha de aprobación;
+- Usuario que canceló;
+- fecha de cancelación;
+- motivo de cancelación.
+
+`dbo.Viatico` conserva:
+
+- motivo de exclusión;
+- Usuario y fecha de exclusión;
+- Usuario y fecha de reactivación.
+
+### Reconstrucción del agregado
+
+`ViajeRepository.ObtenerPorId` reconstruye:
+
+- datos generales;
+- participantes;
+- Visitas;
+- Clientes;
+- Viáticos;
+- Personas pagadoras;
+- Comprobantes;
+- estados;
+- datos de auditoría.
+
+Esto permite calcular en Domain:
+
+`TotalGastado = suma de Viáticos Vigentes`
+
+`SaldoPendiente = TotalGastado - MontoAnticipado`
+
+### Validación
+
+Script:
+
+`database/migrations/006_validar_viaticos_rendiciones.sql`
+
+La validación comprueba:
+
+- versión de migración;
+- tablas y columnas;
+- claves primarias;
+- claves foráneas;
+- índices;
+- restricciones;
+- tipos y estados válidos;
+- importes no negativos;
+- unicidad de Comprobante;
+- integridad de auditoría;
+- asignación de permisos.
 
 Resultado:
 

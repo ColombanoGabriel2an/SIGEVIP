@@ -97,17 +97,28 @@ Se encuentran implementados:
 - selección múltiple de Clientes activos;
 - reconstrucción histórica de Clientes inactivos;
 - bloqueo de cancelación de Viajes con Visitas;
-- validación SQL de las migraciones `003`, `004` y `005`;
-- 291 pruebas automatizadas correctas;
+- módulo funcional de Viáticos y Rendiciones;
+- persistencia SQL de Viáticos y Comprobantes;
+- alta, modificación, consulta y filtrado de Viáticos;
+- carga opcional de Comprobantes;
+- selección de Personas pagadoras;
+- reconstrucción completa de Viajes con Viáticos y Comprobantes;
+- envío de Viajes a rendición;
+- consulta de Rendiciones pendientes;
+- exclusión y reactivación lógica de Viáticos;
+- ajuste de anticipos;
+- aprobación y cancelación de Rendiciones;
+- cálculo de total gastado vigente y saldo pendiente;
+- validación SQL de las migraciones `003` a `006`;
+- 415 pruebas automatizadas correctas;
 - compilación con 0 advertencias y 0 errores;
-- validación manual de Clientes, Viajes y Visitas.
+- validación manual de Clientes, Viajes, Visitas, Viáticos y Rendiciones.
 
 Permanecen pendientes:
 
 - gestión funcional de usuarios, grupos y permisos;
-- persistencia funcional de viáticos y rendiciones;
 - historial funcional completo del cliente;
-- auditoría;
+- auditoría general consultable;
 - reportes;
 - mapa y geolocalización;
 - datos de demostración finales;

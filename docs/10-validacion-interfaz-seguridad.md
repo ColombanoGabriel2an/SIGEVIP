@@ -50,9 +50,11 @@ Comando:
 
 Resultado verificado:
 
-- 197 pruebas totales.
-- 197 correctas.
+- 415 pruebas totales.
+- 415 correctas.
 - 0 fallidas.
+
+La regresión vigente incluye seguridad, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
 
 ## 5. Inicio de la aplicación
 
@@ -109,17 +111,23 @@ Para el administrador actual se verificaron visibles:
 
 - Clientes.
 - Viajes.
+- Visitas.
+- Viáticos y rendiciones.
 - Usuarios.
 - Grupos.
 - Permisos.
 - Auditoría.
 
-Se verificaron ocultas:
+La visibilidad depende de los permisos efectivos del Usuario autenticado.
 
-- Visitas.
-- Viáticos y rendiciones.
+Dentro de Viáticos y Rendiciones también se verificó:
 
-El estado inferior indica seis opciones visibles.
+- ocultamiento de acciones no autorizadas;
+- habilitación individual por permiso;
+- acceso a Rendiciones únicamente con `RENDICION_REVISAR`;
+- nueva validación de autorización en Application.
+
+El estado inferior refleja dinámicamente la cantidad de opciones visibles.
 
 ## 10. Cierre de sesión
 
@@ -283,7 +291,7 @@ Las operaciones también vuelven a validar permisos en Application.
 
 ## 17. Resultado integral actualizado
 
-El flujo de seguridad, navegación principal y módulo Clientes fue validado correctamente.
+El flujo de seguridad, navegación principal y los módulos Clientes, Viajes, Visitas, Viáticos y Rendiciones fueron validados correctamente.
 
 Estado:
 
