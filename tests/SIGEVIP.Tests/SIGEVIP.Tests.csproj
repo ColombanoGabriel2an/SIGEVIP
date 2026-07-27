@@ -78,6 +78,7 @@
     <Compile Include="Integration\VisitaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\PersonaConsultaViaticoRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\RendicionRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\RendicionRevisionRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViaticoRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViajeVisitaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViajeViaticoRepositoryIntegrationTests.cs" />
