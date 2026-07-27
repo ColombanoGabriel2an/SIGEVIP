@@ -2,13 +2,17 @@ using System;
 using System.Configuration;
 using System.Windows.Forms;
 using SIGEVIP.Application.Clientes;
-using SIGEVIP.Application.Viajes;
-using SIGEVIP.Application.Visitas;
+using SIGEVIP.Application.Rendiciones;
 using SIGEVIP.Application.Security;
+using SIGEVIP.Application.Viajes;
+using SIGEVIP.Application.Viaticos;
+using SIGEVIP.Application.Visitas;
 using SIGEVIP.Infrastructure.Clientes;
 using SIGEVIP.Infrastructure.Data;
+using SIGEVIP.Infrastructure.Rendiciones;
 using SIGEVIP.Infrastructure.Security;
 using SIGEVIP.Infrastructure.Viajes;
+using SIGEVIP.Infrastructure.Viaticos;
 using SIGEVIP.Infrastructure.Visitas;
 using SIGEVIP.WinForms.Navigation;
 
@@ -74,6 +78,18 @@ namespace SIGEVIP.WinForms
                     new ClienteConsultaVisitaRepository(
                         connectionFactory);
 
+                var personaConsultaViaticoRepository =
+                    new PersonaConsultaViaticoRepository(
+                        connectionFactory);
+
+                var viaticoRepository =
+                    new ViaticoRepository(
+                        connectionFactory);
+
+                var rendicionRepository =
+                    new RendicionRepository(
+                        connectionFactory);
+
                 var autenticacionService =
                     new AutenticacionService(
                         usuarioRepository,
@@ -110,6 +126,20 @@ namespace SIGEVIP.WinForms
                         sesionActual,
                         autorizacionService);
 
+                var viaticoService =
+                    new ViaticoService(
+                        viaticoRepository,
+                        viajeRepository,
+                        personaConsultaViaticoRepository,
+                        sesionActual,
+                        autorizacionService);
+
+                var rendicionService =
+                    new RendicionService(
+                        rendicionRepository,
+                        sesionActual,
+                        autorizacionService);
+
                 var applicationContext =
                     new SigevipApplicationContext(
                         autenticacionService,
@@ -118,6 +148,8 @@ namespace SIGEVIP.WinForms
                         clienteService,
                         viajeService,
                         visitaService,
+                        viaticoService,
+                        rendicionService,
                         sesionActual);
 
                 System.Windows.Forms.Application.Run(

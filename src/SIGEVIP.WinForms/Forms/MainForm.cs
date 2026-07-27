@@ -1,7 +1,9 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using SIGEVIP.Application.Rendiciones;
 using SIGEVIP.Application.Security;
+using SIGEVIP.Application.Viaticos;
 using SIGEVIP.Domain.Entities;
 
 namespace SIGEVIP.WinForms.Forms
@@ -20,32 +22,8 @@ namespace SIGEVIP.WinForms.Forms
         private const string ViajeConsultar =
             "VIAJE_CONSULTAR";
 
-        private const string ViajeEnviarRendicion =
-            "VIAJE_ENVIAR_RENDICION";
-
-        private const string ViajeAprobar =
-            "VIAJE_APROBAR";
-
-        private const string ViajeCancelar =
-            "VIAJE_CANCELAR";
-
         private const string VisitaRegistrar =
             "VISITA_REGISTRAR";
-
-        private const string ViaticoCargar =
-            "VIATICO_CARGAR";
-
-        private const string ViaticoModificar =
-            "VIATICO_MODIFICAR";
-
-        private const string ViaticoExcluir =
-            "VIATICO_EXCLUIR";
-
-        private const string ViaticoReactivar =
-            "VIATICO_REACTIVAR";
-
-        private const string RendicionRevisar =
-            "RENDICION_REVISAR";
 
         private const string UsuarioGestionar =
             "USUARIO_GESTIONAR";
@@ -123,6 +101,9 @@ namespace SIGEVIP.WinForms.Forms
 
         public event EventHandler
             VisitasSolicitadas;
+
+        public event EventHandler
+            ViaticosSolicitados;
 
         public event EventHandler
             CerrarSesionSolicitada;
@@ -510,9 +491,9 @@ namespace SIGEVIP.WinForms.Forms
                 TieneAlgunPermiso(
                     ViajeCrear,
                     ViajeConsultar,
-                    ViajeEnviarRendicion,
-                    ViajeAprobar,
-                    ViajeCancelar);
+                    RendicionService.PermisoEnviar,
+                    RendicionService.PermisoAprobar,
+                    RendicionService.PermisoCancelar);
 
             bool puedeVisitas =
                 TieneAlgunPermiso(
@@ -520,11 +501,16 @@ namespace SIGEVIP.WinForms.Forms
 
             bool puedeViaticos =
                 TieneAlgunPermiso(
-                    ViaticoCargar,
-                    ViaticoModificar,
-                    ViaticoExcluir,
-                    ViaticoReactivar,
-                    RendicionRevisar);
+                    ViaticoService.PermisoConsultar,
+                    ViaticoService.PermisoRegistrar,
+                    ViaticoService.PermisoModificar,
+                    RendicionService.PermisoEnviar,
+                    RendicionService.PermisoRevisar,
+                    RendicionService.PermisoExcluirViatico,
+                    RendicionService.PermisoReactivarViatico,
+                    RendicionService.PermisoAjustarAnticipo,
+                    RendicionService.PermisoAprobar,
+                    RendicionService.PermisoCancelar);
 
             bool puedeUsuarios =
                 TieneAlgunPermiso(
@@ -675,8 +661,12 @@ namespace SIGEVIP.WinForms.Forms
             object sender,
             EventArgs e)
         {
-            MostrarModuloPendiente(
-                "Viaticos y rendiciones");
+            EventHandler handler =
+                ViaticosSolicitados;
+
+            handler?.Invoke(
+                this,
+                EventArgs.Empty);
         }
 
         private void BtnUsuarios_Click(

@@ -1,9 +1,11 @@
 using System;
 using System.Windows.Forms;
 using SIGEVIP.Application.Clientes;
-using SIGEVIP.Application.Viajes;
-using SIGEVIP.Application.Visitas;
+using SIGEVIP.Application.Rendiciones;
 using SIGEVIP.Application.Security;
+using SIGEVIP.Application.Viajes;
+using SIGEVIP.Application.Viaticos;
+using SIGEVIP.Application.Visitas;
 using SIGEVIP.WinForms.Forms;
 
 namespace SIGEVIP.WinForms.Navigation
@@ -29,6 +31,12 @@ namespace SIGEVIP.WinForms.Navigation
         private readonly VisitaService
             _visitaService;
 
+        private readonly ViaticoService
+            _viaticoService;
+
+        private readonly RendicionService
+            _rendicionService;
+
         private readonly ISesionActual
             _sesionActual;
 
@@ -43,6 +51,8 @@ namespace SIGEVIP.WinForms.Navigation
             ClienteService clienteService,
             ViajeService viajeService,
             VisitaService visitaService,
+            ViaticoService viaticoService,
+            RendicionService rendicionService,
             ISesionActual sesionActual)
         {
             _autenticacionService =
@@ -74,6 +84,16 @@ namespace SIGEVIP.WinForms.Navigation
                 visitaService
                 ?? throw new ArgumentNullException(
                     nameof(visitaService));
+
+            _viaticoService =
+                viaticoService
+                ?? throw new ArgumentNullException(
+                    nameof(viaticoService));
+
+            _rendicionService =
+                rendicionService
+                ?? throw new ArgumentNullException(
+                    nameof(rendicionService));
 
             _sesionActual =
                 sesionActual
@@ -185,6 +205,9 @@ namespace SIGEVIP.WinForms.Navigation
             _mainForm.VisitasSolicitadas +=
                 MainForm_VisitasSolicitadas;
 
+            _mainForm.ViaticosSolicitados +=
+                MainForm_ViaticosSolicitados;
+
             _mainForm.CerrarSesionSolicitada +=
                 MainForm_CerrarSesionSolicitada;
 
@@ -261,6 +284,28 @@ namespace SIGEVIP.WinForms.Navigation
             }
         }
 
+        private void MainForm_ViaticosSolicitados(
+            object sender,
+            EventArgs e)
+        {
+            if (_mainForm == null)
+            {
+                return;
+            }
+
+            using (
+                var formulario =
+                    new ViaticosRendicionesForm(
+                        _viaticoService,
+                        _rendicionService,
+                        _sesionActual,
+                        _autorizacionService))
+            {
+                formulario.ShowDialog(
+                    _mainForm);
+            }
+        }
+
         private void MainForm_CerrarSesionSolicitada(
             object sender,
             EventArgs e)
@@ -324,6 +369,9 @@ namespace SIGEVIP.WinForms.Navigation
 
             _mainForm.VisitasSolicitadas -=
                 MainForm_VisitasSolicitadas;
+
+            _mainForm.ViaticosSolicitados -=
+                MainForm_ViaticosSolicitados;
 
             _mainForm.CerrarSesionSolicitada -=
                 MainForm_CerrarSesionSolicitada;
