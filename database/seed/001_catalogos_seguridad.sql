@@ -134,7 +134,17 @@ BEGIN TRY
         (
             N'VIATICO_CARGAR',
             N'Cargar viáticos',
-            N'Permite incorporar viáticos a un viaje.'
+            N'Permiso legado conservado por compatibilidad.'
+        ),
+        (
+            N'VIATICO_CONSULTAR',
+            N'Consultar viáticos',
+            N'Permite consultar viáticos asociados a viajes.'
+        ),
+        (
+            N'VIATICO_REGISTRAR',
+            N'Registrar viáticos',
+            N'Permite registrar nuevos viáticos en viajes abiertos.'
         ),
         (
             N'VIATICO_MODIFICAR',
@@ -154,17 +164,42 @@ BEGIN TRY
         (
             N'VIATICO_EXCLUIR',
             N'Excluir viáticos',
-            N'Permite excluir lógicamente un viático durante la revisión.'
+            N'Permiso legado conservado por compatibilidad.'
         ),
         (
             N'VIATICO_REACTIVAR',
             N'Reactivar viáticos',
-            N'Permite reactivar un viático previamente excluido.'
+            N'Permiso legado conservado por compatibilidad.'
         ),
         (
             N'VIAJE_APROBAR',
             N'Aprobar viajes',
-            N'Permite aprobar un viaje que se encuentra en rendición.'
+            N'Permiso legado conservado por compatibilidad.'
+        ),
+        (
+            N'RENDICION_EXCLUIR_VIATICO',
+            N'Excluir viáticos de rendición',
+            N'Permite excluir lógicamente un viático durante la revisión.'
+        ),
+        (
+            N'RENDICION_REACTIVAR_VIATICO',
+            N'Reactivar viáticos de rendición',
+            N'Permite reactivar un viático previamente excluido.'
+        ),
+        (
+            N'RENDICION_AJUSTAR_ANTICIPO',
+            N'Ajustar anticipo de rendición',
+            N'Permite ajustar el monto anticipado durante la revisión.'
+        ),
+        (
+            N'RENDICION_APROBAR',
+            N'Aprobar rendiciones',
+            N'Permite aprobar una rendición completa.'
+        ),
+        (
+            N'RENDICION_CANCELAR',
+            N'Cancelar rendiciones',
+            N'Permite cancelar un viaje en rendición cuando las reglas lo admiten.'
         ),
         (
             N'VIAJE_CANCELAR',
@@ -261,6 +296,8 @@ BEGIN TRY
         (N'ADMINISTRATIVO', N'CLIENTE_CONSULTAR'),
         (N'ADMINISTRATIVO', N'VIAJE_CONSULTAR'),
         (N'ADMINISTRATIVO', N'VIATICO_CARGAR'),
+        (N'ADMINISTRATIVO', N'VIATICO_CONSULTAR'),
+        (N'ADMINISTRATIVO', N'VIATICO_REGISTRAR'),
         (N'ADMINISTRATIVO', N'VIATICO_MODIFICAR'),
         (N'ADMINISTRATIVO', N'VIAJE_ENVIAR_RENDICION'),
 
@@ -269,17 +306,33 @@ BEGIN TRY
         */
         (N'GERENTE', N'CLIENTE_CONSULTAR'),
         (N'GERENTE', N'VIAJE_CONSULTAR'),
+        (N'GERENTE', N'VIATICO_CONSULTAR'),
         (N'GERENTE', N'RENDICION_REVISAR'),
         (N'GERENTE', N'VIATICO_EXCLUIR'),
         (N'GERENTE', N'VIATICO_REACTIVAR'),
         (N'GERENTE', N'VIAJE_APROBAR'),
         (N'GERENTE', N'VIAJE_CANCELAR'),
+        (N'GERENTE', N'RENDICION_EXCLUIR_VIATICO'),
+        (N'GERENTE', N'RENDICION_REACTIVAR_VIATICO'),
+        (N'GERENTE', N'RENDICION_AJUSTAR_ANTICIPO'),
+        (N'GERENTE', N'RENDICION_APROBAR'),
+        (N'GERENTE', N'RENDICION_CANCELAR'),
 
         /*
             Administrador General
         */
         (N'ADMINISTRADOR_GENERAL', N'CLIENTE_CONSULTAR'),
         (N'ADMINISTRADOR_GENERAL', N'VIAJE_CONSULTAR'),
+        (N'ADMINISTRADOR_GENERAL', N'VIATICO_CONSULTAR'),
+        (N'ADMINISTRADOR_GENERAL', N'VIATICO_REGISTRAR'),
+        (N'ADMINISTRADOR_GENERAL', N'VIATICO_MODIFICAR'),
+        (N'ADMINISTRADOR_GENERAL', N'VIAJE_ENVIAR_RENDICION'),
+        (N'ADMINISTRADOR_GENERAL', N'RENDICION_REVISAR'),
+        (N'ADMINISTRADOR_GENERAL', N'RENDICION_EXCLUIR_VIATICO'),
+        (N'ADMINISTRADOR_GENERAL', N'RENDICION_REACTIVAR_VIATICO'),
+        (N'ADMINISTRADOR_GENERAL', N'RENDICION_AJUSTAR_ANTICIPO'),
+        (N'ADMINISTRADOR_GENERAL', N'RENDICION_APROBAR'),
+        (N'ADMINISTRADOR_GENERAL', N'RENDICION_CANCELAR'),
         (N'ADMINISTRADOR_GENERAL', N'USUARIO_GESTIONAR'),
         (N'ADMINISTRADOR_GENERAL', N'GRUPO_GESTIONAR'),
         (N'ADMINISTRADOR_GENERAL', N'PERMISO_GESTIONAR'),
