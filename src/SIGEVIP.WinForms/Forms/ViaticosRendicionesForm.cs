@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using SIGEVIP.Application.Rendiciones;
 using SIGEVIP.Application.Security;
+using SIGEVIP.Application.Viajes;
 using SIGEVIP.Application.Viaticos;
 
 namespace SIGEVIP.WinForms.Forms
@@ -15,6 +16,9 @@ namespace SIGEVIP.WinForms.Forms
 
         private readonly RendicionService
             _rendicionService;
+
+        private readonly ViajeService
+            _viajeService;
 
         private readonly ISesionActual
             _sesionActual;
@@ -29,6 +33,7 @@ namespace SIGEVIP.WinForms.Forms
         public ViaticosRendicionesForm(
             ViaticoService viaticoService,
             RendicionService rendicionService,
+            ViajeService viajeService,
             ISesionActual sesionActual,
             AutorizacionService autorizacionService)
         {
@@ -41,6 +46,11 @@ namespace SIGEVIP.WinForms.Forms
                 rendicionService
                 ?? throw new ArgumentNullException(
                     nameof(rendicionService));
+
+            _viajeService =
+                viajeService
+                ?? throw new ArgumentNullException(
+                    nameof(viajeService));
 
             _sesionActual =
                 sesionActual
@@ -225,6 +235,9 @@ namespace SIGEVIP.WinForms.Forms
         {
             bool puedeGestionarViaticos =
                 TieneAlgunPermiso(
+                    ViajeService.PermisoConsultar)
+                &&
+                TieneAlgunPermiso(
                     ViaticoService.PermisoConsultar,
                     ViaticoService.PermisoRegistrar,
                     ViaticoService.PermisoModificar,
@@ -292,12 +305,18 @@ namespace SIGEVIP.WinForms.Forms
             object sender,
             EventArgs e)
         {
-            MessageBox.Show(
-                "La composición del servicio de viáticos está activa. " +
-                "La pantalla de consulta y carga se incorporará en el siguiente incremento.",
-                "Gestión de viáticos",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            using (
+                var formulario =
+                    new ViaticosForm(
+                        _viaticoService,
+                        _rendicionService,
+                        _viajeService,
+                        _sesionActual,
+                        _autorizacionService))
+            {
+                formulario.ShowDialog(
+                    this);
+            }
         }
 
         private void BtnRendiciones_Click(

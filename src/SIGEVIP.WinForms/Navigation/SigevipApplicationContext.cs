@@ -298,6 +298,7 @@ namespace SIGEVIP.WinForms.Navigation
                     new ViaticosRendicionesForm(
                         _viaticoService,
                         _rendicionService,
+                        _viajeService,
                         _sesionActual,
                         _autorizacionService))
             {
