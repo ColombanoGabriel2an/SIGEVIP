@@ -76,6 +76,7 @@
     <Compile Include="Integration\JerarquiaGruposRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViajeRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\VisitaRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\PersonaConsultaViaticoRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViajeVisitaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioAutenticacionRepositoryIntegrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
