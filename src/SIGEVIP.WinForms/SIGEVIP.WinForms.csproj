@@ -106,6 +106,10 @@
                         <SubType>Form</SubType>
                 </Compile>
 
+                <Compile Include="Forms\RendicionesForm.cs">
+                        <SubType>Form</SubType>
+                </Compile>
+
                 <Compile Include="Forms\ViaticoEditForm.cs">
                         <SubType>Form</SubType>
                 </Compile>

@@ -245,12 +245,7 @@ namespace SIGEVIP.WinForms.Forms
 
             bool puedeRevisarRendiciones =
                 TieneAlgunPermiso(
-                    RendicionService.PermisoRevisar,
-                    RendicionService.PermisoExcluirViatico,
-                    RendicionService.PermisoReactivarViatico,
-                    RendicionService.PermisoAjustarAnticipo,
-                    RendicionService.PermisoAprobar,
-                    RendicionService.PermisoCancelar);
+                    RendicionService.PermisoRevisar);
 
             _btnGestionViaticos.Visible =
                 puedeGestionarViaticos;
@@ -323,12 +318,16 @@ namespace SIGEVIP.WinForms.Forms
             object sender,
             EventArgs e)
         {
-            MessageBox.Show(
-                "La composición del servicio de rendiciones está activa. " +
-                "La pantalla de revisión se incorporará en el siguiente incremento.",
-                "Rendiciones",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            using (
+                var formulario =
+                    new RendicionesForm(
+                        _rendicionService,
+                        _sesionActual,
+                        _autorizacionService))
+            {
+                formulario.ShowDialog(
+                    this);
+            }
         }
     }
 }

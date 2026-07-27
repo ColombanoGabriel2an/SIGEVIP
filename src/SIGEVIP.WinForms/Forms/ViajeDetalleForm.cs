@@ -169,7 +169,10 @@ namespace SIGEVIP.WinForms.Forms
                     Size =
                         new Size(625, 42),
                     Text =
-                        "Total gastado y saldo: disponibles al incorporar la persistencia de viáticos.",
+                        "Total gastado vigente: " +
+                        _viaje.TotalGastado.ToString("N2") +
+                        "    |    Saldo pendiente: " +
+                        _viaje.SaldoPendiente.ToString("N2"),
                     TextAlign =
                         ContentAlignment.MiddleLeft
                 };
