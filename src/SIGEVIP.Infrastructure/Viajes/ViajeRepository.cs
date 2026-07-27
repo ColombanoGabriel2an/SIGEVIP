@@ -44,7 +44,14 @@ SELECT
     v.Descripcion,
     v.TipoViaje,
     v.MontoAnticipado,
-    v.EstadoViaje
+    v.EstadoViaje,
+    v.IdUsuarioEnvioRendicion,
+    v.FechaEnvioRendicion,
+    v.IdUsuarioAprobador,
+    v.FechaAprobacion,
+    v.MotivoCancelacion,
+    v.IdUsuarioCancelacion,
+    v.FechaCancelacion
 FROM dbo.Viaje AS v
 WHERE v.IdViaje = @IdViaje;";
 
@@ -97,6 +104,12 @@ WHERE v.IdViaje = @IdViaje;";
                                 connection,
                                 idViaje);
 
+                    IReadOnlyCollection<Viatico>
+                        viaticos =
+                            ObtenerViaticos(
+                                connection,
+                                idViaje);
+
                     return Viaje.Reconstruir(
                         datos.IdViaje,
                         datos.FechaInicio,
@@ -106,7 +119,15 @@ WHERE v.IdViaje = @IdViaje;";
                         datos.MontoAnticipado,
                         datos.EstadoViaje,
                         participantes,
-                        visitas);
+                        visitas,
+                        viaticos,
+                        datos.IdUsuarioEnvioRendicion,
+                        datos.FechaEnvioRendicion,
+                        datos.IdUsuarioAprobador,
+                        datos.FechaAprobacion,
+                        datos.MotivoCancelacion,
+                        datos.IdUsuarioCancelacion,
+                        datos.FechaCancelacion);
                 }
             }
             catch (PersistenciaException)
@@ -829,6 +850,232 @@ ORDER BY
             return clientes.AsReadOnly();
         }
 
+
+        private static IReadOnlyCollection<Viatico>
+            ObtenerViaticos(
+                SqlConnection connection,
+                int idViaje)
+        {
+            const string sql = @"
+SELECT
+    viatico.IdViatico,
+    viatico.IdViaje,
+    viatico.Fecha,
+    viatico.CategoriaGasto,
+    viatico.MetodoPago,
+    viatico.IdPersonaPagadora,
+    viatico.Monto,
+    viatico.Descripcion,
+    viatico.EstadoViatico,
+    viatico.MotivoExclusion,
+    viatico.IdUsuarioExclusion,
+    viatico.FechaExclusion,
+    viatico.IdUsuarioReactivacion,
+    viatico.FechaReactivacion,
+
+    persona.IdPersona
+        AS PagadorIdPersona,
+    persona.Nombre
+        AS PagadorNombre,
+    persona.Apellido
+        AS PagadorApellido,
+    persona.Email
+        AS PagadorEmail,
+    persona.Activo
+        AS PagadorActivo,
+
+    comprobante.IdComprobante,
+    comprobante.TipoComprobante,
+    comprobante.CuitProveedor,
+    comprobante.RazonSocialProveedor,
+    comprobante.SituacionFiscal,
+    comprobante.Sucursal,
+    comprobante.Numero,
+    comprobante.MontoGravado,
+    comprobante.MontoImpuestos
+FROM dbo.Viatico AS viatico
+LEFT JOIN dbo.Persona AS persona
+    ON persona.IdPersona =
+        viatico.IdPersonaPagadora
+LEFT JOIN dbo.Comprobante AS comprobante
+    ON comprobante.IdViatico =
+        viatico.IdViatico
+WHERE viatico.IdViaje = @IdViaje
+ORDER BY
+    viatico.Fecha,
+    viatico.IdViatico;";
+
+            var viaticos =
+                new List<Viatico>();
+
+            using (
+                SqlCommand command =
+                    new SqlCommand(
+                        sql,
+                        connection))
+            {
+                command.Parameters.Add(
+                    "@IdViaje",
+                    SqlDbType.Int).Value =
+                        idViaje;
+
+                using (
+                    SqlDataReader reader =
+                        command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        viaticos.Add(
+                            ReconstruirViatico(
+                                reader));
+                    }
+                }
+            }
+
+            return viaticos.AsReadOnly();
+        }
+
+        private static Viatico ReconstruirViatico(
+            SqlDataReader reader)
+        {
+            Persona pagador =
+                ReconstruirPagadorViatico(
+                    reader);
+
+            Comprobante comprobante =
+                ReconstruirComprobanteViatico(
+                    reader);
+
+            return Viatico.Reconstruir(
+                reader.GetInt32(
+                    reader.GetOrdinal(
+                        "IdViatico")),
+                reader.GetInt32(
+                    reader.GetOrdinal(
+                        "IdViaje")),
+                reader.GetDateTime(
+                    reader.GetOrdinal(
+                        "Fecha")),
+                (CategoriaGasto)
+                    reader.GetByte(
+                        reader.GetOrdinal(
+                            "CategoriaGasto")),
+                (MetodoPago)
+                    reader.GetByte(
+                        reader.GetOrdinal(
+                            "MetodoPago")),
+                pagador,
+                reader.GetDecimal(
+                    reader.GetOrdinal(
+                        "Monto")),
+                LeerTextoPermitidoVacio(
+                    reader,
+                    "Descripcion"),
+                comprobante,
+                (EstadoViatico)
+                    reader.GetByte(
+                        reader.GetOrdinal(
+                            "EstadoViatico")),
+                LeerTextoOpcionalNulo(
+                    reader,
+                    "MotivoExclusion"),
+                LeerEnteroOpcional(
+                    reader,
+                    "IdUsuarioExclusion"),
+                LeerFechaOpcional(
+                    reader,
+                    "FechaExclusion"),
+                LeerEnteroOpcional(
+                    reader,
+                    "IdUsuarioReactivacion"),
+                LeerFechaOpcional(
+                    reader,
+                    "FechaReactivacion"));
+        }
+
+        private static Persona
+            ReconstruirPagadorViatico(
+                SqlDataReader reader)
+        {
+            int ordinalId =
+                reader.GetOrdinal(
+                    "PagadorIdPersona");
+
+            if (reader.IsDBNull(
+                ordinalId))
+            {
+                return null;
+            }
+
+            var persona =
+                new Persona(
+                    reader.GetInt32(
+                        ordinalId),
+                    LeerTextoObligatorio(
+                        reader,
+                        "PagadorNombre"),
+                    LeerTextoObligatorio(
+                        reader,
+                        "PagadorApellido"),
+                    LeerTextoObligatorio(
+                        reader,
+                        "PagadorEmail"));
+
+            if (!reader.GetBoolean(
+                reader.GetOrdinal(
+                    "PagadorActivo")))
+            {
+                persona.Desactivar();
+            }
+
+            return persona;
+        }
+
+        private static Comprobante
+            ReconstruirComprobanteViatico(
+                SqlDataReader reader)
+        {
+            int ordinalId =
+                reader.GetOrdinal(
+                    "IdComprobante");
+
+            if (reader.IsDBNull(
+                ordinalId))
+            {
+                return null;
+            }
+
+            return new Comprobante(
+                reader.GetInt32(
+                    ordinalId),
+                (TipoComprobante)
+                    reader.GetByte(
+                        reader.GetOrdinal(
+                            "TipoComprobante")),
+                LeerTextoObligatorio(
+                    reader,
+                    "CuitProveedor"),
+                LeerTextoObligatorio(
+                    reader,
+                    "RazonSocialProveedor"),
+                (SituacionFiscal)
+                    reader.GetByte(
+                        reader.GetOrdinal(
+                            "SituacionFiscal")),
+                LeerTextoObligatorio(
+                    reader,
+                    "Sucursal"),
+                LeerTextoObligatorio(
+                    reader,
+                    "Numero"),
+                reader.GetDecimal(
+                    reader.GetOrdinal(
+                        "MontoGravado")),
+                reader.GetDecimal(
+                    reader.GetOrdinal(
+                        "MontoImpuestos")));
+        }
+
         private static void InsertarParticipantes(
             SqlConnection connection,
             SqlTransaction transaction,
@@ -988,7 +1235,28 @@ VALUES
                 (EstadoViaje)
                     reader.GetByte(
                         reader.GetOrdinal(
-                            "EstadoViaje")));
+                            "EstadoViaje")),
+                LeerEnteroOpcional(
+                    reader,
+                    "IdUsuarioEnvioRendicion"),
+                LeerFechaOpcional(
+                    reader,
+                    "FechaEnvioRendicion"),
+                LeerEnteroOpcional(
+                    reader,
+                    "IdUsuarioAprobador"),
+                LeerFechaOpcional(
+                    reader,
+                    "FechaAprobacion"),
+                LeerTextoOpcionalNulo(
+                    reader,
+                    "MotivoCancelacion"),
+                LeerEnteroOpcional(
+                    reader,
+                    "IdUsuarioCancelacion"),
+                LeerFechaOpcional(
+                    reader,
+                    "FechaCancelacion"));
         }
 
         private static ViajeListadoDto CrearDto(
@@ -1084,6 +1352,73 @@ VALUES
                     ordinal);
         }
 
+
+        private static int? LeerEnteroOpcional(
+            SqlDataReader reader,
+            string columna)
+        {
+            int ordinal =
+                reader.GetOrdinal(
+                    columna);
+
+            return reader.IsDBNull(
+                ordinal)
+                    ? (int?)null
+                    : reader.GetInt32(
+                        ordinal);
+        }
+
+        private static DateTime? LeerFechaOpcional(
+            SqlDataReader reader,
+            string columna)
+        {
+            int ordinal =
+                reader.GetOrdinal(
+                    columna);
+
+            return reader.IsDBNull(
+                ordinal)
+                    ? (DateTime?)null
+                    : reader.GetDateTime(
+                        ordinal);
+        }
+
+        private static string LeerTextoOpcionalNulo(
+            SqlDataReader reader,
+            string columna)
+        {
+            int ordinal =
+                reader.GetOrdinal(
+                    columna);
+
+            return reader.IsDBNull(
+                ordinal)
+                    ? null
+                    : reader.GetString(
+                        ordinal);
+        }
+
+        private static string LeerTextoPermitidoVacio(
+            SqlDataReader reader,
+            string columna)
+        {
+            int ordinal =
+                reader.GetOrdinal(
+                    columna);
+
+            if (reader.IsDBNull(
+                ordinal))
+            {
+                throw new PersistenciaException(
+                    "La columna " +
+                    columna +
+                    " no puede ser nula.");
+            }
+
+            return reader.GetString(
+                ordinal);
+        }
+
         private static PersistenciaException
             CrearErrorPersistencia(
                 string mensaje,
@@ -1135,7 +1470,14 @@ VALUES
                 string descripcion,
                 TipoViaje tipoViaje,
                 decimal montoAnticipado,
-                EstadoViaje estadoViaje)
+                EstadoViaje estadoViaje,
+                int? idUsuarioEnvioRendicion,
+                DateTime? fechaEnvioRendicion,
+                int? idUsuarioAprobador,
+                DateTime? fechaAprobacion,
+                string motivoCancelacion,
+                int? idUsuarioCancelacion,
+                DateTime? fechaCancelacion)
             {
                 IdViaje = idViaje;
                 FechaInicio = fechaInicio;
@@ -1146,6 +1488,20 @@ VALUES
                     montoAnticipado;
                 EstadoViaje =
                     estadoViaje;
+                IdUsuarioEnvioRendicion =
+                    idUsuarioEnvioRendicion;
+                FechaEnvioRendicion =
+                    fechaEnvioRendicion;
+                IdUsuarioAprobador =
+                    idUsuarioAprobador;
+                FechaAprobacion =
+                    fechaAprobacion;
+                MotivoCancelacion =
+                    motivoCancelacion;
+                IdUsuarioCancelacion =
+                    idUsuarioCancelacion;
+                FechaCancelacion =
+                    fechaCancelacion;
             }
 
             public int IdViaje { get; private set; }
@@ -1158,9 +1514,59 @@ VALUES
 
             public TipoViaje TipoViaje { get; private set; }
 
-            public decimal MontoAnticipado { get; private set; }
+            public decimal MontoAnticipado
+            {
+                get;
+                private set;
+            }
 
-            public EstadoViaje EstadoViaje { get; private set; }
+            public EstadoViaje EstadoViaje
+            {
+                get;
+                private set;
+            }
+
+            public int? IdUsuarioEnvioRendicion
+            {
+                get;
+                private set;
+            }
+
+            public DateTime? FechaEnvioRendicion
+            {
+                get;
+                private set;
+            }
+
+            public int? IdUsuarioAprobador
+            {
+                get;
+                private set;
+            }
+
+            public DateTime? FechaAprobacion
+            {
+                get;
+                private set;
+            }
+
+            public string MotivoCancelacion
+            {
+                get;
+                private set;
+            }
+
+            public int? IdUsuarioCancelacion
+            {
+                get;
+                private set;
+            }
+
+            public DateTime? FechaCancelacion
+            {
+                get;
+                private set;
+            }
         }
     }
 }

@@ -79,6 +79,7 @@
     <Compile Include="Integration\PersonaConsultaViaticoRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViaticoRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViajeVisitaRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\ViajeViaticoRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioAutenticacionRepositoryIntegrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
