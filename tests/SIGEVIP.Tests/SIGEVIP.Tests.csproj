@@ -84,6 +84,7 @@
     <Compile Include="Integration\ViajeVisitaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViajeViaticoRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioAutenticacionRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\UsuarioGestionRepositoryIntegrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
