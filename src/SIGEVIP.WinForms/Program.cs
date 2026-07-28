@@ -2,6 +2,7 @@ using System;
 using System.Configuration;
 using System.Windows.Forms;
 using SIGEVIP.Application.Clientes;
+using SIGEVIP.Application.Grupos;
 using SIGEVIP.Application.Rendiciones;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Application.Usuarios;
@@ -10,6 +11,7 @@ using SIGEVIP.Application.Viaticos;
 using SIGEVIP.Application.Visitas;
 using SIGEVIP.Infrastructure.Clientes;
 using SIGEVIP.Infrastructure.Data;
+using SIGEVIP.Infrastructure.Grupos;
 using SIGEVIP.Infrastructure.Rendiciones;
 using SIGEVIP.Infrastructure.Security;
 using SIGEVIP.Infrastructure.Usuarios;
@@ -62,6 +64,10 @@ namespace SIGEVIP.WinForms
 
                 var usuarioGestionRepository =
                     new UsuarioGestionRepository(
+                        connectionFactory);
+
+                var grupoGestionRepository =
+                    new GrupoGestionRepository(
                         connectionFactory);
 
                 var usuarioClaveRepository =
@@ -122,6 +128,12 @@ namespace SIGEVIP.WinForms
                         sesionActual,
                         autorizacionService);
 
+                var grupoGestionService =
+                    new GrupoGestionService(
+                        grupoGestionRepository,
+                        sesionActual,
+                        autorizacionService);
+
                 var cambiarClaveService =
                     new CambiarClaveService(
                         usuarioClaveRepository,
@@ -174,6 +186,7 @@ namespace SIGEVIP.WinForms
                         viaticoService,
                         rendicionService,
                         usuarioGestionService,
+                        grupoGestionService,
                         cambiarClaveService,
                         sesionActual);
 

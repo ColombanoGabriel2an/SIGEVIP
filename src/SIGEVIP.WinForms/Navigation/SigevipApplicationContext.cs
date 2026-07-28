@@ -1,6 +1,7 @@
 using System;
 using System.Windows.Forms;
 using SIGEVIP.Application.Clientes;
+using SIGEVIP.Application.Grupos;
 using SIGEVIP.Application.Rendiciones;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Application.Usuarios;
@@ -41,6 +42,9 @@ namespace SIGEVIP.WinForms.Navigation
         private readonly UsuarioGestionService
             _usuarioGestionService;
 
+        private readonly GrupoGestionService
+            _grupoGestionService;
+
         private readonly CambiarClaveService
             _cambiarClaveService;
 
@@ -61,6 +65,7 @@ namespace SIGEVIP.WinForms.Navigation
             ViaticoService viaticoService,
             RendicionService rendicionService,
             UsuarioGestionService usuarioGestionService,
+            GrupoGestionService grupoGestionService,
             CambiarClaveService cambiarClaveService,
             ISesionActual sesionActual)
         {
@@ -108,6 +113,11 @@ namespace SIGEVIP.WinForms.Navigation
                 usuarioGestionService
                 ?? throw new ArgumentNullException(
                     nameof(usuarioGestionService));
+
+            _grupoGestionService =
+                grupoGestionService
+                ?? throw new ArgumentNullException(
+                    nameof(grupoGestionService));
 
             _cambiarClaveService =
                 cambiarClaveService
@@ -229,6 +239,9 @@ namespace SIGEVIP.WinForms.Navigation
 
             _mainForm.UsuariosSolicitados +=
                 MainForm_UsuariosSolicitados;
+
+            _mainForm.GruposSolicitados +=
+                MainForm_GruposSolicitados;
 
             _mainForm.CambiarClaveSolicitada +=
                 MainForm_CambiarClaveSolicitada;
@@ -353,6 +366,27 @@ namespace SIGEVIP.WinForms.Navigation
             }
         }
 
+        private void MainForm_GruposSolicitados(
+            object sender,
+            EventArgs e)
+        {
+            if (_mainForm == null)
+            {
+                return;
+            }
+
+            using (
+                var formulario =
+                    new GruposForm(
+                        _grupoGestionService,
+                        _sesionActual,
+                        _autorizacionService))
+            {
+                formulario.ShowDialog(
+                    _mainForm);
+            }
+        }
+
         private void MainForm_CambiarClaveSolicitada(
             object sender,
             EventArgs e)
@@ -454,6 +488,9 @@ namespace SIGEVIP.WinForms.Navigation
 
             _mainForm.UsuariosSolicitados -=
                 MainForm_UsuariosSolicitados;
+
+            _mainForm.GruposSolicitados -=
+                MainForm_GruposSolicitados;
 
             _mainForm.CambiarClaveSolicitada -=
                 MainForm_CambiarClaveSolicitada;
