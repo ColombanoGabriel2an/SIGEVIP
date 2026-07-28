@@ -27,12 +27,12 @@ El subsistema de seguridad contiene:
 - Activación y desactivación lógica de Usuarios.
 - Protección del Usuario autenticado.
 - Protección del último Administrador activo.
+- Cambio seguro de clave del Usuario autenticado.
 
 No incluye todavía:
 
 - mantenimiento de grupos;
 - mantenimiento de permisos;
-- cambio de contraseña;
 - recuperación por correo;
 - bloqueo por intentos fallidos;
 - autenticación multifactor;
@@ -350,8 +350,8 @@ Características:
 
 ### Pruebas automatizadas
 
-- 462 pruebas totales;
-- 462 correctas;
+- 479 pruebas totales;
+- 479 correctas;
 - 0 fallidas.
 
 La regresión incluye seguridad, Gestión de Usuarios, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
@@ -468,7 +468,7 @@ Resultado:
 
 - 0 advertencias;
 - 0 errores;
-- 462 pruebas correctas;
+- 479 pruebas correctas;
 - 0 pruebas fallidas.
 
 La validación manual comprobó:
@@ -483,11 +483,64 @@ La validación manual comprobó:
 - reactivación;
 - protecciones sobre el Usuario autenticado.
 
-## 21. Responsabilidades pendientes
+## 21. Cambio de clave
+
+La opción Cambiar contraseña se encuentra disponible para todo Usuario autenticado.
+
+No requiere un permiso administrativo porque la operación solo afecta las credenciales del Usuario de la sesión.
+
+Componentes:
+
+- `CambiarClaveCommand`;
+- `CambiarClaveService`;
+- `IUsuarioClaveRepository`;
+- `UsuarioClaveRepository`;
+- `CambiarClaveForm`.
+
+La operación valida:
+
+- sesión activa;
+- Usuario activo;
+- contraseña actual;
+- contraseña nueva;
+- confirmación;
+- longitud mínima de ocho caracteres.
+
+La contraseña actual se verifica mediante PBKDF2.
+
+La contraseña nueva genera:
+
+- nuevo hash;
+- nuevo salt;
+- iteraciones vigentes.
+
+Después de persistir correctamente:
+
+1. se actualiza el Usuario en memoria;
+2. se cierra el formulario;
+3. se cierra la sesión;
+4. se vuelve al login.
+
+No se modifican:
+
+- Persona;
+- nombre de Usuario;
+- Grupos;
+- Permisos;
+- estado.
+
+Resultado:
+
+- 17 pruebas nuevas;
+- 479 pruebas totales correctas;
+- validación manual aprobada.
+
+CUD12: Recuperar clave continúa pendiente.
+
+## 22. Responsabilidades pendientes
 
 ### Application
 
-- cambio de contraseña;
 - recuperación de contraseña;
 - gestión de grupos;
 - gestión de permisos;
@@ -505,10 +558,9 @@ La validación manual comprobó:
 - formulario funcional de grupos;
 - formulario funcional de permisos;
 - pantalla de auditoría;
-- cambio de contraseña;
 - recuperación de contraseña.
 
-## 22. Estado académico
+## 23. Estado académico
 
 El flujo de seguridad básico del MVP está implementado y comprobado:
 
@@ -526,6 +578,5 @@ Continúan pendientes para etapas posteriores:
 
 - gestión del catálogo de Grupos;
 - gestión del catálogo de Permisos;
-- cambio de contraseña;
 - recuperación de contraseña;
 - auditoría general.

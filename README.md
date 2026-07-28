@@ -88,6 +88,8 @@ Se encuentran implementados:
 - asignación y reemplazo transaccional de Grupos directos;
 - activación y desactivación lógica de Usuarios;
 - protección del Usuario autenticado y del último Administrador;
+- cambio seguro de contraseña por el propio Usuario;
+- cierre automático de sesión después del cambio;
 - módulo funcional de Clientes;
 - persistencia SQL de Clientes;
 - alta y modificación de Clientes;
@@ -118,13 +120,14 @@ Se encuentran implementados:
 - aprobación y cancelación de Rendiciones;
 - cálculo de total gastado vigente y saldo pendiente;
 - validación SQL de las migraciones `003` a `006`;
-- 462 pruebas automatizadas correctas;
+- 479 pruebas automatizadas correctas;
 - compilación con 0 advertencias y 0 errores;
-- validación manual de Usuarios, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
+- validación manual de Usuarios, Cambio de clave, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
 
 Permanecen pendientes:
 
 - gestión funcional de grupos y permisos;
+- recuperación de contraseña;
 - historial funcional completo del cliente;
 - auditoría general consultable;
 - reportes;

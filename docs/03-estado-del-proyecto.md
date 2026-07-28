@@ -4,7 +4,7 @@
 
 Etapa 4: módulos funcionales documentados.
 
-Bloque actual: cierre técnico y documental del módulo de Gestión de Usuarios.
+Bloque actual: cierre técnico y documental de Gestión de Usuarios y Cambio de clave.
 
 ## Rama de trabajo
 
@@ -12,8 +12,8 @@ Bloque actual: cierre técnico y documental del módulo de Gestión de Usuarios.
 
 ## Último cierre funcional publicado
 
-- Commit: `9460bf9`
-- Mensaje: `Completo interfaz de gestion de usuarios`
+- Commit: `74dec4b`
+- Mensaje: `Agrego interfaz de cambio de clave`
 
 La rama local se encuentra sincronizada con:
 
@@ -259,8 +259,8 @@ Ese formulario solo servía para comprobar la conexión inicial y ya no particip
 
 ### Pruebas
 
-- Totales: 462.
-- Correctas: 462.
+- Totales: 479.
+- Correctas: 479.
 - Fallidas: 0.
 
 Incluyen:
@@ -411,7 +411,6 @@ Se utilizan:
 - Gestión visual de usuarios.
 - Gestión visual de grupos.
 - Gestión visual de permisos.
-- Cambio de contraseña.
 - Recuperación de contraseña.
 - Historial funcional completo del Cliente.
 - Auditoría general consultable.
@@ -905,7 +904,7 @@ La interfaz permite:
 ### Validación técnica
 
 - compilación con 0 advertencias y 0 errores;
-- 462 pruebas automatizadas correctas;
+- 479 pruebas automatizadas correctas;
 - 0 pruebas fallidas;
 - pruebas unitarias de Domain y Application;
 - pruebas de integración real con SQL Server;
@@ -917,3 +916,89 @@ La interfaz permite:
 - `e13d291` — `Agrego casos de uso de usuarios`
 - `ad7772c` — `Agrego persistencia de usuarios`
 - `9460bf9` — `Completo interfaz de gestion de usuarios`
+
+## Cambio de clave del Usuario autenticado
+
+CUD11: Cambiar clave se encuentra implementado de extremo a extremo.
+
+### Domain
+
+Se incorporó:
+
+`Usuario.ActualizarCredenciales`
+
+La entidad valida y reemplaza:
+
+- hash;
+- salt;
+- iteraciones.
+
+Los arreglos se copian defensivamente y las credenciales anteriores se conservan cuando los datos nuevos son inválidos.
+
+### Application
+
+Se implementaron:
+
+- `CambiarClaveCommand`;
+- `IUsuarioClaveRepository`;
+- `CambiarClaveService`.
+
+El servicio valida:
+
+- sesión autenticada;
+- Usuario activo;
+- campos obligatorios;
+- contraseña nueva de al menos ocho caracteres;
+- confirmación;
+- contraseña actual;
+- disponibilidad persistente del Usuario.
+
+La operación no requiere un permiso administrativo porque cada Usuario modifica únicamente su propia contraseña.
+
+### Infrastructure
+
+Se implementó:
+
+`src/SIGEVIP.Infrastructure/Security/UsuarioClaveRepository.cs`
+
+La actualización ADO.NET modifica exclusivamente:
+
+- `PasswordHash`;
+- `PasswordSalt`;
+- `IteracionesPassword`.
+
+La operación exige que el Usuario continúe activo.
+
+No fue necesaria una migración nueva.
+
+### WinForms
+
+Se implementó:
+
+`src/SIGEVIP.WinForms/Forms/CambiarClaveForm.cs`
+
+El menú principal permite abrir el formulario a todo Usuario autenticado.
+
+Después de un cambio correcto:
+
+1. se informa el resultado;
+2. se cierra el formulario;
+3. se cierra la sesión;
+4. se vuelve al login.
+
+### Validación
+
+- 17 pruebas nuevas;
+- 479 pruebas totales;
+- 479 correctas;
+- 0 fallidas;
+- compilación con 0 advertencias y 0 errores;
+- validación manual aprobada;
+- ausencia de problemas visuales.
+
+### Commits
+
+- `1b920cc` — `Agrego cambio seguro de clave`
+- `74dec4b` — `Agrego interfaz de cambio de clave`
+
+CUD12: Recuperar clave permanece pendiente.

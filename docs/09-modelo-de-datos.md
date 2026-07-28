@@ -605,6 +605,59 @@ La protección administrativa comprueba la existencia de otro Usuario:
 
 Esta consulta respalda la regla que impide eliminar el último acceso administrativo.
 
+## Cambio persistente de clave
+
+CUD11 reutiliza el esquema de seguridad existente.
+
+No fue necesaria una migración nueva.
+
+La actualización se realiza sobre:
+
+`dbo.Usuario`
+
+Columnas modificadas:
+
+- `PasswordHash`;
+- `PasswordSalt`;
+- `IteracionesPassword`.
+
+Columnas no modificadas:
+
+- `IdUsuario`;
+- `IdPersona`;
+- `NombreUsuario`;
+- `Activo`.
+
+La sentencia exige:
+
+- `IdUsuario` coincidente;
+- `Activo = 1`.
+
+El repositorio utiliza:
+
+- consulta parametrizada;
+- hash binario;
+- salt binario;
+- iteraciones enteras;
+- control de filas afectadas.
+
+Si no se actualiza exactamente una fila, Application considera que el Usuario ya no se encuentra disponible.
+
+Las restricciones existentes garantizan:
+
+- hash obligatorio;
+- salt obligatorio;
+- longitudes válidas;
+- iteraciones mayores que cero.
+
+El cambio no altera:
+
+- `UsuarioGrupo`;
+- `GrupoPermiso`;
+- `GrupoGrupo`;
+- Persona;
+- permisos efectivos.
+
 ## Modelo relacional de Clientes
 
 ### Script de migración
