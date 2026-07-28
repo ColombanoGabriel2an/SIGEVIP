@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Domain.Entities;
 
 namespace SIGEVIP.Application.Usuarios
@@ -39,16 +40,20 @@ namespace SIGEVIP.Application.Usuarios
 
         int Insertar(
             Usuario usuario,
-            IReadOnlyCollection<int> idsGrupos);
+            IReadOnlyCollection<int> idsGrupos,
+            AuditoriaRegistro auditoria);
 
         void Actualizar(
             Usuario usuario,
-            IReadOnlyCollection<int> idsGrupos);
+            IReadOnlyCollection<int> idsGrupos,
+            AuditoriaRegistro auditoria);
 
         void Activar(
-            int idUsuario);
+            int idUsuario,
+            AuditoriaRegistro auditoria);
 
         void Desactivar(
-            int idUsuario);
+            int idUsuario,
+            AuditoriaRegistro auditoria);
     }
 }

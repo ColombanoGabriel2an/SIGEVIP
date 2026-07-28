@@ -4,9 +4,11 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Usuarios;
 using SIGEVIP.Domain.Entities;
 using SIGEVIP.Domain.Exceptions;
+using SIGEVIP.Infrastructure.Auditoria;
 using SIGEVIP.Infrastructure.Data;
 using SIGEVIP.Infrastructure.Exceptions;
 
@@ -874,6 +876,34 @@ SELECT
             Usuario usuario,
             IReadOnlyCollection<int> idsGrupos)
         {
+            return InsertarInterno(
+                usuario,
+                idsGrupos,
+                null);
+        }
+
+        public int Insertar(
+            Usuario usuario,
+            IReadOnlyCollection<int> idsGrupos,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            return InsertarInterno(
+                usuario,
+                idsGrupos,
+                auditoria);
+        }
+
+        private int InsertarInterno(
+            Usuario usuario,
+            IReadOnlyCollection<int> idsGrupos,
+            AuditoriaRegistro auditoria)
+        {
             if (usuario == null)
             {
                 throw new ArgumentNullException(
@@ -930,6 +960,15 @@ SELECT
                                 idUsuario,
                                 ids);
 
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria.ConIdEntidad(
+                                        idUsuario));
+                            }
+
                             transaction.Commit();
 
                             return idUsuario;
@@ -948,8 +987,13 @@ SELECT
             {
                 throw;
             }
+            catch (PersistenciaException)
+            {
+                throw;
+            }
             catch (SqlException exception)
-                when (EsErrorDuplicado(exception))
+                when (EsErrorDuplicado(
+                    exception))
             {
                 throw CrearErrorDuplicado(
                     exception,
@@ -972,6 +1016,34 @@ SELECT
         public void Actualizar(
             Usuario usuario,
             IReadOnlyCollection<int> idsGrupos)
+        {
+            ActualizarInterno(
+                usuario,
+                idsGrupos,
+                null);
+        }
+
+        public void Actualizar(
+            Usuario usuario,
+            IReadOnlyCollection<int> idsGrupos,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarInterno(
+                usuario,
+                idsGrupos,
+                auditoria);
+        }
+
+        private void ActualizarInterno(
+            Usuario usuario,
+            IReadOnlyCollection<int> idsGrupos,
+            AuditoriaRegistro auditoria)
         {
             if (usuario == null)
             {
@@ -1031,6 +1103,14 @@ SELECT
                                 usuario.IdUsuario,
                                 ids);
 
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
                             transaction.Commit();
                         }
                         catch
@@ -1047,8 +1127,13 @@ SELECT
             {
                 throw;
             }
+            catch (PersistenciaException)
+            {
+                throw;
+            }
             catch (SqlException exception)
-                when (EsErrorDuplicado(exception))
+                when (EsErrorDuplicado(
+                    exception))
             {
                 throw CrearErrorDuplicado(
                     exception,
@@ -1071,22 +1156,57 @@ SELECT
         public void Activar(
             int idUsuario)
         {
-            ActualizarEstado(
+            ActualizarEstadoInterno(
                 idUsuario,
-                true);
+                true,
+                null);
+        }
+
+        public void Activar(
+            int idUsuario,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarEstadoInterno(
+                idUsuario,
+                true,
+                auditoria);
         }
 
         public void Desactivar(
             int idUsuario)
         {
-            ActualizarEstado(
+            ActualizarEstadoInterno(
                 idUsuario,
-                false);
+                false,
+                null);
         }
 
-        private void ActualizarEstado(
+        public void Desactivar(
             int idUsuario,
-            bool activo)
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarEstadoInterno(
+                idUsuario,
+                false,
+                auditoria);
+        }
+
+        private void ActualizarEstadoInterno(
+            int idUsuario,
+            bool activo,
+            AuditoriaRegistro auditoria)
         {
             ValidarIdUsuario(
                 idUsuario);
@@ -1101,38 +1221,73 @@ WHERE IdUsuario = @IdUsuario;";
                 using (
                     SqlConnection connection =
                         _connectionFactory.Create())
-                using (
-                    SqlCommand command =
-                        new SqlCommand(
-                            sql,
-                            connection))
                 {
-                    command.Parameters.Add(
-                        "@Activo",
-                        SqlDbType.Bit).Value =
-                            activo;
-
-                    command.Parameters.Add(
-                        "@IdUsuario",
-                        SqlDbType.Int).Value =
-                            idUsuario;
-
                     connection.Open();
 
-                    int filas =
-                        command.ExecuteNonQuery();
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sql,
+                                        connection,
+                                        transaction))
+                            {
+                                command.Parameters.Add(
+                                    "@Activo",
+                                    SqlDbType.Bit).Value =
+                                        activo;
 
-                    ExigirUnaFilaUsuario(
-                        filas,
-                        activo
-                            ? "activar"
-                            : "desactivar");
+                                command.Parameters.Add(
+                                    "@IdUsuario",
+                                    SqlDbType.Int).Value =
+                                        idUsuario;
+
+                                ExigirUnaFilaUsuario(
+                                    command.ExecuteNonQuery(),
+                                    activo
+                                        ? "activar"
+                                        : "desactivar");
+                            }
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
                 }
+            }
+            catch (PersistenciaException)
+            {
+                throw;
             }
             catch (SqlException exception)
             {
                 throw CrearErrorPersistencia(
                     "No fue posible actualizar el estado del usuario.",
+                    exception);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de estado del usuario no pudo completarse.",
                     exception);
             }
         }

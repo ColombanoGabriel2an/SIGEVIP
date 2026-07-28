@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Application.Usuarios;
@@ -315,6 +316,30 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 "Clave123",
                 hasher.PasswordRecibido);
+
+            Assert.IsNotNull(
+                repository.AuditoriaInsertada);
+
+            Assert.AreEqual(
+                "Seguridad",
+                repository.AuditoriaInsertada.Modulo);
+
+            Assert.AreEqual(
+                "Alta",
+                repository.AuditoriaInsertada.Accion);
+
+            Assert.AreEqual(
+                "Usuario",
+                repository.AuditoriaInsertada.Entidad);
+
+            Assert.IsNull(
+                repository.AuditoriaInsertada.IdEntidad);
+
+            Assert.IsFalse(
+                repository.AuditoriaInsertada
+                    .Descripcion
+                    .Contains(
+                        "Clave123"));
         }
 
         [TestMethod]
@@ -395,6 +420,21 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 "usuario.actual",
                 repository.UsuarioActualizado.NombreUsuario);
+
+            Assert.IsNotNull(
+                repository.AuditoriaActualizacion);
+
+            Assert.AreEqual(
+                "Modificacion",
+                repository
+                    .AuditoriaActualizacion
+                    .Accion);
+
+            Assert.AreEqual(
+                10,
+                repository
+                    .AuditoriaActualizacion
+                    .IdEntidad);
         }
 
         [TestMethod]
@@ -586,6 +626,15 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 10,
                 repository.IdUsuarioDesactivado);
+
+            Assert.IsNotNull(
+                repository.AuditoriaDesactivacion);
+
+            Assert.AreEqual(
+                "Desactivacion",
+                repository
+                    .AuditoriaDesactivacion
+                    .Accion);
         }
 
         [TestMethod]
@@ -614,6 +663,15 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 10,
                 repository.IdUsuarioActivado);
+
+            Assert.IsNotNull(
+                repository.AuditoriaActivacion);
+
+            Assert.AreEqual(
+                "Activacion",
+                repository
+                    .AuditoriaActivacion
+                    .Accion);
         }
 
         [TestMethod]
@@ -962,6 +1020,30 @@ namespace SIGEVIP.Tests.Application
                 private set;
             }
 
+            public AuditoriaRegistro AuditoriaInsertada
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaActualizacion
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaActivacion
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaDesactivacion
+            {
+                get;
+                private set;
+            }
+
             public IReadOnlyCollection<int>
                 IdsGruposInsertados
             {
@@ -1099,40 +1181,60 @@ namespace SIGEVIP.Tests.Application
 
             public int Insertar(
                 Usuario usuario,
-                IReadOnlyCollection<int> idsGrupos)
+                IReadOnlyCollection<int> idsGrupos,
+                AuditoriaRegistro auditoria)
             {
                 UsuarioInsertado =
                     usuario;
 
                 IdsGruposInsertados =
-                    idsGrupos.ToList().AsReadOnly();
+                    idsGrupos
+                        .ToList()
+                        .AsReadOnly();
+
+                AuditoriaInsertada =
+                    auditoria;
 
                 return IdInsertado;
             }
 
             public void Actualizar(
                 Usuario usuario,
-                IReadOnlyCollection<int> idsGrupos)
+                IReadOnlyCollection<int> idsGrupos,
+                AuditoriaRegistro auditoria)
             {
                 UsuarioActualizado =
                     usuario;
 
                 IdsGruposActualizados =
-                    idsGrupos.ToList().AsReadOnly();
+                    idsGrupos
+                        .ToList()
+                        .AsReadOnly();
+
+                AuditoriaActualizacion =
+                    auditoria;
             }
 
             public void Activar(
-                int idUsuario)
+                int idUsuario,
+                AuditoriaRegistro auditoria)
             {
                 IdUsuarioActivado =
                     idUsuario;
+
+                AuditoriaActivacion =
+                    auditoria;
             }
 
             public void Desactivar(
-                int idUsuario)
+                int idUsuario,
+                AuditoriaRegistro auditoria)
             {
                 IdUsuarioDesactivado =
                     idUsuario;
+
+                AuditoriaDesactivacion =
+                    auditoria;
             }
         }
     }

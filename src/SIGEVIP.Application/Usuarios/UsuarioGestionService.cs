@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Domain.Entities;
@@ -17,6 +18,12 @@ namespace SIGEVIP.Application.Usuarios
             "ADMINISTRADOR_GENERAL";
 
         public const int LongitudMinimaPassword = 8;
+
+        private const string ModuloAuditoria =
+            "Seguridad";
+
+        private const string EntidadAuditoria =
+            "Usuario";
 
         private readonly IUsuarioGestionRepository
             _usuarioRepository;
@@ -186,9 +193,18 @@ namespace SIGEVIP.Application.Usuarios
             usuario.ReemplazarGrupos(
                 grupos);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Alta",
+                    null,
+                    "Se registró el usuario " +
+                    usuario.NombreUsuario +
+                    ".");
+
             return _usuarioRepository.Insertar(
                 usuario,
-                idsGrupos.AsReadOnly());
+                idsGrupos.AsReadOnly(),
+                auditoria);
         }
 
         public void Modificar(
@@ -269,9 +285,18 @@ namespace SIGEVIP.Application.Usuarios
             usuario.ReemplazarGrupos(
                 gruposNuevos);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Modificacion",
+                    usuario.IdUsuario,
+                    "Se modificaron el nombre y los grupos del usuario " +
+                    usuario.NombreUsuario +
+                    ".");
+
             _usuarioRepository.Actualizar(
                 usuario,
-                idsGrupos.AsReadOnly());
+                idsGrupos.AsReadOnly(),
+                auditoria);
         }
 
         public void Activar(
@@ -286,8 +311,17 @@ namespace SIGEVIP.Application.Usuarios
 
             usuario.Activar();
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Activacion",
+                    idUsuario,
+                    "Se activó el usuario " +
+                    usuario.NombreUsuario +
+                    ".");
+
             _usuarioRepository.Activar(
-                idUsuario);
+                idUsuario,
+                auditoria);
         }
 
         public void Desactivar(
@@ -319,8 +353,35 @@ namespace SIGEVIP.Application.Usuarios
 
             usuario.Desactivar();
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Desactivacion",
+                    idUsuario,
+                    "Se desactivó el usuario " +
+                    usuario.NombreUsuario +
+                    ".");
+
             _usuarioRepository.Desactivar(
-                idUsuario);
+                idUsuario,
+                auditoria);
+        }
+
+        private AuditoriaRegistro CrearAuditoria(
+            string accion,
+            int? idEntidad,
+            string descripcion)
+        {
+            Usuario usuarioActual =
+                _sesionActual.UsuarioActual;
+
+            return new AuditoriaRegistro(
+                usuarioActual.IdUsuario,
+                usuarioActual.NombreUsuario,
+                ModuloAuditoria,
+                accion,
+                EntidadAuditoria,
+                idEntidad,
+                descripcion);
         }
 
         private Usuario ObtenerUsuarioExistente(

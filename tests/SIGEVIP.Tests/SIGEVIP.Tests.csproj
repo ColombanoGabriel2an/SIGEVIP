@@ -98,6 +98,7 @@
     <Compile Include="Integration\ViajeVisitaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViajeViaticoRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioAutenticacionRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\UsuarioAuditoriaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioGestionRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioClaveRepositoryIntegrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
