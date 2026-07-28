@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Domain.Entities;
@@ -26,6 +27,12 @@ namespace SIGEVIP.Application.Permisos
         private const int LongitudMaximaCodigo = 100;
         private const int LongitudMaximaNombre = 150;
         private const int LongitudMaximaDescripcion = 500;
+
+        private const string ModuloAuditoria =
+            "Seguridad";
+
+        private const string EntidadAuditoria =
+            "Permiso";
 
         private readonly IPermisoGestionRepository
             _permisoRepository;
@@ -133,8 +140,17 @@ namespace SIGEVIP.Application.Permisos
                     nombre,
                     descripcion);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Alta",
+                    null,
+                    "Se registró el permiso " +
+                    permiso.Codigo +
+                    ".");
+
             return _permisoRepository.Insertar(
-                permiso);
+                permiso,
+                auditoria);
         }
 
         public void Modificar(
@@ -173,8 +189,17 @@ namespace SIGEVIP.Application.Permisos
                 nombre,
                 descripcion);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Modificacion",
+                    permiso.IdPermiso,
+                    "Se modificaron el nombre y la descripción del permiso " +
+                    permiso.Codigo +
+                    ".");
+
             _permisoRepository.Actualizar(
-                permiso);
+                permiso,
+                auditoria);
         }
 
         public void Activar(
@@ -190,8 +215,17 @@ namespace SIGEVIP.Application.Permisos
 
             permiso.Activar();
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Activacion",
+                    idPermiso,
+                    "Se activó el permiso " +
+                    permiso.Codigo +
+                    ".");
+
             _permisoRepository.Activar(
-                idPermiso);
+                idPermiso,
+                auditoria);
         }
 
         public void Desactivar(
@@ -216,8 +250,17 @@ namespace SIGEVIP.Application.Permisos
 
             permiso.Desactivar();
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Desactivacion",
+                    idPermiso,
+                    "Se desactivó el permiso " +
+                    permiso.Codigo +
+                    ".");
+
             _permisoRepository.Desactivar(
-                idPermiso);
+                idPermiso,
+                auditoria);
         }
 
         public static string NormalizarCodigo(
@@ -297,6 +340,24 @@ namespace SIGEVIP.Application.Permisos
             }
 
             return codigoNormalizado;
+        }
+
+        private AuditoriaRegistro CrearAuditoria(
+            string accion,
+            int? idEntidad,
+            string descripcion)
+        {
+            Usuario usuarioActual =
+                _sesionActual.UsuarioActual;
+
+            return new AuditoriaRegistro(
+                usuarioActual.IdUsuario,
+                usuarioActual.NombreUsuario,
+                ModuloAuditoria,
+                accion,
+                EntidadAuditoria,
+                idEntidad,
+                descripcion);
         }
 
         private Permiso ObtenerPermisoExistente(

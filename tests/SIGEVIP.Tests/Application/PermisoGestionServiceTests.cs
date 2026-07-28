@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Permisos;
 using SIGEVIP.Application.Security;
@@ -319,6 +320,24 @@ namespace SIGEVIP.Tests.Application
 
             Assert.IsTrue(
                 repository.PermisoInsertado.Activo);
+
+            Assert.IsNotNull(
+                repository.AuditoriaInsertada);
+
+            Assert.AreEqual(
+                "Seguridad",
+                repository.AuditoriaInsertada.Modulo);
+
+            Assert.AreEqual(
+                "Alta",
+                repository.AuditoriaInsertada.Accion);
+
+            Assert.AreEqual(
+                "Permiso",
+                repository.AuditoriaInsertada.Entidad);
+
+            Assert.IsNull(
+                repository.AuditoriaInsertada.IdEntidad);
         }
 
         [TestMethod]
@@ -402,6 +421,21 @@ namespace SIGEVIP.Tests.Application
                 repository
                     .PermisoActualizado
                     .Descripcion);
+
+            Assert.IsNotNull(
+                repository.AuditoriaActualizacion);
+
+            Assert.AreEqual(
+                "Modificacion",
+                repository
+                    .AuditoriaActualizacion
+                    .Accion);
+
+            Assert.AreEqual(
+                10,
+                repository
+                    .AuditoriaActualizacion
+                    .IdEntidad);
         }
 
         [TestMethod]
@@ -471,6 +505,15 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 10,
                 repository.IdPermisoActivado);
+
+            Assert.IsNotNull(
+                repository.AuditoriaActivacion);
+
+            Assert.AreEqual(
+                "Activacion",
+                repository
+                    .AuditoriaActivacion
+                    .Accion);
         }
 
         [TestMethod]
@@ -494,6 +537,15 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 10,
                 repository.IdPermisoDesactivado);
+
+            Assert.IsNotNull(
+                repository.AuditoriaDesactivacion);
+
+            Assert.AreEqual(
+                "Desactivacion",
+                repository
+                    .AuditoriaDesactivacion
+                    .Accion);
         }
 
         [TestMethod]
@@ -791,6 +843,30 @@ namespace SIGEVIP.Tests.Application
                 private set;
             }
 
+            public AuditoriaRegistro AuditoriaInsertada
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaActualizacion
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaActivacion
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaDesactivacion
+            {
+                get;
+                private set;
+            }
+
             public int? IdPermisoActivado
             {
                 get;
@@ -856,33 +932,49 @@ namespace SIGEVIP.Tests.Application
             }
 
             public int Insertar(
-                Permiso permiso)
+                Permiso permiso,
+                AuditoriaRegistro auditoria)
             {
                 PermisoInsertado =
                     permiso;
+
+                AuditoriaInsertada =
+                    auditoria;
 
                 return IdInsertado;
             }
 
             public void Actualizar(
-                Permiso permiso)
+                Permiso permiso,
+                AuditoriaRegistro auditoria)
             {
                 PermisoActualizado =
                     permiso;
+
+                AuditoriaActualizacion =
+                    auditoria;
             }
 
             public void Activar(
-                int idPermiso)
+                int idPermiso,
+                AuditoriaRegistro auditoria)
             {
                 IdPermisoActivado =
                     idPermiso;
+
+                AuditoriaActivacion =
+                    auditoria;
             }
 
             public void Desactivar(
-                int idPermiso)
+                int idPermiso,
+                AuditoriaRegistro auditoria)
             {
                 IdPermisoDesactivado =
                     idPermiso;
+
+                AuditoriaDesactivacion =
+                    auditoria;
             }
         }
     }

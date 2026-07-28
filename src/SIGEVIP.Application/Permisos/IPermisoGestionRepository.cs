@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Domain.Entities;
 
 namespace SIGEVIP.Application.Permisos
@@ -20,15 +21,19 @@ namespace SIGEVIP.Application.Permisos
             int? idPermisoExcluido);
 
         int Insertar(
-            Permiso permiso);
+            Permiso permiso,
+            AuditoriaRegistro auditoria);
 
         void Actualizar(
-            Permiso permiso);
+            Permiso permiso,
+            AuditoriaRegistro auditoria);
 
         void Activar(
-            int idPermiso);
+            int idPermiso,
+            AuditoriaRegistro auditoria);
 
         void Desactivar(
-            int idPermiso);
+            int idPermiso,
+            AuditoriaRegistro auditoria);
     }
 }

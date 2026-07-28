@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Permisos;
 using SIGEVIP.Domain.Entities;
 using SIGEVIP.Domain.Exceptions;
+using SIGEVIP.Infrastructure.Auditoria;
 using SIGEVIP.Infrastructure.Data;
 using SIGEVIP.Infrastructure.Exceptions;
 
@@ -327,6 +329,30 @@ SELECT
         public int Insertar(
             Permiso permiso)
         {
+            return InsertarInterno(
+                permiso,
+                null);
+        }
+
+        public int Insertar(
+            Permiso permiso,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            return InsertarInterno(
+                permiso,
+                auditoria);
+        }
+
+        private int InsertarInterno(
+            Permiso permiso,
+            AuditoriaRegistro auditoria)
+        {
             if (permiso == null)
             {
                 throw new ArgumentNullException(
@@ -360,6 +386,15 @@ SELECT
                                     transaction,
                                     permiso);
 
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria.ConIdEntidad(
+                                        idPermiso));
+                            }
+
                             transaction.Commit();
 
                             return idPermiso;
@@ -375,6 +410,10 @@ SELECT
                 }
             }
             catch (ReglaNegocioException)
+            {
+                throw;
+            }
+            catch (PersistenciaException)
             {
                 throw;
             }
@@ -402,6 +441,30 @@ SELECT
 
         public void Actualizar(
             Permiso permiso)
+        {
+            ActualizarInterno(
+                permiso,
+                null);
+        }
+
+        public void Actualizar(
+            Permiso permiso,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarInterno(
+                permiso,
+                auditoria);
+        }
+
+        private void ActualizarInterno(
+            Permiso permiso,
+            AuditoriaRegistro auditoria)
         {
             if (permiso == null)
             {
@@ -432,6 +495,14 @@ SELECT
                                 transaction,
                                 permiso);
 
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
                             transaction.Commit();
                         }
                         catch
@@ -443,6 +514,10 @@ SELECT
                         }
                     }
                 }
+            }
+            catch (PersistenciaException)
+            {
+                throw;
             }
             catch (SqlException exception)
             {
@@ -461,22 +536,57 @@ SELECT
         public void Activar(
             int idPermiso)
         {
-            ActualizarEstado(
+            ActualizarEstadoInterno(
                 idPermiso,
-                true);
+                true,
+                null);
+        }
+
+        public void Activar(
+            int idPermiso,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarEstadoInterno(
+                idPermiso,
+                true,
+                auditoria);
         }
 
         public void Desactivar(
             int idPermiso)
         {
-            ActualizarEstado(
+            ActualizarEstadoInterno(
                 idPermiso,
-                false);
+                false,
+                null);
         }
 
-        private void ActualizarEstado(
+        public void Desactivar(
             int idPermiso,
-            bool activo)
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarEstadoInterno(
+                idPermiso,
+                false,
+                auditoria);
+        }
+
+        private void ActualizarEstadoInterno(
+            int idPermiso,
+            bool activo,
+            AuditoriaRegistro auditoria)
         {
             ValidarIdPermiso(
                 idPermiso);
@@ -491,38 +601,73 @@ WHERE IdPermiso = @IdPermiso;";
                 using (
                     SqlConnection connection =
                         _connectionFactory.Create())
-                using (
-                    SqlCommand command =
-                        new SqlCommand(
-                            sql,
-                            connection))
                 {
-                    command.Parameters.Add(
-                        "@Activo",
-                        SqlDbType.Bit).Value =
-                            activo;
-
-                    command.Parameters.Add(
-                        "@IdPermiso",
-                        SqlDbType.Int).Value =
-                            idPermiso;
-
                     connection.Open();
 
-                    int filas =
-                        command.ExecuteNonQuery();
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sql,
+                                        connection,
+                                        transaction))
+                            {
+                                command.Parameters.Add(
+                                    "@Activo",
+                                    SqlDbType.Bit).Value =
+                                        activo;
 
-                    ExigirUnaFilaPermiso(
-                        filas,
-                        activo
-                            ? "activar"
-                            : "desactivar");
+                                command.Parameters.Add(
+                                    "@IdPermiso",
+                                    SqlDbType.Int).Value =
+                                        idPermiso;
+
+                                ExigirUnaFilaPermiso(
+                                    command.ExecuteNonQuery(),
+                                    activo
+                                        ? "activar"
+                                        : "desactivar");
+                            }
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
                 }
+            }
+            catch (PersistenciaException)
+            {
+                throw;
             }
             catch (SqlException exception)
             {
                 throw CrearErrorPersistencia(
                     "No fue posible actualizar el estado del permiso.",
+                    exception);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de estado del permiso no pudo completarse.",
                     exception);
             }
         }
