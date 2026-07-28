@@ -106,6 +106,9 @@ namespace SIGEVIP.WinForms.Forms
             ViaticosSolicitados;
 
         public event EventHandler
+            UsuariosSolicitados;
+
+        public event EventHandler
             CerrarSesionSolicitada;
 
         public event EventHandler
@@ -673,8 +676,12 @@ namespace SIGEVIP.WinForms.Forms
             object sender,
             EventArgs e)
         {
-            MostrarModuloPendiente(
-                "Usuarios");
+            EventHandler handler =
+                UsuariosSolicitados;
+
+            handler?.Invoke(
+                this,
+                EventArgs.Empty);
         }
 
         private void BtnGrupos_Click(

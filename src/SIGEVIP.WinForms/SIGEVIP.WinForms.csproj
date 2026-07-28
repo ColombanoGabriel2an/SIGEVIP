@@ -86,6 +86,14 @@
                         <SubType>Form</SubType>
                 </Compile>
 
+                <Compile Include="Forms\UsuarioEditForm.cs">
+                        <SubType>Form</SubType>
+                </Compile>
+
+                <Compile Include="Forms\UsuariosForm.cs">
+                        <SubType>Form</SubType>
+                </Compile>
+
                 <Compile Include="Forms\ViajeDetalleForm.cs">
                         <SubType>Form</SubType>
                 </Compile>

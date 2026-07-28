@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using SIGEVIP.Application.Clientes;
 using SIGEVIP.Application.Rendiciones;
 using SIGEVIP.Application.Security;
+using SIGEVIP.Application.Usuarios;
 using SIGEVIP.Application.Viajes;
 using SIGEVIP.Application.Viaticos;
 using SIGEVIP.Application.Visitas;
@@ -37,6 +38,9 @@ namespace SIGEVIP.WinForms.Navigation
         private readonly RendicionService
             _rendicionService;
 
+        private readonly UsuarioGestionService
+            _usuarioGestionService;
+
         private readonly ISesionActual
             _sesionActual;
 
@@ -53,6 +57,7 @@ namespace SIGEVIP.WinForms.Navigation
             VisitaService visitaService,
             ViaticoService viaticoService,
             RendicionService rendicionService,
+            UsuarioGestionService usuarioGestionService,
             ISesionActual sesionActual)
         {
             _autenticacionService =
@@ -94,6 +99,11 @@ namespace SIGEVIP.WinForms.Navigation
                 rendicionService
                 ?? throw new ArgumentNullException(
                     nameof(rendicionService));
+
+            _usuarioGestionService =
+                usuarioGestionService
+                ?? throw new ArgumentNullException(
+                    nameof(usuarioGestionService));
 
             _sesionActual =
                 sesionActual
@@ -208,6 +218,9 @@ namespace SIGEVIP.WinForms.Navigation
             _mainForm.ViaticosSolicitados +=
                 MainForm_ViaticosSolicitados;
 
+            _mainForm.UsuariosSolicitados +=
+                MainForm_UsuariosSolicitados;
+
             _mainForm.CerrarSesionSolicitada +=
                 MainForm_CerrarSesionSolicitada;
 
@@ -307,6 +320,27 @@ namespace SIGEVIP.WinForms.Navigation
             }
         }
 
+        private void MainForm_UsuariosSolicitados(
+            object sender,
+            EventArgs e)
+        {
+            if (_mainForm == null)
+            {
+                return;
+            }
+
+            using (
+                var formulario =
+                    new UsuariosForm(
+                        _usuarioGestionService,
+                        _sesionActual,
+                        _autorizacionService))
+            {
+                formulario.ShowDialog(
+                    _mainForm);
+            }
+        }
+
         private void MainForm_CerrarSesionSolicitada(
             object sender,
             EventArgs e)
@@ -373,6 +407,9 @@ namespace SIGEVIP.WinForms.Navigation
 
             _mainForm.ViaticosSolicitados -=
                 MainForm_ViaticosSolicitados;
+
+            _mainForm.UsuariosSolicitados -=
+                MainForm_UsuariosSolicitados;
 
             _mainForm.CerrarSesionSolicitada -=
                 MainForm_CerrarSesionSolicitada;
