@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Domain.Entities;
@@ -19,6 +20,12 @@ namespace SIGEVIP.Application.Viajes
 
         public const string PermisoCancelar =
             "VIAJE_CANCELAR";
+
+        private const string ModuloAuditoria =
+            "Viajes";
+
+        private const string EntidadAuditoria =
+            "Viaje";
 
         private readonly IViajeRepository
             _viajeRepository;
@@ -129,8 +136,15 @@ namespace SIGEVIP.Application.Viajes
             viaje.ReemplazarParticipantes(
                 participantes);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Alta",
+                    null,
+                    "Se registró un viaje y sus participantes.");
+
             return _viajeRepository.Insertar(
-                viaje);
+                viaje,
+                auditoria);
         }
 
         public void Modificar(
@@ -170,8 +184,15 @@ namespace SIGEVIP.Application.Viajes
                 montoAnticipado,
                 participantes);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Modificacion",
+                    viaje.IdViaje,
+                    "Se modificaron los datos y participantes del viaje.");
+
             _viajeRepository.Actualizar(
-                viaje);
+                viaje,
+                auditoria);
         }
 
         public void Cancelar(
@@ -195,8 +216,33 @@ namespace SIGEVIP.Application.Viajes
 
             viaje.Cancelar();
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Cancelacion",
+                    viaje.IdViaje,
+                    "Se canceló el viaje.");
+
             _viajeRepository.Cancelar(
-                viaje);
+                viaje,
+                auditoria);
+        }
+
+        private AuditoriaRegistro CrearAuditoria(
+            string accion,
+            int? idEntidad,
+            string descripcion)
+        {
+            Usuario usuarioActual =
+                _sesionActual.UsuarioActual;
+
+            return new AuditoriaRegistro(
+                usuarioActual.IdUsuario,
+                usuarioActual.NombreUsuario,
+                ModuloAuditoria,
+                accion,
+                EntidadAuditoria,
+                idEntidad,
+                descripcion);
         }
 
         private IReadOnlyCollection<Persona>

@@ -91,6 +91,7 @@
     <Compile Include="Integration\JerarquiaGruposRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\PermisoAuditoriaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\PermisoGestionRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\ViajeAuditoriaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViajeRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\VisitaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\PersonaConsultaViaticoRepositoryIntegrationTests.cs" />

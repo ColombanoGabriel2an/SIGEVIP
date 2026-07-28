@@ -680,18 +680,21 @@ namespace SIGEVIP.Tests.Application
             }
 
             public int Insertar(
-                Viaje viaje)
+                Viaje viaje,
+                SIGEVIP.Application.Auditoria.AuditoriaRegistro auditoria)
             {
                 return 0;
             }
 
             public void Actualizar(
-                Viaje viaje)
+                Viaje viaje,
+                SIGEVIP.Application.Auditoria.AuditoriaRegistro auditoria)
             {
             }
 
             public void Cancelar(
-                Viaje viaje)
+                Viaje viaje,
+                SIGEVIP.Application.Auditoria.AuditoriaRegistro auditoria)
             {
             }
         }

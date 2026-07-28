@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Viajes;
 using SIGEVIP.Domain.Entities;
 using SIGEVIP.Domain.Enums;
 using SIGEVIP.Domain.Exceptions;
+using SIGEVIP.Infrastructure.Auditoria;
 using SIGEVIP.Infrastructure.Data;
 using SIGEVIP.Infrastructure.Exceptions;
 
@@ -334,6 +336,30 @@ ORDER BY
         public int Insertar(
             Viaje viaje)
         {
+            return InsertarInterno(
+                viaje,
+                null);
+        }
+
+        public int Insertar(
+            Viaje viaje,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            return InsertarInterno(
+                viaje,
+                auditoria);
+        }
+
+        private int InsertarInterno(
+            Viaje viaje,
+            AuditoriaRegistro auditoria)
+        {
             ValidarViajePersistible(
                 viaje,
                 false);
@@ -389,8 +415,7 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                                 idViaje =
                                     Convert.ToInt32(
-                                        command
-                                            .ExecuteScalar());
+                                        command.ExecuteScalar());
                             }
 
                             InsertarParticipantes(
@@ -399,16 +424,23 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                 idViaje,
                                 viaje.Participantes);
 
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria.ConIdEntidad(
+                                        idViaje));
+                            }
+
                             transaction.Commit();
 
                             return idViaje;
                         }
                         catch
                         {
-                            if (transaction.Connection != null)
-                            {
-                                transaction.Rollback();
-                            }
+                            RevertirSiCorresponde(
+                                transaction);
 
                             throw;
                         }
@@ -425,10 +457,40 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     "No fue posible registrar el viaje.",
                     exception);
             }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de registro del viaje no pudo completarse.",
+                    exception);
+            }
         }
 
         public void Actualizar(
             Viaje viaje)
+        {
+            ActualizarInterno(
+                viaje,
+                null);
+        }
+
+        public void Actualizar(
+            Viaje viaje,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarInterno(
+                viaje,
+                auditoria);
+        }
+
+        private void ActualizarInterno(
+            Viaje viaje,
+            AuditoriaRegistro auditoria)
         {
             ValidarViajePersistible(
                 viaje,
@@ -480,11 +542,8 @@ WHERE IdViaje = @IdViaje;";
                                     SqlDbType.Int).Value =
                                         viaje.IdViaje;
 
-                                int filas =
-                                    command.ExecuteNonQuery();
-
                                 ExigirUnaFila(
-                                    filas,
+                                    command.ExecuteNonQuery(),
                                     "actualizar");
                             }
 
@@ -509,14 +568,20 @@ WHERE IdViaje = @IdViaje;";
                                 viaje.IdViaje,
                                 viaje.Participantes);
 
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
                             transaction.Commit();
                         }
                         catch
                         {
-                            if (transaction.Connection != null)
-                            {
-                                transaction.Rollback();
-                            }
+                            RevertirSiCorresponde(
+                                transaction);
 
                             throw;
                         }
@@ -533,10 +598,40 @@ WHERE IdViaje = @IdViaje;";
                     "No fue posible actualizar el viaje.",
                     exception);
             }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de actualización del viaje no pudo completarse.",
+                    exception);
+            }
         }
 
         public void Cancelar(
             Viaje viaje)
+        {
+            CancelarInterno(
+                viaje,
+                null);
+        }
+
+        public void Cancelar(
+            Viaje viaje,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            CancelarInterno(
+                viaje,
+                auditoria);
+        }
+
+        private void CancelarInterno(
+            Viaje viaje,
+            AuditoriaRegistro auditoria)
         {
             if (viaje == null)
             {
@@ -577,31 +672,56 @@ WHERE
                 using (
                     SqlConnection connection =
                         _connectionFactory.Create())
-                using (
-                    SqlCommand command =
-                        new SqlCommand(
-                            sql,
-                            connection))
                 {
-                    command.Parameters.Add(
-                        "@EstadoViaje",
-                        SqlDbType.TinyInt).Value =
-                            Convert.ToByte(
-                                viaje.EstadoActual);
-
-                    command.Parameters.Add(
-                        "@IdViaje",
-                        SqlDbType.Int).Value =
-                            viaje.IdViaje;
-
                     connection.Open();
 
-                    int filas =
-                        command.ExecuteNonQuery();
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sql,
+                                        connection,
+                                        transaction))
+                            {
+                                command.Parameters.Add(
+                                    "@EstadoViaje",
+                                    SqlDbType.TinyInt).Value =
+                                        Convert.ToByte(
+                                            viaje.EstadoActual);
 
-                    ExigirUnaFila(
-                        filas,
-                        "cancelar");
+                                command.Parameters.Add(
+                                    "@IdViaje",
+                                    SqlDbType.Int).Value =
+                                        viaje.IdViaje;
+
+                                ExigirUnaFila(
+                                    command.ExecuteNonQuery(),
+                                    "cancelar");
+                            }
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
                 }
             }
             catch (PersistenciaException)
@@ -612,6 +732,12 @@ WHERE
             {
                 throw CrearErrorPersistencia(
                     "No fue posible cancelar el viaje.",
+                    exception);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de cancelación del viaje no pudo completarse.",
                     exception);
             }
         }
@@ -1417,6 +1543,16 @@ VALUES
 
             return reader.GetString(
                 ordinal);
+        }
+
+        private static void RevertirSiCorresponde(
+            SqlTransaction transaction)
+        {
+            if (transaction != null &&
+                transaction.Connection != null)
+            {
+                transaction.Rollback();
+            }
         }
 
         private static PersistenciaException

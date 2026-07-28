@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Application.Viajes;
@@ -148,6 +149,24 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 1,
                 viajes.Insertado.Participantes.Count);
+
+            Assert.IsNotNull(
+                viajes.AuditoriaInsertada);
+
+            Assert.AreEqual(
+                "Viajes",
+                viajes.AuditoriaInsertada.Modulo);
+
+            Assert.AreEqual(
+                "Alta",
+                viajes.AuditoriaInsertada.Accion);
+
+            Assert.AreEqual(
+                "Viaje",
+                viajes.AuditoriaInsertada.Entidad);
+
+            Assert.IsNull(
+                viajes.AuditoriaInsertada.IdEntidad);
         }
 
         [TestMethod]
@@ -277,6 +296,21 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 EstadoViaje.Abierto,
                 viajes.Actualizado.EstadoActual);
+
+            Assert.IsNotNull(
+                viajes.AuditoriaActualizacion);
+
+            Assert.AreEqual(
+                "Modificacion",
+                viajes
+                    .AuditoriaActualizacion
+                    .Accion);
+
+            Assert.AreEqual(
+                1,
+                viajes
+                    .AuditoriaActualizacion
+                    .IdEntidad);
         }
 
         [TestMethod]
@@ -444,6 +478,21 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 EstadoViaje.Cancelado,
                 viajes.Cancelado.EstadoActual);
+
+            Assert.IsNotNull(
+                viajes.AuditoriaCancelacion);
+
+            Assert.AreEqual(
+                "Cancelacion",
+                viajes
+                    .AuditoriaCancelacion
+                    .Accion);
+
+            Assert.AreEqual(
+                1,
+                viajes
+                    .AuditoriaCancelacion
+                    .IdEntidad);
         }
 
         [TestMethod]
@@ -678,6 +727,24 @@ namespace SIGEVIP.Tests.Application
 
             public Viaje Cancelado { get; private set; }
 
+            public AuditoriaRegistro AuditoriaInsertada
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaActualizacion
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaCancelacion
+            {
+                get;
+                private set;
+            }
+
             public ViajeFiltro UltimoFiltro { get; private set; }
 
             public List<ViajeListadoDto> Resultados
@@ -700,23 +767,35 @@ namespace SIGEVIP.Tests.Application
             }
 
             public int Insertar(
-                Viaje viaje)
+                Viaje viaje,
+                AuditoriaRegistro auditoria)
             {
                 Insertado = viaje;
+
+                AuditoriaInsertada =
+                    auditoria;
 
                 return 20;
             }
 
             public void Actualizar(
-                Viaje viaje)
+                Viaje viaje,
+                AuditoriaRegistro auditoria)
             {
                 Actualizado = viaje;
+
+                AuditoriaActualizacion =
+                    auditoria;
             }
 
             public void Cancelar(
-                Viaje viaje)
+                Viaje viaje,
+                AuditoriaRegistro auditoria)
             {
                 Cancelado = viaje;
+
+                AuditoriaCancelacion =
+                    auditoria;
             }
         }
 
