@@ -48,6 +48,7 @@
     <Compile Include="Data\DatabaseHealthCheck.cs" />
     <Compile Include="Data\SqlConnectionFactory.cs" />
     <Compile Include="Grupos\GrupoGestionRepository.cs" />
+    <Compile Include="Permisos\PermisoGestionRepository.cs" />
     <Compile Include="Rendiciones\RendicionRepository.cs" />
     <Compile Include="Viajes\PersonaConsultaRepository.cs" />
     <Compile Include="Viajes\ViajeRepository.cs" />

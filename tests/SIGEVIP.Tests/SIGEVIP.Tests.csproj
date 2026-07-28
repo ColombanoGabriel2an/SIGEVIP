@@ -82,6 +82,7 @@
     <Compile Include="Integration\GrupoGestionRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\InicializacionSeguridadRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\JerarquiaGruposRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\PermisoGestionRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViajeRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\VisitaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\PersonaConsultaViaticoRepositoryIntegrationTests.cs" />
