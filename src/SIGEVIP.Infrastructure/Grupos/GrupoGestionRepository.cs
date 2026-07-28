@@ -363,17 +363,47 @@ ORDER BY
                     idsSeleccionados
                     ?? new int[0]);
 
-            const string sql = @"
+            StringBuilder sql =
+                new StringBuilder(@"
 SELECT
     p.IdPermiso,
     p.Codigo,
     p.Nombre,
     p.Descripcion
 FROM dbo.Permiso AS p
-WHERE p.Activo = 1
+WHERE
+    p.Activo = 1");
+
+            List<SqlParameter> parametros =
+                new List<SqlParameter>();
+
+            if (seleccionados.Count > 0)
+            {
+                sql.Append(@"
+    OR p.IdPermiso IN
+(");
+
+                List<int> idsOrdenados =
+                    seleccionados
+                        .OrderBy(
+                            idPermiso =>
+                                idPermiso)
+                        .ToList();
+
+                parametros.AddRange(
+                    CrearParametrosIds(
+                        idsOrdenados,
+                        "@IdPermisoSeleccionado",
+                        sql));
+
+                sql.Append(@"
+)");
+            }
+
+            sql.Append(@"
 ORDER BY
     p.Codigo,
-    p.IdPermiso;";
+    p.IdPermiso;");
 
             try
             {
@@ -383,9 +413,17 @@ ORDER BY
                 using (
                     SqlCommand command =
                         new SqlCommand(
-                            sql,
+                            sql.ToString(),
                             connection))
                 {
+                    foreach (
+                        SqlParameter parametro
+                        in parametros)
+                    {
+                        command.Parameters.Add(
+                            parametro);
+                    }
+
                     connection.Open();
 
                     List<PermisoSeleccionGrupoDto> resultados =
@@ -425,7 +463,7 @@ ORDER BY
             catch (SqlException exception)
             {
                 throw CrearErrorPersistencia(
-                    "No fue posible listar los permisos activos.",
+                    "No fue posible listar los permisos disponibles.",
                     exception);
             }
         }

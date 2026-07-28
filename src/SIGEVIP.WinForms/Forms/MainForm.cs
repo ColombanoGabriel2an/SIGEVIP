@@ -113,6 +113,9 @@ namespace SIGEVIP.WinForms.Forms
             GruposSolicitados;
 
         public event EventHandler
+            PermisosSolicitados;
+
+        public event EventHandler
             CambiarClaveSolicitada;
 
         public event EventHandler
@@ -732,8 +735,12 @@ namespace SIGEVIP.WinForms.Forms
             object sender,
             EventArgs e)
         {
-            MostrarModuloPendiente(
-                "Permisos");
+            EventHandler handler =
+                PermisosSolicitados;
+
+            handler?.Invoke(
+                this,
+                EventArgs.Empty);
         }
 
         private void BtnAuditoria_Click(

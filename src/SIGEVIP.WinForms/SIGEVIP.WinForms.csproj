@@ -90,6 +90,14 @@
                         <SubType>Form</SubType>
                 </Compile>
 
+                <Compile Include="Forms\PermisoEditForm.cs">
+                        <SubType>Form</SubType>
+                </Compile>
+
+                <Compile Include="Forms\PermisosForm.cs">
+                        <SubType>Form</SubType>
+                </Compile>
+
                 <Compile Include="Forms\GrupoEditForm.cs">
                         <SubType>Form</SubType>
                 </Compile>

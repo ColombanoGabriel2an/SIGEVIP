@@ -317,6 +317,124 @@ namespace SIGEVIP.Tests.Integration
         }
 
         [TestMethod]
+        public void ListarPermisosActivos_InactivoSeleccionado_LoIncluyeMarcado()
+        {
+            DatosPermisoPrueba permiso =
+                CrearPermisoPrueba(
+                    false);
+
+            try
+            {
+                GrupoGestionRepository repository =
+                    CrearRepository();
+
+                PermisoSeleccionGrupoDto resultado =
+                    repository
+                        .ListarPermisosActivos(
+                            new[]
+                            {
+                                permiso.IdPermiso
+                            })
+                        .Single(
+                            actual =>
+                                actual.IdPermiso ==
+                                permiso.IdPermiso);
+
+                Assert.IsTrue(
+                    resultado.Seleccionado);
+
+                Assert.AreEqual(
+                    permiso.Codigo,
+                    resultado.Codigo);
+            }
+            finally
+            {
+                EliminarPermisoPrueba(
+                    permiso);
+            }
+        }
+
+        [TestMethod]
+        public void ListarPermisosActivos_InactivoNoSeleccionado_LoExcluye()
+        {
+            DatosPermisoPrueba permiso =
+                CrearPermisoPrueba(
+                    false);
+
+            try
+            {
+                GrupoGestionRepository repository =
+                    CrearRepository();
+
+                IReadOnlyCollection<PermisoSeleccionGrupoDto>
+                    resultados =
+                        repository
+                            .ListarPermisosActivos(
+                                new int[0]);
+
+                Assert.IsFalse(
+                    resultados.Any(
+                        actual =>
+                            actual.IdPermiso ==
+                            permiso.IdPermiso));
+            }
+            finally
+            {
+                EliminarPermisoPrueba(
+                    permiso);
+            }
+        }
+
+        [TestMethod]
+        public void ListarPermisosActivos_ActivoEInactivoSeleccionado_DevuelveAmbos()
+        {
+            DatosPermisoPrueba permisoActivo =
+                CrearPermisoPrueba(
+                    true);
+
+            DatosPermisoPrueba permisoInactivo =
+                CrearPermisoPrueba(
+                    false);
+
+            try
+            {
+                GrupoGestionRepository repository =
+                    CrearRepository();
+
+                IReadOnlyCollection<PermisoSeleccionGrupoDto>
+                    resultados =
+                        repository
+                            .ListarPermisosActivos(
+                                new[]
+                                {
+                                    permisoInactivo.IdPermiso
+                                });
+
+                Assert.IsTrue(
+                    resultados.Any(
+                        actual =>
+                            actual.IdPermiso ==
+                            permisoActivo.IdPermiso
+                            && !actual.Seleccionado));
+
+                Assert.IsTrue(
+                    resultados.Any(
+                        actual =>
+                            actual.IdPermiso ==
+                            permisoInactivo.IdPermiso
+                            && actual.Seleccionado));
+            }
+            finally
+            {
+                EliminarPermisoPrueba(
+                    permisoActivo);
+
+                EliminarPermisoPrueba(
+                    permisoInactivo);
+            }
+        }
+
+        [TestMethod]
         public void ObtenerPermisosPorIds_RecuperaPermisosSolicitados()
         {
             int idCliente =
