@@ -93,6 +93,9 @@
     <Compile Include="Exceptions\AccesoDenegadoException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\AutenticacionService.cs" />
+    <Compile Include="Security\CambiarClaveCommand.cs" />
+    <Compile Include="Security\CambiarClaveService.cs" />
+    <Compile Include="Security\IUsuarioClaveRepository.cs" />
     <Compile Include="Security\AutorizacionService.cs" />
     <Compile Include="Security\IInicializacionSeguridadRepository.cs" />
     <Compile Include="Security\InicializacionSeguridadService.cs" />

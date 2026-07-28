@@ -45,6 +45,7 @@
 
   <ItemGroup>
     <Compile Include="Application\AutenticacionServiceTests.cs" />
+    <Compile Include="Application\CambiarClaveServiceTests.cs" />
     <Compile Include="Application\AutorizacionServiceTests.cs" />
     <Compile Include="Application\ClienteServiceTests.cs" />
     <Compile Include="Application\UsuarioGestionServiceTests.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Domain\GrupoPermisoTests.cs" />
     <Compile Include="Domain\PersonaTests.cs" />
     <Compile Include="Domain\UsuarioTests.cs" />
+    <Compile Include="Domain\UsuarioCredencialesTests.cs" />
     <Compile Include="Domain\ViajeTests.cs" />
     <Compile Include="Domain\ViajeRendicionTests.cs" />
     <Compile Include="Domain\ViajeParticipanteTests.cs" />
@@ -85,6 +87,7 @@
     <Compile Include="Integration\ViajeViaticoRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioAutenticacionRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioGestionRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\UsuarioClaveRepositoryIntegrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 

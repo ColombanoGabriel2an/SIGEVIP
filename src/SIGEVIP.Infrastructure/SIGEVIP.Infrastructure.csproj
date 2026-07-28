@@ -60,6 +60,7 @@
     <Compile Include="Security\Pbkdf2PasswordHasher.cs" />
     <Compile Include="Security\PerfilSesionRepository.cs" />
     <Compile Include="Security\UsuarioAutenticacionRepository.cs" />
+    <Compile Include="Security\UsuarioClaveRepository.cs" />
     <Compile Include="Usuarios\UsuarioGestionRepository.cs" />
   </ItemGroup>
 

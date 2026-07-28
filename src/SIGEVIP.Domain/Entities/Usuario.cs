@@ -8,8 +8,8 @@ namespace SIGEVIP.Domain.Entities
 {
     public sealed class Usuario
     {
-        private readonly byte[] _passwordHash;
-        private readonly byte[] _passwordSalt;
+        private byte[] _passwordHash;
+        private byte[] _passwordSalt;
         private readonly List<Grupo> _grupos;
 
         public Usuario(
@@ -29,25 +29,10 @@ namespace SIGEVIP.Domain.Entities
             ValidarNombreUsuario(
                 nombreUsuario);
 
-            if (passwordHash == null ||
-                passwordHash.Length == 0)
-            {
-                throw new ReglaNegocioException(
-                    "El hash de contraseña es obligatorio.");
-            }
-
-            if (passwordSalt == null ||
-                passwordSalt.Length == 0)
-            {
-                throw new ReglaNegocioException(
-                    "El salt de contraseña es obligatorio.");
-            }
-
-            if (iteracionesPassword <= 0)
-            {
-                throw new ReglaNegocioException(
-                    "La cantidad de iteraciones de contraseña debe ser mayor que cero.");
-            }
+            ValidarCredenciales(
+                passwordHash,
+                passwordSalt,
+                iteracionesPassword);
 
             IdUsuario = idUsuario;
             IdPersona = idPersona;
@@ -127,6 +112,28 @@ namespace SIGEVIP.Domain.Entities
                 return new ReadOnlyCollection<Grupo>(
                     _grupos);
             }
+        }
+
+        public void ActualizarCredenciales(
+            byte[] passwordHash,
+            byte[] passwordSalt,
+            int iteracionesPassword)
+        {
+            ValidarCredenciales(
+                passwordHash,
+                passwordSalt,
+                iteracionesPassword);
+
+            _passwordHash =
+                CopiarArreglo(
+                    passwordHash);
+
+            _passwordSalt =
+                CopiarArreglo(
+                    passwordSalt);
+
+            IteracionesPassword =
+                iteracionesPassword;
         }
 
         public void ActualizarNombreUsuario(
@@ -222,6 +229,32 @@ namespace SIGEVIP.Domain.Entities
                 : nombreUsuario
                     .Trim()
                     .ToLowerInvariant();
+        }
+
+        private static void ValidarCredenciales(
+            byte[] passwordHash,
+            byte[] passwordSalt,
+            int iteracionesPassword)
+        {
+            if (passwordHash == null ||
+                passwordHash.Length == 0)
+            {
+                throw new ReglaNegocioException(
+                    "El hash de contraseña es obligatorio.");
+            }
+
+            if (passwordSalt == null ||
+                passwordSalt.Length == 0)
+            {
+                throw new ReglaNegocioException(
+                    "El salt de contraseña es obligatorio.");
+            }
+
+            if (iteracionesPassword <= 0)
+            {
+                throw new ReglaNegocioException(
+                    "La cantidad de iteraciones de contraseña debe ser mayor que cero.");
+            }
         }
 
         private static void ValidarNombreUsuario(
