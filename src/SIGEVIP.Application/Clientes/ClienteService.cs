@@ -152,6 +152,17 @@ namespace SIGEVIP.Application.Clientes
                     "El cliente indicado no existe.");
             }
 
+            Cliente clienteAnterior =
+                Cliente.Reconstruir(
+                    clienteActual.IdCliente,
+                    clienteActual.RazonSocial,
+                    clienteActual.Cuit,
+                    clienteActual.Email,
+                    clienteActual.Telefono,
+                    clienteActual.Localidad,
+                    clienteActual.Provincia,
+                    clienteActual.Activo);
+
             Cliente datosValidados =
                 new Cliente(
                     idCliente,
@@ -184,7 +195,11 @@ namespace SIGEVIP.Application.Clientes
                     idCliente,
                     "Se modificaron los datos del cliente " +
                     clienteActual.RazonSocial +
-                    ".");
+                    ".")
+                .ConCambios(
+                    CrearCambiosCliente(
+                        clienteAnterior,
+                        clienteActual));
 
             _clienteRepository.Actualizar(
                 clienteActual,
@@ -245,6 +260,74 @@ namespace SIGEVIP.Application.Clientes
             _clienteRepository.Desactivar(
                 idCliente,
                 auditoria);
+        }
+
+        private static IReadOnlyCollection
+            <AuditoriaCambioRegistro> CrearCambiosCliente(
+                Cliente anterior,
+                Cliente nuevo)
+        {
+            List<AuditoriaCambioRegistro> cambios =
+                new List<AuditoriaCambioRegistro>();
+
+            AgregarCambio(
+                cambios,
+                "RazonSocial",
+                anterior.RazonSocial,
+                nuevo.RazonSocial);
+
+            AgregarCambio(
+                cambios,
+                "Cuit",
+                anterior.Cuit,
+                nuevo.Cuit);
+
+            AgregarCambio(
+                cambios,
+                "Email",
+                anterior.Email,
+                nuevo.Email);
+
+            AgregarCambio(
+                cambios,
+                "Telefono",
+                anterior.Telefono,
+                nuevo.Telefono);
+
+            AgregarCambio(
+                cambios,
+                "Localidad",
+                anterior.Localidad,
+                nuevo.Localidad);
+
+            AgregarCambio(
+                cambios,
+                "Provincia",
+                anterior.Provincia,
+                nuevo.Provincia);
+
+            return cambios.AsReadOnly();
+        }
+
+        private static void AgregarCambio(
+            ICollection<AuditoriaCambioRegistro> cambios,
+            string campo,
+            string valorAnterior,
+            string valorNuevo)
+        {
+            if (string.Equals(
+                valorAnterior,
+                valorNuevo,
+                StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            cambios.Add(
+                new AuditoriaCambioRegistro(
+                    campo,
+                    valorAnterior,
+                    valorNuevo));
         }
 
         private Cliente ObtenerClienteGestionable(

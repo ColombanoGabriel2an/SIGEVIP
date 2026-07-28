@@ -8,7 +8,7 @@ namespace SIGEVIP.Infrastructure.Auditoria
 {
     internal static class AuditoriaSqlWriter
     {
-        public static void Insertar(
+        public static long Insertar(
             SqlConnection connection,
             SqlTransaction transaction,
             AuditoriaRegistro registro)
@@ -66,7 +66,11 @@ VALUES
     @Entidad,
     @IdEntidad,
     @Descripcion
-);";
+);
+
+SELECT CAST(SCOPE_IDENTITY() AS BIGINT);";
+
+            long idAuditoria;
 
             using (
                 SqlCommand command =
@@ -120,13 +124,110 @@ VALUES
                     1000).Value =
                         registro.Descripcion;
 
+                object resultado =
+                    command.ExecuteScalar();
+
+                if (resultado == null ||
+                    resultado == DBNull.Value)
+                {
+                    throw new PersistenciaException(
+                        "No fue posible recuperar el identificador del evento de auditoría.");
+                }
+
+                idAuditoria =
+                    Convert.ToInt64(
+                        resultado);
+
+                if (idAuditoria <= 0)
+                {
+                    throw new PersistenciaException(
+                        "El identificador del evento de auditoría es inválido.");
+                }
+            }
+
+            foreach (
+                AuditoriaCambioRegistro cambio
+                in registro.Cambios)
+            {
+                InsertarCambio(
+                    connection,
+                    transaction,
+                    idAuditoria,
+                    cambio);
+            }
+
+            return idAuditoria;
+        }
+
+        private static void InsertarCambio(
+            SqlConnection connection,
+            SqlTransaction transaction,
+            long idAuditoria,
+            AuditoriaCambioRegistro cambio)
+        {
+            const string sql = @"
+INSERT INTO dbo.AuditoriaCambio
+(
+    IdAuditoria,
+    Campo,
+    ValorAnterior,
+    ValorNuevo
+)
+VALUES
+(
+    @IdAuditoria,
+    @Campo,
+    @ValorAnterior,
+    @ValorNuevo
+);";
+
+            using (
+                SqlCommand command =
+                    new SqlCommand(
+                        sql,
+                        connection,
+                        transaction))
+            {
+                command.Parameters.Add(
+                    "@IdAuditoria",
+                    SqlDbType.BigInt).Value =
+                        idAuditoria;
+
+                command.Parameters.Add(
+                    "@Campo",
+                    SqlDbType.NVarChar,
+                    100).Value =
+                        cambio.Campo;
+
+                SqlParameter valorAnterior =
+                    command.Parameters.Add(
+                        "@ValorAnterior",
+                        SqlDbType.NVarChar,
+                        -1);
+
+                valorAnterior.Value =
+                    cambio.ValorAnterior == null
+                        ? (object)DBNull.Value
+                        : cambio.ValorAnterior;
+
+                SqlParameter valorNuevo =
+                    command.Parameters.Add(
+                        "@ValorNuevo",
+                        SqlDbType.NVarChar,
+                        -1);
+
+                valorNuevo.Value =
+                    cambio.ValorNuevo == null
+                        ? (object)DBNull.Value
+                        : cambio.ValorNuevo;
+
                 int filas =
                     command.ExecuteNonQuery();
 
                 if (filas != 1)
                 {
                     throw new PersistenciaException(
-                        "No fue posible registrar el evento de auditoría.");
+                        "No fue posible registrar el detalle del cambio auditado.");
                 }
             }
         }

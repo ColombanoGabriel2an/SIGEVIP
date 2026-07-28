@@ -80,6 +80,7 @@ La implementación no se considerará completa si no existe correspondencia entr
 |---|---|
 | `evidencias/metricas/SIGEVIP-UCP-Viaticos-Rendiciones.xlsx` | Cálculo verificable de Puntos de Casos de Uso |
 | `evidencias/seguridad/2026-07-28-auditoria-sesiones.md` | Validación de eventos persistentes de inicio y cierre de sesión |
+| `evidencias/auditoria/2026-07-28-control-cambios-cliente.md` | Validación de valores anteriores y nuevos de Cliente |
 | `database/migrations/` | Evolución reproducible de la base de datos |
 | `database/seeds/` o ruta equivalente | Datos iniciales y de demostración |
 | `tests/SIGEVIP.Tests/` | Evidencia automatizada de calidad |

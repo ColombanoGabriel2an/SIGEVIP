@@ -1680,3 +1680,31 @@ No se registran:
 - cadenas de conexión;
 - contenido binario de Comprobantes;
 - excepciones completas.
+
+## Detalle de cambios de Auditoría
+
+La migración `008` incorpora `dbo.AuditoriaCambio`.
+
+| Columna | Tipo | Nulabilidad | Finalidad |
+|---|---|---|---|
+| IdAuditoriaCambio | BIGINT IDENTITY | No | Clave primaria |
+| IdAuditoria | BIGINT | No | Evento principal |
+| Campo | NVARCHAR(100) | No | Atributo modificado |
+| ValorAnterior | NVARCHAR(MAX) | Sí | Estado previo |
+| ValorNuevo | NVARCHAR(MAX) | Sí | Estado posterior |
+
+Relación:
+
+- `Auditoria` 1 a 0..N `AuditoriaCambio`;
+- clave foránea con eliminación en cascada;
+- combinación única de `IdAuditoria` y `Campo`.
+
+El primer uso funcional se aplica a Cliente.
+
+La actualización de Cliente, el encabezado de Auditoría y sus detalles se persisten dentro de la misma transacción SQL.
+
+Scripts:
+
+- `008_crear_detalle_cambios_auditoria.sql`;
+- `008_validar_detalle_cambios_auditoria.sql`;
+- `008_revertir_detalle_cambios_auditoria.sql`.

@@ -45,8 +45,8 @@ Comparar los requisitos, los criterios de aceptación, la documentación de refe
 | Bitácora consultable | Cumplido | Auditoría general y filtros | Documentar búsqueda combinada | Alta |
 | Auditoría de operaciones | Cumplido ampliamente | Escritura transaccional por entidad | Incorporar alcance y limitaciones | Alta |
 | Auditoría de login/logout | Cumplido | Eventos `InicioSesion` y `CierreSesion`, 6 pruebas específicas, regresión 688/688 y evidencia SQL | Sin faltantes para el alcance definido | Alta |
-| Control de cambios de una entidad | Parcial | Auditoría registra acciones | Verificar si permite reconstruir valores anteriores | Alta |
-| Tabla paralela por entidad | No aplicada literalmente | Auditoría general centralizada | Justificar diseño o complementar una entidad | Media |
+| Control de cambios de una entidad | Cumplido | `AuditoriaCambio` conserva campo, valor anterior y valor nuevo para Cliente; pruebas 6/6 y regresión 690/690 | La visualización pertenece al reporte de Auditoría | Alta |
+| Tabla paralela por entidad | Cumplido mediante diseño genérico | `AuditoriaCambio` complementa `Auditoria` para Cliente y es reutilizable | Sin faltantes para el control exigido | Media |
 | Reporte por iteración | Parcial | Listados y filtros existentes | Definir valor y usuario beneficiado | Alta |
 | Instructivo por iteración | Parcial | Documentos de validación | Consolidar manual breve | Alta |
 | Prueba de caja negra | Cumplido | Casos, particiones y 6 pruebas correctas | Incorporar evidencia al anexo técnico | Alta |
@@ -102,10 +102,9 @@ Comparar los requisitos, los criterios de aceptación, la documentación de refe
 
 1. Definir el reporte de valor por iteración.
 2. Crear el instructivo breve por iteración.
-3. Verificar el control detallado de cambios de al menos una entidad.
-4. Actualizar los diagramas UML y DER.
-5. Consolidar el documento maestro del proyecto.
-6. Preparar el PDF final y las evidencias.
+3. Actualizar los diagramas UML y DER.
+4. Consolidar el documento maestro del proyecto.
+5. Preparar el PDF final y las evidencias.
 
 ### Prioridad 2 — cierre técnico recomendable
 

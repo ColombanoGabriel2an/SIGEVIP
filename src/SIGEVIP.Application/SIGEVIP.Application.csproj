@@ -42,6 +42,7 @@
 
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="Auditoria\AuditoriaCambioRegistro.cs" />
     <Compile Include="Auditoria\AuditoriaFiltro.cs" />
     <Compile Include="Auditoria\AuditoriaListadoDto.cs" />
     <Compile Include="Auditoria\AuditoriaRegistro.cs" />

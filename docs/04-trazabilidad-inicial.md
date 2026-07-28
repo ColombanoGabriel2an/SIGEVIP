@@ -72,4 +72,5 @@
 | State en Viaje | `IEstadoViaje` y estados concretos | Domain | Transiciones | Implementado |
 | Composite en seguridad | `IPermisoComponente`, Grupo y Permiso | Domain | Anidamiento y ciclos | Implementado |
 | Auditoría general consultable | Migración `007`, `dbo.Auditoria`, servicios, repositorios y escritura transaccional | Application / Infrastructure / database / WinForms | Unitarias, integración SQL, atomicidad, rollback y consulta autorizada | Implementado |
+| Control detallado de cambios de Cliente | `AuditoriaCambioRegistro`, `dbo.AuditoriaCambio`, `ClienteService` y escritura transaccional | Application / Infrastructure / database | Valores anteriores y nuevos, 6 pruebas específicas y regresión 690/690 | Implementado |
 | SQL reproducible | Migraciones, seeds y validaciones de seguridad, Clientes, Viajes, Visitas, Viáticos, Rendiciones y Auditoría | database | Migraciones `001` a `007`, seeds reejecutables y validaciones correctas | Implementado para los módulos funcionales actuales |
