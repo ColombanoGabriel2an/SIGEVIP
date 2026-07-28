@@ -35,31 +35,77 @@ namespace SIGEVIP.Domain.Entities
             Descripcion = NormalizarTextoOpcional(descripcion);
             Activo = true;
 
-            _componentes = new List<IPermisoComponente>();
+            _componentes =
+                new List<IPermisoComponente>();
         }
 
-        public int IdGrupo { get; private set; }
+        public int IdGrupo
+        {
+            get;
+            private set;
+        }
 
         public int IdComponente
         {
-            get { return IdGrupo; }
+            get
+            {
+                return IdGrupo;
+            }
         }
 
-        public string Codigo { get; private set; }
+        public string Codigo
+        {
+            get;
+            private set;
+        }
 
-        public string Nombre { get; private set; }
+        public string Nombre
+        {
+            get;
+            private set;
+        }
 
-        public string Descripcion { get; private set; }
+        public string Descripcion
+        {
+            get;
+            private set;
+        }
 
-        public bool Activo { get; private set; }
+        public bool Activo
+        {
+            get;
+            private set;
+        }
 
-        public IReadOnlyCollection<IPermisoComponente> Componentes
+        public IReadOnlyCollection<IPermisoComponente>
+            Componentes
         {
             get
             {
-                return new ReadOnlyCollection<IPermisoComponente>(
-                    _componentes);
+                return new ReadOnlyCollection
+                    <IPermisoComponente>(
+                        _componentes);
             }
+        }
+
+        public void ActualizarDatos(
+            string nombre,
+            string descripcion)
+        {
+            if (string.IsNullOrWhiteSpace(nombre))
+            {
+                throw new ReglaNegocioException(
+                    "El nombre del grupo es obligatorio.");
+            }
+
+            if (string.IsNullOrWhiteSpace(descripcion))
+            {
+                throw new ReglaNegocioException(
+                    "La descripción del grupo es obligatoria.");
+            }
+
+            Nombre = nombre.Trim();
+            Descripcion = descripcion.Trim();
         }
 
         public void Activar()
@@ -81,16 +127,20 @@ namespace SIGEVIP.Domain.Entities
                     "Debe indicar un componente de seguridad válido.");
             }
 
-            Grupo grupoCandidato = componente as Grupo;
+            Grupo grupoCandidato =
+                componente as Grupo;
 
             if (grupoCandidato != null)
             {
-                ValidarAusenciaDeCiclo(grupoCandidato);
+                ValidarAusenciaDeCiclo(
+                    grupoCandidato);
             }
 
             if (_componentes.Any(
                 existente =>
-                    SonElMismoComponente(existente, componente)))
+                    SonElMismoComponente(
+                        existente,
+                        componente)))
             {
                 throw new ReglaNegocioException(
                     "El componente ya pertenece al grupo.");
@@ -99,7 +149,75 @@ namespace SIGEVIP.Domain.Entities
             _componentes.Add(componente);
         }
 
-        public IReadOnlyCollection<Permiso> ObtenerPermisosEfectivos()
+        public void ReemplazarPermisosDirectos(
+            IEnumerable<Permiso> permisos)
+        {
+            if (permisos == null)
+            {
+                throw new ReglaNegocioException(
+                    "Debe asignar al menos un permiso al grupo.");
+            }
+
+            List<Permiso> permisosNuevos =
+                permisos.ToList();
+
+            if (permisosNuevos.Count == 0)
+            {
+                throw new ReglaNegocioException(
+                    "Debe asignar al menos un permiso al grupo.");
+            }
+
+            foreach (Permiso permiso in permisosNuevos)
+            {
+                if (permiso == null)
+                {
+                    throw new ReglaNegocioException(
+                        "Los permisos asignados contienen un elemento inválido.");
+                }
+            }
+
+            for (
+                int indiceActual = 0;
+                indiceActual < permisosNuevos.Count;
+                indiceActual++)
+            {
+                for (
+                    int indiceCandidato =
+                        indiceActual + 1;
+                    indiceCandidato <
+                        permisosNuevos.Count;
+                    indiceCandidato++)
+                {
+                    if (SonElMismoComponente(
+                        permisosNuevos[indiceActual],
+                        permisosNuevos[indiceCandidato]))
+                    {
+                        throw new ReglaNegocioException(
+                            "No se pueden asignar permisos duplicados al grupo.");
+                    }
+                }
+            }
+
+            List<IPermisoComponente> gruposHijos =
+                _componentes
+                    .Where(
+                        componente =>
+                            componente is Grupo)
+                    .ToList();
+
+            _componentes.Clear();
+            _componentes.AddRange(
+                gruposHijos);
+
+            foreach (Permiso permiso in permisosNuevos)
+            {
+                _componentes.Add(
+                    permiso);
+            }
+        }
+
+        public IReadOnlyCollection<Permiso>
+            ObtenerPermisosEfectivos()
         {
             Dictionary<string, Permiso> permisos =
                 new Dictionary<string, Permiso>(
@@ -111,7 +229,9 @@ namespace SIGEVIP.Domain.Entities
                     permisos.Values.ToList());
             }
 
-            foreach (IPermisoComponente componente in _componentes)
+            foreach (
+                IPermisoComponente componente
+                in _componentes)
             {
                 if (!componente.Activo)
                 {
@@ -120,7 +240,8 @@ namespace SIGEVIP.Domain.Entities
 
                 foreach (
                     Permiso permiso
-                    in componente.ObtenerPermisosEfectivos())
+                    in componente
+                        .ObtenerPermisosEfectivos())
                 {
                     if (!permiso.Activo)
                     {
@@ -128,11 +249,15 @@ namespace SIGEVIP.Domain.Entities
                     }
 
                     string codigo =
-                        Permiso.NormalizarCodigo(permiso.Codigo);
+                        Permiso.NormalizarCodigo(
+                            permiso.Codigo);
 
-                    if (!permisos.ContainsKey(codigo))
+                    if (!permisos.ContainsKey(
+                        codigo))
                     {
-                        permisos.Add(codigo, permiso);
+                        permisos.Add(
+                            codigo,
+                            permiso);
                     }
                 }
             }
@@ -141,17 +266,22 @@ namespace SIGEVIP.Domain.Entities
                 permisos.Values.ToList());
         }
 
-        internal static string NormalizarCodigo(string codigo)
+        internal static string NormalizarCodigo(
+            string codigo)
         {
             return string.IsNullOrWhiteSpace(codigo)
                 ? string.Empty
-                : codigo.Trim().ToUpperInvariant();
+                : codigo
+                    .Trim()
+                    .ToUpperInvariant();
         }
 
         private void ValidarAusenciaDeCiclo(
             Grupo grupoCandidato)
         {
-            if (ReferenceEquals(this, grupoCandidato))
+            if (ReferenceEquals(
+                this,
+                grupoCandidato))
             {
                 throw new ReglaNegocioException(
                     "Un grupo no puede agregarse a sí mismo.");
@@ -178,12 +308,16 @@ namespace SIGEVIP.Domain.Entities
                 return false;
             }
 
-            if (ReferenceEquals(this, grupoBuscado))
+            if (ReferenceEquals(
+                this,
+                grupoBuscado))
             {
                 return true;
             }
 
-            foreach (Grupo grupoHijo in _componentes.OfType<Grupo>())
+            foreach (
+                Grupo grupoHijo
+                in _componentes.OfType<Grupo>())
             {
                 if (grupoHijo.ContieneGrupo(
                     grupoBuscado,
@@ -200,12 +334,15 @@ namespace SIGEVIP.Domain.Entities
             IPermisoComponente existente,
             IPermisoComponente candidato)
         {
-            if (ReferenceEquals(existente, candidato))
+            if (ReferenceEquals(
+                existente,
+                candidato))
             {
                 return true;
             }
 
-            if (existente.GetType() != candidato.GetType())
+            if (existente.GetType() !=
+                candidato.GetType())
             {
                 return false;
             }
@@ -219,12 +356,15 @@ namespace SIGEVIP.Domain.Entities
             }
 
             return string.Equals(
-                NormalizarCodigo(existente.Codigo),
-                NormalizarCodigo(candidato.Codigo),
+                NormalizarCodigo(
+                    existente.Codigo),
+                NormalizarCodigo(
+                    candidato.Codigo),
                 StringComparison.OrdinalIgnoreCase);
         }
 
-        private static string NormalizarTextoOpcional(string valor)
+        private static string NormalizarTextoOpcional(
+            string valor)
         {
             return string.IsNullOrWhiteSpace(valor)
                 ? string.Empty

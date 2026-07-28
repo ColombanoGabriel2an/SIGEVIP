@@ -48,6 +48,8 @@
     <Compile Include="Application\CambiarClaveServiceTests.cs" />
     <Compile Include="Application\AutorizacionServiceTests.cs" />
     <Compile Include="Application\ClienteServiceTests.cs" />
+    <Compile Include="Application\GrupoGestionServiceTests.cs" />
+    <Compile Include="Domain\GrupoGestionDomainTests.cs" />
     <Compile Include="Application\UsuarioGestionServiceTests.cs" />
     <Compile Include="Application\InicializacionSeguridadServiceTests.cs" />
     <Compile Include="Application\PerfilSesionServiceTests.cs" />

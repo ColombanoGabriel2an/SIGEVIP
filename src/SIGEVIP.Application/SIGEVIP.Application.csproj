@@ -42,6 +42,14 @@
 
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="Grupos\GrupoDetalleDto.cs" />
+    <Compile Include="Grupos\GrupoFiltro.cs" />
+    <Compile Include="Grupos\GrupoGestionService.cs" />
+    <Compile Include="Grupos\GrupoListadoDto.cs" />
+    <Compile Include="Grupos\IGrupoGestionRepository.cs" />
+    <Compile Include="Grupos\ModificarGrupoCommand.cs" />
+    <Compile Include="Grupos\PermisoSeleccionGrupoDto.cs" />
+    <Compile Include="Grupos\RegistrarGrupoCommand.cs" />
     <Compile Include="Clientes\ClienteFiltro.cs" />
     <Compile Include="Clientes\ClienteListadoDto.cs" />
     <Compile Include="Clientes\ClienteService.cs" />
