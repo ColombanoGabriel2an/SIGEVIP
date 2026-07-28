@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Grupos;
 using SIGEVIP.Application.Security;
@@ -790,6 +791,18 @@ namespace SIGEVIP.Tests.Application
                 private set;
             }
 
+            public AuditoriaRegistro AuditoriaInsertada
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaActualizacion
+            {
+                get;
+                private set;
+            }
+
             public int IdInsertado
             {
                 get;
@@ -1035,10 +1048,17 @@ namespace SIGEVIP.Tests.Application
 
             public int Insertar(
                 Grupo grupo,
-                IReadOnlyCollection<int> idsPermisos)
+                IReadOnlyCollection<int> idsPermisos,
+                AuditoriaRegistro auditoria)
             {
                 GrupoInsertado =
                     grupo;
+
+                IdsGruposInsertados =
+                    new int[0];
+
+                AuditoriaInsertada =
+                    auditoria;
 
                 return IdInsertado;
             }
@@ -1046,7 +1066,8 @@ namespace SIGEVIP.Tests.Application
             public int Insertar(
                 Grupo grupo,
                 IReadOnlyCollection<int> idsPermisos,
-                IReadOnlyCollection<int> idsGruposHijos)
+                IReadOnlyCollection<int> idsGruposHijos,
+                AuditoriaRegistro auditoria)
             {
                 GrupoInsertado =
                     grupo;
@@ -1056,15 +1077,22 @@ namespace SIGEVIP.Tests.Application
                         .ToList()
                         .AsReadOnly();
 
+                AuditoriaInsertada =
+                    auditoria;
+
                 return IdInsertado;
             }
 
             public void Actualizar(
                 Grupo grupo,
-                IReadOnlyCollection<int> idsPermisos)
+                IReadOnlyCollection<int> idsPermisos,
+                AuditoriaRegistro auditoria)
             {
                 GrupoActualizado =
                     grupo;
+
+                AuditoriaActualizacion =
+                    auditoria;
 
                 ActualizacionAnteriorInvocada =
                     true;
@@ -1073,7 +1101,8 @@ namespace SIGEVIP.Tests.Application
             public void Actualizar(
                 Grupo grupo,
                 IReadOnlyCollection<int> idsPermisos,
-                IReadOnlyCollection<int> idsGruposHijos)
+                IReadOnlyCollection<int> idsGruposHijos,
+                AuditoriaRegistro auditoria)
             {
                 GrupoActualizado =
                     grupo;
@@ -1083,17 +1112,22 @@ namespace SIGEVIP.Tests.Application
                         .ToList()
                         .AsReadOnly();
 
+                AuditoriaActualizacion =
+                    auditoria;
+
                 ActualizacionJerarquiaInvocada =
                     true;
             }
 
             public void Activar(
-                int idGrupo)
+                int idGrupo,
+                AuditoriaRegistro auditoria)
             {
             }
 
             public void Desactivar(
-                int idGrupo)
+                int idGrupo,
+                AuditoriaRegistro auditoria)
             {
             }
         }

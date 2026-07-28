@@ -4,9 +4,11 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Grupos;
 using SIGEVIP.Domain.Entities;
 using SIGEVIP.Domain.Exceptions;
+using SIGEVIP.Infrastructure.Auditoria;
 using SIGEVIP.Infrastructure.Data;
 using SIGEVIP.Infrastructure.Exceptions;
 
@@ -1142,100 +1144,67 @@ SELECT
             Grupo grupo,
             IReadOnlyCollection<int> idsPermisos)
         {
-            if (grupo == null)
+            return InsertarInterno(
+                grupo,
+                idsPermisos,
+                new int[0],
+                null);
+        }
+
+        public int Insertar(
+            Grupo grupo,
+            IReadOnlyCollection<int> idsPermisos,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
             {
                 throw new ArgumentNullException(
-                    nameof(grupo));
+                    nameof(auditoria));
             }
 
-            List<int> ids =
-                ValidarIdsObligatorios(
-                    idsPermisos,
-                    nameof(idsPermisos));
-
-            try
-            {
-                using (
-                    SqlConnection connection =
-                        _connectionFactory.Create())
-                {
-                    connection.Open();
-
-                    using (
-                        SqlTransaction transaction =
-                            connection.BeginTransaction(
-                                IsolationLevel.Serializable))
-                    {
-                        try
-                        {
-                            ValidarUnicidadInterna(
-                                connection,
-                                transaction,
-                                grupo.Codigo,
-                                grupo.Nombre,
-                                null);
-
-                            ValidarPermisosActivosInterno(
-                                connection,
-                                transaction,
-                                ids);
-
-                            int idGrupo =
-                                InsertarGrupoInterno(
-                                    connection,
-                                    transaction,
-                                    grupo);
-
-                            InsertarGrupoPermisosInterno(
-                                connection,
-                                transaction,
-                                idGrupo,
-                                ids);
-
-                            transaction.Commit();
-
-                            return idGrupo;
-                        }
-                        catch
-                        {
-                            RevertirSiCorresponde(
-                                transaction);
-
-                            throw;
-                        }
-                    }
-                }
-            }
-            catch (ReglaNegocioException)
-            {
-                throw;
-            }
-            catch (SqlException exception)
-                when (EsErrorDuplicado(
-                    exception))
-            {
-                throw CrearErrorDuplicado(
-                    exception,
-                    false);
-            }
-            catch (SqlException exception)
-            {
-                throw CrearErrorPersistencia(
-                    "No fue posible registrar el grupo.",
-                    exception);
-            }
-            catch (InvalidOperationException exception)
-            {
-                throw new PersistenciaException(
-                    "La transacción de registro del grupo no pudo completarse.",
-                    exception);
-            }
+            return InsertarInterno(
+                grupo,
+                idsPermisos,
+                new int[0],
+                auditoria);
         }
 
         public int Insertar(
             Grupo grupo,
             IReadOnlyCollection<int> idsPermisos,
             IReadOnlyCollection<int> idsGruposHijos)
+        {
+            return InsertarInterno(
+                grupo,
+                idsPermisos,
+                idsGruposHijos,
+                null);
+        }
+
+        public int Insertar(
+            Grupo grupo,
+            IReadOnlyCollection<int> idsPermisos,
+            IReadOnlyCollection<int> idsGruposHijos,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            return InsertarInterno(
+                grupo,
+                idsPermisos,
+                idsGruposHijos,
+                auditoria);
+        }
+
+        private int InsertarInterno(
+            Grupo grupo,
+            IReadOnlyCollection<int> idsPermisos,
+            IReadOnlyCollection<int> idsGruposHijos,
+            AuditoriaRegistro auditoria)
         {
             if (grupo == null)
             {
@@ -1303,6 +1272,15 @@ SELECT
                                 idGrupo,
                                 hijos);
 
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria.ConIdEntidad(
+                                        idGrupo));
+                            }
+
                             transaction.Commit();
 
                             return idGrupo;
@@ -1321,6 +1299,10 @@ SELECT
             {
                 throw;
             }
+            catch (PersistenciaException)
+            {
+                throw;
+            }
             catch (SqlException exception)
                 when (EsErrorDuplicado(
                     exception))
@@ -1332,7 +1314,7 @@ SELECT
             catch (SqlException exception)
             {
                 throw CrearErrorPersistencia(
-                    "No fue posible registrar el grupo y su jerarquía.",
+                    "No fue posible registrar el grupo y sus asociaciones.",
                     exception);
             }
             catch (InvalidOperationException exception)
@@ -1347,105 +1329,72 @@ SELECT
             Grupo grupo,
             IReadOnlyCollection<int> idsPermisos)
         {
-            if (grupo == null)
+            ActualizarInterno(
+                grupo,
+                idsPermisos,
+                new int[0],
+                false,
+                null);
+        }
+
+        public void Actualizar(
+            Grupo grupo,
+            IReadOnlyCollection<int> idsPermisos,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
             {
                 throw new ArgumentNullException(
-                    nameof(grupo));
+                    nameof(auditoria));
             }
 
-            ValidarIdGrupo(
-                grupo.IdGrupo);
-
-            List<int> ids =
-                ValidarIdsObligatorios(
-                    idsPermisos,
-                    nameof(idsPermisos));
-
-            try
-            {
-                using (
-                    SqlConnection connection =
-                        _connectionFactory.Create())
-                {
-                    connection.Open();
-
-                    using (
-                        SqlTransaction transaction =
-                            connection.BeginTransaction(
-                                IsolationLevel.Serializable))
-                    {
-                        try
-                        {
-                            ValidarUnicidadInterna(
-                                connection,
-                                transaction,
-                                grupo.Codigo,
-                                grupo.Nombre,
-                                grupo.IdGrupo);
-
-                            ValidarPermisosActivosInterno(
-                                connection,
-                                transaction,
-                                ids);
-
-                            ActualizarGrupoInterno(
-                                connection,
-                                transaction,
-                                grupo);
-
-                            EliminarGrupoPermisosInterno(
-                                connection,
-                                transaction,
-                                grupo.IdGrupo);
-
-                            InsertarGrupoPermisosInterno(
-                                connection,
-                                transaction,
-                                grupo.IdGrupo,
-                                ids);
-
-                            transaction.Commit();
-                        }
-                        catch
-                        {
-                            RevertirSiCorresponde(
-                                transaction);
-
-                            throw;
-                        }
-                    }
-                }
-            }
-            catch (ReglaNegocioException)
-            {
-                throw;
-            }
-            catch (SqlException exception)
-                when (EsErrorDuplicado(
-                    exception))
-            {
-                throw CrearErrorDuplicado(
-                    exception,
-                    true);
-            }
-            catch (SqlException exception)
-            {
-                throw CrearErrorPersistencia(
-                    "No fue posible actualizar el grupo.",
-                    exception);
-            }
-            catch (InvalidOperationException exception)
-            {
-                throw new PersistenciaException(
-                    "La transacción de actualización del grupo no pudo completarse.",
-                    exception);
-            }
+            ActualizarInterno(
+                grupo,
+                idsPermisos,
+                new int[0],
+                false,
+                auditoria);
         }
 
         public void Actualizar(
             Grupo grupo,
             IReadOnlyCollection<int> idsPermisos,
             IReadOnlyCollection<int> idsGruposHijos)
+        {
+            ActualizarInterno(
+                grupo,
+                idsPermisos,
+                idsGruposHijos,
+                true,
+                null);
+        }
+
+        public void Actualizar(
+            Grupo grupo,
+            IReadOnlyCollection<int> idsPermisos,
+            IReadOnlyCollection<int> idsGruposHijos,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarInterno(
+                grupo,
+                idsPermisos,
+                idsGruposHijos,
+                true,
+                auditoria);
+        }
+
+        private void ActualizarInterno(
+            Grupo grupo,
+            IReadOnlyCollection<int> idsPermisos,
+            IReadOnlyCollection<int> idsGruposHijos,
+            bool reemplazarJerarquia,
+            AuditoriaRegistro auditoria)
         {
             if (grupo == null)
             {
@@ -1462,12 +1411,15 @@ SELECT
                     nameof(idsPermisos));
 
             List<int> hijos =
-                ValidarIds(
-                    idsGruposHijos,
-                    nameof(idsGruposHijos));
+                reemplazarJerarquia
+                    ? ValidarIds(
+                        idsGruposHijos,
+                        nameof(idsGruposHijos))
+                    : new List<int>();
 
-            if (hijos.Contains(
-                grupo.IdGrupo))
+            if (reemplazarJerarquia &&
+                hijos.Contains(
+                    grupo.IdGrupo))
             {
                 throw new ReglaNegocioException(
                     "Un grupo no puede agregarse a sí mismo.");
@@ -1500,17 +1452,20 @@ SELECT
                                 transaction,
                                 permisos);
 
-                            ValidarGruposHijosDisponiblesInterno(
-                                connection,
-                                transaction,
-                                grupo.IdGrupo,
-                                hijos);
+                            if (reemplazarJerarquia)
+                            {
+                                ValidarGruposHijosDisponiblesInterno(
+                                    connection,
+                                    transaction,
+                                    grupo.IdGrupo,
+                                    hijos);
 
-                            ValidarAusenciaDeCicloInterno(
-                                connection,
-                                transaction,
-                                grupo.IdGrupo,
-                                hijos);
+                                ValidarAusenciaDeCicloInterno(
+                                    connection,
+                                    transaction,
+                                    grupo.IdGrupo,
+                                    hijos);
+                            }
 
                             ActualizarGrupoInterno(
                                 connection,
@@ -1528,16 +1483,27 @@ SELECT
                                 grupo.IdGrupo,
                                 permisos);
 
-                            EliminarGrupoGruposInterno(
-                                connection,
-                                transaction,
-                                grupo.IdGrupo);
+                            if (reemplazarJerarquia)
+                            {
+                                EliminarGrupoGruposInterno(
+                                    connection,
+                                    transaction,
+                                    grupo.IdGrupo);
 
-                            InsertarGrupoGruposInterno(
-                                connection,
-                                transaction,
-                                grupo.IdGrupo,
-                                hijos);
+                                InsertarGrupoGruposInterno(
+                                    connection,
+                                    transaction,
+                                    grupo.IdGrupo,
+                                    hijos);
+                            }
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
 
                             transaction.Commit();
                         }
@@ -1555,6 +1521,10 @@ SELECT
             {
                 throw;
             }
+            catch (PersistenciaException)
+            {
+                throw;
+            }
             catch (SqlException exception)
                 when (EsErrorDuplicado(
                     exception))
@@ -1566,7 +1536,9 @@ SELECT
             catch (SqlException exception)
             {
                 throw CrearErrorPersistencia(
-                    "No fue posible actualizar el grupo y su jerarquía.",
+                    reemplazarJerarquia
+                        ? "No fue posible actualizar el grupo y su jerarquía."
+                        : "No fue posible actualizar el grupo.",
                     exception);
             }
             catch (InvalidOperationException exception)
@@ -1580,22 +1552,57 @@ SELECT
         public void Activar(
             int idGrupo)
         {
-            ActualizarEstado(
+            ActualizarEstadoInterno(
                 idGrupo,
-                true);
+                true,
+                null);
+        }
+
+        public void Activar(
+            int idGrupo,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarEstadoInterno(
+                idGrupo,
+                true,
+                auditoria);
         }
 
         public void Desactivar(
             int idGrupo)
         {
-            ActualizarEstado(
+            ActualizarEstadoInterno(
                 idGrupo,
-                false);
+                false,
+                null);
         }
 
-        private void ActualizarEstado(
+        public void Desactivar(
             int idGrupo,
-            bool activo)
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarEstadoInterno(
+                idGrupo,
+                false,
+                auditoria);
+        }
+
+        private void ActualizarEstadoInterno(
+            int idGrupo,
+            bool activo,
+            AuditoriaRegistro auditoria)
         {
             ValidarIdGrupo(
                 idGrupo);
@@ -1610,38 +1617,73 @@ WHERE IdGrupo = @IdGrupo;";
                 using (
                     SqlConnection connection =
                         _connectionFactory.Create())
-                using (
-                    SqlCommand command =
-                        new SqlCommand(
-                            sql,
-                            connection))
                 {
-                    command.Parameters.Add(
-                        "@Activo",
-                        SqlDbType.Bit).Value =
-                            activo;
-
-                    command.Parameters.Add(
-                        "@IdGrupo",
-                        SqlDbType.Int).Value =
-                            idGrupo;
-
                     connection.Open();
 
-                    int filas =
-                        command.ExecuteNonQuery();
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sql,
+                                        connection,
+                                        transaction))
+                            {
+                                command.Parameters.Add(
+                                    "@Activo",
+                                    SqlDbType.Bit).Value =
+                                        activo;
 
-                    ExigirUnaFilaGrupo(
-                        filas,
-                        activo
-                            ? "activar"
-                            : "desactivar");
+                                command.Parameters.Add(
+                                    "@IdGrupo",
+                                    SqlDbType.Int).Value =
+                                        idGrupo;
+
+                                ExigirUnaFilaGrupo(
+                                    command.ExecuteNonQuery(),
+                                    activo
+                                        ? "activar"
+                                        : "desactivar");
+                            }
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
                 }
+            }
+            catch (PersistenciaException)
+            {
+                throw;
             }
             catch (SqlException exception)
             {
                 throw CrearErrorPersistencia(
                     "No fue posible actualizar el estado del grupo.",
+                    exception);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de estado del grupo no pudo completarse.",
                     exception);
             }
         }

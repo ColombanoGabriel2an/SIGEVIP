@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Domain.Entities;
 
 namespace SIGEVIP.Application.Grupos
@@ -49,26 +50,32 @@ namespace SIGEVIP.Application.Grupos
 
         int Insertar(
             Grupo grupo,
-            IReadOnlyCollection<int> idsPermisos);
+            IReadOnlyCollection<int> idsPermisos,
+            AuditoriaRegistro auditoria);
 
         int Insertar(
             Grupo grupo,
             IReadOnlyCollection<int> idsPermisos,
-            IReadOnlyCollection<int> idsGruposHijos);
-
-        void Actualizar(
-            Grupo grupo,
-            IReadOnlyCollection<int> idsPermisos);
+            IReadOnlyCollection<int> idsGruposHijos,
+            AuditoriaRegistro auditoria);
 
         void Actualizar(
             Grupo grupo,
             IReadOnlyCollection<int> idsPermisos,
-            IReadOnlyCollection<int> idsGruposHijos);
+            AuditoriaRegistro auditoria);
+
+        void Actualizar(
+            Grupo grupo,
+            IReadOnlyCollection<int> idsPermisos,
+            IReadOnlyCollection<int> idsGruposHijos,
+            AuditoriaRegistro auditoria);
 
         void Activar(
-            int idGrupo);
+            int idGrupo,
+            AuditoriaRegistro auditoria);
 
         void Desactivar(
-            int idGrupo);
+            int idGrupo,
+            AuditoriaRegistro auditoria);
     }
 }

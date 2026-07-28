@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Domain.Entities;
@@ -30,6 +31,12 @@ namespace SIGEVIP.Application.Grupos
         private const int LongitudMaximaCodigo = 100;
         private const int LongitudMaximaNombre = 150;
         private const int LongitudMaximaDescripcion = 500;
+
+        private const string ModuloAuditoria =
+            "Seguridad";
+
+        private const string EntidadAuditoria =
+            "Grupo";
 
         private readonly IGrupoGestionRepository
             _grupoRepository;
@@ -222,10 +229,19 @@ namespace SIGEVIP.Application.Grupos
             grupo.ReemplazarGruposHijos(
                 gruposHijos);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Alta",
+                    null,
+                    "Se registró el grupo " +
+                    grupo.Codigo +
+                    ".");
+
             return _grupoRepository.Insertar(
                 grupo,
                 idsPermisos.AsReadOnly(),
-                idsGruposHijos.AsReadOnly());
+                idsGruposHijos.AsReadOnly(),
+                auditoria);
         }
 
         public void Modificar(
@@ -312,17 +328,35 @@ namespace SIGEVIP.Application.Grupos
                 grupo.ReemplazarGruposHijos(
                     gruposHijos);
 
+                AuditoriaRegistro auditoria =
+                    CrearAuditoria(
+                        "Modificacion",
+                        grupo.IdGrupo,
+                        "Se modificaron los datos, permisos y jerarquía del grupo " +
+                        grupo.Codigo +
+                        ".");
+
                 _grupoRepository.Actualizar(
                     grupo,
                     idsPermisos.AsReadOnly(),
-                    idsGruposHijos.AsReadOnly());
+                    idsGruposHijos.AsReadOnly(),
+                    auditoria);
 
                 return;
             }
 
+            AuditoriaRegistro auditoriaSinJerarquia =
+                CrearAuditoria(
+                    "Modificacion",
+                    grupo.IdGrupo,
+                    "Se modificaron los datos y permisos del grupo " +
+                    grupo.Codigo +
+                    ".");
+
             _grupoRepository.Actualizar(
                 grupo,
-                idsPermisos.AsReadOnly());
+                idsPermisos.AsReadOnly(),
+                auditoriaSinJerarquia);
         }
 
         public void Activar(
@@ -337,8 +371,17 @@ namespace SIGEVIP.Application.Grupos
 
             grupo.Activar();
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Activacion",
+                    idGrupo,
+                    "Se activó el grupo " +
+                    grupo.Codigo +
+                    ".");
+
             _grupoRepository.Activar(
-                idGrupo);
+                idGrupo,
+                auditoria);
         }
 
         public void Desactivar(
@@ -360,8 +403,17 @@ namespace SIGEVIP.Application.Grupos
 
             grupo.Desactivar();
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Desactivacion",
+                    idGrupo,
+                    "Se desactivó el grupo " +
+                    grupo.Codigo +
+                    ".");
+
             _grupoRepository.Desactivar(
-                idGrupo);
+                idGrupo,
+                auditoria);
         }
 
         public static string GenerarCodigo(
@@ -434,6 +486,24 @@ namespace SIGEVIP.Application.Grupos
             }
 
             return codigo;
+        }
+
+        private AuditoriaRegistro CrearAuditoria(
+            string accion,
+            int? idEntidad,
+            string descripcion)
+        {
+            Usuario usuarioActual =
+                _sesionActual.UsuarioActual;
+
+            return new AuditoriaRegistro(
+                usuarioActual.IdUsuario,
+                usuarioActual.NombreUsuario,
+                ModuloAuditoria,
+                accion,
+                EntidadAuditoria,
+                idEntidad,
+                descripcion);
         }
 
         private Grupo ObtenerGrupoExistente(

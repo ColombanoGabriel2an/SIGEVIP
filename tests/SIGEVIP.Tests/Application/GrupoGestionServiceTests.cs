@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Grupos;
 using SIGEVIP.Application.Security;
@@ -232,6 +233,24 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 "Grupo demostración",
                 repository.GrupoInsertado.Nombre);
+
+            Assert.IsNotNull(
+                repository.AuditoriaInsertada);
+
+            Assert.AreEqual(
+                "Seguridad",
+                repository.AuditoriaInsertada.Modulo);
+
+            Assert.AreEqual(
+                "Alta",
+                repository.AuditoriaInsertada.Accion);
+
+            Assert.AreEqual(
+                "Grupo",
+                repository.AuditoriaInsertada.Entidad);
+
+            Assert.IsNull(
+                repository.AuditoriaInsertada.IdEntidad);
         }
 
         [TestMethod]
@@ -348,6 +367,21 @@ namespace SIGEVIP.Tests.Application
                 repository
                     .GrupoActualizado
                     .Descripcion);
+
+            Assert.IsNotNull(
+                repository.AuditoriaActualizacion);
+
+            Assert.AreEqual(
+                "Modificacion",
+                repository
+                    .AuditoriaActualizacion
+                    .Accion);
+
+            Assert.AreEqual(
+                10,
+                repository
+                    .AuditoriaActualizacion
+                    .IdEntidad);
         }
 
         [TestMethod]
@@ -563,6 +597,15 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 10,
                 repository.IdGrupoDesactivado);
+
+            Assert.IsNotNull(
+                repository.AuditoriaDesactivacion);
+
+            Assert.AreEqual(
+                "Desactivacion",
+                repository
+                    .AuditoriaDesactivacion
+                    .Accion);
         }
 
         [TestMethod]
@@ -594,6 +637,15 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 10,
                 repository.IdGrupoActivado);
+
+            Assert.IsNotNull(
+                repository.AuditoriaActivacion);
+
+            Assert.AreEqual(
+                "Activacion",
+                repository
+                    .AuditoriaActivacion
+                    .Accion);
         }
 
         [TestMethod]
@@ -879,6 +931,30 @@ namespace SIGEVIP.Tests.Application
                 private set;
             }
 
+            public AuditoriaRegistro AuditoriaInsertada
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaActualizacion
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaActivacion
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaDesactivacion
+            {
+                get;
+                private set;
+            }
+
             public IReadOnlyCollection<int>
                 IdsPermisosInsertados
             {
@@ -1107,7 +1183,8 @@ namespace SIGEVIP.Tests.Application
 
             public int Insertar(
                 Grupo grupo,
-                IReadOnlyCollection<int> idsPermisos)
+                IReadOnlyCollection<int> idsPermisos,
+                AuditoriaRegistro auditoria)
             {
                 GrupoInsertado =
                     grupo;
@@ -1117,13 +1194,20 @@ namespace SIGEVIP.Tests.Application
                         .ToList()
                         .AsReadOnly();
 
+                IdsGruposInsertados =
+                    new int[0];
+
+                AuditoriaInsertada =
+                    auditoria;
+
                 return IdInsertado;
             }
 
             public int Insertar(
                 Grupo grupo,
                 IReadOnlyCollection<int> idsPermisos,
-                IReadOnlyCollection<int> idsGruposHijos)
+                IReadOnlyCollection<int> idsGruposHijos,
+                AuditoriaRegistro auditoria)
             {
                 GrupoInsertado =
                     grupo;
@@ -1138,12 +1222,16 @@ namespace SIGEVIP.Tests.Application
                         .ToList()
                         .AsReadOnly();
 
+                AuditoriaInsertada =
+                    auditoria;
+
                 return IdInsertado;
             }
 
             public void Actualizar(
                 Grupo grupo,
-                IReadOnlyCollection<int> idsPermisos)
+                IReadOnlyCollection<int> idsPermisos,
+                AuditoriaRegistro auditoria)
             {
                 GrupoActualizado =
                     grupo;
@@ -1152,12 +1240,16 @@ namespace SIGEVIP.Tests.Application
                     idsPermisos
                         .ToList()
                         .AsReadOnly();
+
+                AuditoriaActualizacion =
+                    auditoria;
             }
 
             public void Actualizar(
                 Grupo grupo,
                 IReadOnlyCollection<int> idsPermisos,
-                IReadOnlyCollection<int> idsGruposHijos)
+                IReadOnlyCollection<int> idsGruposHijos,
+                AuditoriaRegistro auditoria)
             {
                 GrupoActualizado =
                     grupo;
@@ -1171,20 +1263,31 @@ namespace SIGEVIP.Tests.Application
                     idsGruposHijos
                         .ToList()
                         .AsReadOnly();
+
+                AuditoriaActualizacion =
+                    auditoria;
             }
 
             public void Activar(
-                int idGrupo)
+                int idGrupo,
+                AuditoriaRegistro auditoria)
             {
                 IdGrupoActivado =
                     idGrupo;
+
+                AuditoriaActivacion =
+                    auditoria;
             }
 
             public void Desactivar(
-                int idGrupo)
+                int idGrupo,
+                AuditoriaRegistro auditoria)
             {
                 IdGrupoDesactivado =
                     idGrupo;
+
+                AuditoriaDesactivacion =
+                    auditoria;
             }
         }
     }
