@@ -4,7 +4,7 @@
 
 Etapa 4: módulos funcionales documentados.
 
-Bloque actual: cierre técnico y documental de la Auditoría general.
+Bloque actual: cierre de controles de Auditoría y trazabilidad.
 
 ## Rama de trabajo
 
@@ -288,6 +288,35 @@ No se auditan:
 La Auditoría general comienza con la migración `007`. No se realizó una
 reconstrucción retroactiva de eventos anteriores.
 
+### Auditoría de inicio y cierre de sesión
+
+Se incorporó la Auditoría persistente de sesiones.
+
+Componentes:
+
+- `ISesionAuditoriaRepository`;
+- `SesionAuditoriaService`;
+- `SesionAuditoriaRepository`;
+- integración desde `SigevipApplicationContext`.
+
+Se registran:
+
+- `InicioSesion`;
+- `CierreSesion`.
+
+Validación:
+
+- 6 pruebas específicas correctas;
+- 688 pruebas de regresión correctas;
+- 0 pruebas fallidas;
+- cuatro eventos comprobados en `dbo.Auditoria`;
+- ausencia de credenciales y secretos;
+- validación manual completa.
+
+Evidencia:
+
+`evidencias/seguridad/2026-07-28-auditoria-sesiones.md`
+
 ### Eliminación del formulario técnico
 
 Se eliminaron:
@@ -314,8 +343,8 @@ Ese formulario solo servía para comprobar la conexión inicial y ya no particip
 
 ### Pruebas
 
-- Totales: 682.
-- Correctas: 682.
+- Totales: 688.
+- Correctas: 688.
 - Fallidas: 0.
 
 Incluyen:
@@ -463,7 +492,7 @@ Se utilizan:
 
 - Recuperación de contraseña.
 - Historial funcional completo del Cliente.
-- Auditoría general consultable.
+- Pantalla funcional de consulta de Auditoría.
 - Reportes.
 - Mapa y geolocalización.
 - Datos de demostración.

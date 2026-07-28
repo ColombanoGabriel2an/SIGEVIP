@@ -47,7 +47,7 @@ No incluye todavía:
 - recuperación por correo;
 - bloqueo por intentos fallidos;
 - autenticación multifactor;
-- auditoría persistente;
+- pantalla funcional de consulta de Auditoría;
 - autorización dentro de todos los casos de uso funcionales.
 
 ## 1.1. Auditoría general
@@ -277,8 +277,9 @@ Después de autenticar:
 
 1. se inicia la sesión;
 2. se recupera el perfil;
-3. se cierra el login;
-4. se muestra el menú principal.
+3. se registra `InicioSesion` en la Auditoría;
+4. se cierra el login;
+5. se muestra el menú principal.
 
 La navegación se coordina mediante:
 
@@ -327,9 +328,11 @@ La autorización se vuelve a validar en `ViaticoService` y `RendicionService`.
 Al cerrar sesión:
 
 1. se cierra el menú;
-2. se limpia `SesionActual`;
-3. se vuelve a mostrar el login.
+2. se registra `CierreSesion` en la Auditoría;
+3. se limpia `SesionActual`;
+4. se vuelve a mostrar el login.
 
+La sesión se limpia incluso cuando no puede persistirse el evento.
 El usuario debe autenticarse nuevamente para regresar al menú.
 
 ## 15. Salida de la aplicación
@@ -344,6 +347,7 @@ Se muestra una única confirmación.
 Al salir:
 
 - se cierran los formularios;
+- se registra `CierreSesion` cuando existe una sesión activa;
 - se limpia la sesión;
 - se finaliza el hilo de interfaz.
 
@@ -580,19 +584,15 @@ CUD12: Recuperar clave continúa pendiente.
 
 ### Application
 
-- recuperación de contraseña;
-- gestión visual de jerarquías entre Grupos;
-- auditoría.
+- recuperación de contraseña.
 
 ### Infrastructure
 
-- persistencia visual de relaciones `GrupoGrupo`;
-- auditoría.
+No existen pendientes de persistencia de seguridad para el alcance actual.
 
 ### WinForms
 
-- formulario de jerarquías entre Grupos;
-- pantalla de auditoría;
+- pantalla funcional de consulta de Auditoría;
 - recuperación de contraseña.
 
 ## 23. Estado de implementación
@@ -617,7 +617,57 @@ Continúan pendientes para etapas posteriores:
 
 - gestión visual de jerarquías `GrupoGrupo`;
 - recuperación de contraseña;
-- auditoría general.
+- pantalla funcional de consulta de Auditoría.
+
+## 23.1. Auditoría de sesiones
+
+La Auditoría de sesiones registra:
+
+- `InicioSesion`;
+- `CierreSesion`.
+
+Los eventos utilizan:
+
+- módulo `Seguridad`;
+- entidad `Sesion`;
+- `IdUsuario` como actor;
+- `IdUsuario` como identificador de la sesión auditada;
+- fecha y hora generadas por SQL Server.
+
+Componentes:
+
+- `ISesionAuditoriaRepository`;
+- `SesionAuditoriaService`;
+- `SesionAuditoriaRepository`;
+- `AuditoriaSqlWriter`;
+- `SigevipApplicationContext`.
+
+El inicio se registra después de validar las credenciales, establecer la
+sesión y recuperar correctamente el perfil.
+
+El cierre se registra antes de limpiar `SesionActual`. La sesión se elimina
+aunque el registro de Auditoría falle.
+
+No se registran:
+
+- contraseñas;
+- hashes;
+- salts;
+- iteraciones;
+- cadenas de conexión.
+
+Validación:
+
+- compilación con 0 advertencias y 0 errores;
+- 6 pruebas específicas correctas;
+- 688 pruebas totales correctas;
+- flujo manual de inicio, cierre, nuevo inicio y salida;
+- cuatro eventos comprobados en SQL Server;
+- cero descripciones con datos sensibles.
+
+Evidencia:
+
+`evidencias/seguridad/2026-07-28-auditoria-sesiones.md`
 
 ## 24. Gestión funcional de Grupos
 

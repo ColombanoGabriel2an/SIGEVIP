@@ -63,6 +63,7 @@
     <Compile Include="Application\ViajeServiceTests.cs" />
     <Compile Include="Application\VisitaServiceTests.cs" />
     <Compile Include="Application\SesionActualTests.cs" />
+    <Compile Include="Application\SesionAuditoriaServiceTests.cs" />
     <Compile Include="ArchitectureTests.cs" />
     <Compile Include="Domain\ClienteTests.cs" />
     <Compile Include="Domain\ComprobanteTests.cs" />
@@ -104,6 +105,7 @@
     <Compile Include="Integration\ViajeVisitaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViajeViaticoRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioAutenticacionRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\SesionAuditoriaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioAuditoriaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioGestionRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\UsuarioClaveRepositoryIntegrationTests.cs" />

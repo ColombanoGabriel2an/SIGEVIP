@@ -49,6 +49,7 @@
 | RF39: acceso mediante grupos y permisos | Usuario, Grupo, Permiso, Composite persistido y mantenimiento del catálogo | Domain / Application / Infrastructure / database / WinForms | Pruebas unitarias, integración SQL, navegación y validación manual | Implementado |
 | Perfil del usuario autenticado | `PerfilSesion`, servicio y repositorio ADO.NET | Application / Infrastructure / WinForms | Nombre completo y usuario visibles | Implementado |
 | Cierre de sesión | Evento `CerrarSesionSolicitada` y `SesionActual.Cerrar()` | WinForms / Application | Retorno al login | Implementado |
+| Auditoría de inicio y cierre de sesión | `SesionAuditoriaService`, `SesionAuditoriaRepository` y `dbo.Auditoria` | Application / Infrastructure / database / WinForms | 6 pruebas específicas, regresión 688/688, consulta SQL y validación manual | Implementado |
 | Salida controlada | `SalirSolicitado` y `ApplicationContext.ExitThread()` | WinForms | Botón Salir y cruz de ventana | Implementado |
 | Persona 1 a 0..1 Usuario | Entidades separadas e índice único | Domain / database | Restricción SQL | Implementado |
 | Usuario N a N Grupo | Colección, `ReemplazarGrupos`, servicio y tabla `UsuarioGrupo` | Domain / Application / Infrastructure / database / WinForms | PK compuesta, transacciones, integración SQL y manual | Implementado |

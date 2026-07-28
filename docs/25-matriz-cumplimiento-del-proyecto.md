@@ -44,7 +44,7 @@ Comparar los requisitos, los criterios de aceptación, la documentación de refe
 | Gestión de riesgos | Cumplido | Matriz, exposición, tratamiento y seguimiento | Mantener actualizado el estado residual | Alta |
 | Bitácora consultable | Cumplido | Auditoría general y filtros | Documentar búsqueda combinada | Alta |
 | Auditoría de operaciones | Cumplido ampliamente | Escritura transaccional por entidad | Incorporar alcance y limitaciones | Alta |
-| Auditoría de login/logout | A verificar | Documentación de cierre de sesión | No consta evento persistido en Auditoria | Alta |
+| Auditoría de login/logout | Cumplido | Eventos `InicioSesion` y `CierreSesion`, 6 pruebas específicas, regresión 688/688 y evidencia SQL | Sin faltantes para el alcance definido | Alta |
 | Control de cambios de una entidad | Parcial | Auditoría registra acciones | Verificar si permite reconstruir valores anteriores | Alta |
 | Tabla paralela por entidad | No aplicada literalmente | Auditoría general centralizada | Justificar diseño o complementar una entidad | Media |
 | Reporte por iteración | Parcial | Listados y filtros existentes | Definir valor y usuario beneficiado | Alta |
@@ -102,11 +102,10 @@ Comparar los requisitos, los criterios de aceptación, la documentación de refe
 
 1. Definir el reporte de valor por iteración.
 2. Crear el instructivo breve por iteración.
-3. Verificar la auditoría de inicio y cierre de sesión.
-4. Verificar el control detallado de cambios de al menos una entidad.
-5. Actualizar los diagramas UML y DER.
-6. Consolidar el documento maestro del proyecto.
-7. Preparar el PDF final y las evidencias.
+3. Verificar el control detallado de cambios de al menos una entidad.
+4. Actualizar los diagramas UML y DER.
+5. Consolidar el documento maestro del proyecto.
+6. Preparar el PDF final y las evidencias.
 
 ### Prioridad 2 — cierre técnico recomendable
 

@@ -64,6 +64,10 @@ namespace SIGEVIP.WinForms
                     new PerfilSesionRepository(
                         connectionFactory);
 
+                var sesionAuditoriaRepository =
+                    new SesionAuditoriaRepository(
+                        connectionFactory);
+
                 var usuarioGestionRepository =
                     new UsuarioGestionRepository(
                         connectionFactory);
@@ -126,6 +130,11 @@ namespace SIGEVIP.WinForms
 
                 ISesionActual sesionActual =
                     new SesionActual();
+
+                var sesionAuditoriaService =
+                    new SesionAuditoriaService(
+                        sesionAuditoriaRepository,
+                        sesionActual);
 
                 var usuarioGestionService =
                     new UsuarioGestionService(
@@ -201,6 +210,7 @@ namespace SIGEVIP.WinForms
                         grupoGestionService,
                         permisoGestionService,
                         cambiarClaveService,
+                        sesionAuditoriaService,
                         sesionActual);
 
                 System.Windows.Forms.Application.Run(

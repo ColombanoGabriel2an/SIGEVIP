@@ -52,6 +52,9 @@ namespace SIGEVIP.WinForms.Navigation
         private readonly CambiarClaveService
             _cambiarClaveService;
 
+        private readonly SesionAuditoriaService
+            _sesionAuditoriaService;
+
         private readonly ISesionActual
             _sesionActual;
 
@@ -72,6 +75,7 @@ namespace SIGEVIP.WinForms.Navigation
             GrupoGestionService grupoGestionService,
             PermisoGestionService permisoGestionService,
             CambiarClaveService cambiarClaveService,
+            SesionAuditoriaService sesionAuditoriaService,
             ISesionActual sesionActual)
         {
             _autenticacionService =
@@ -133,6 +137,11 @@ namespace SIGEVIP.WinForms.Navigation
                 cambiarClaveService
                 ?? throw new ArgumentNullException(
                     nameof(cambiarClaveService));
+
+            _sesionAuditoriaService =
+                sesionAuditoriaService
+                ?? throw new ArgumentNullException(
+                    nameof(sesionAuditoriaService));
 
             _sesionActual =
                 sesionActual
@@ -203,6 +212,24 @@ namespace SIGEVIP.WinForms.Navigation
                     "No se encontró la persona asociada " +
                     "al usuario autenticado.",
                     "Error de sesión",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+                _sesionActual.Cerrar();
+                return;
+            }
+
+            try
+            {
+                _sesionAuditoriaService
+                    .RegistrarInicioSesion();
+            }
+            catch (Exception)
+            {
+                MessageBox.Show(
+                    "No fue posible registrar el inicio " +
+                    "de sesión. La sesión no será abierta.",
+                    "Error de auditoría",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
 
@@ -448,7 +475,7 @@ namespace SIGEVIP.WinForms.Navigation
 
             CerrarMenuSinFinalizarAplicacion();
 
-            _sesionActual.Cerrar();
+            CerrarSesionActual();
 
             MostrarLogin();
         }
@@ -459,7 +486,7 @@ namespace SIGEVIP.WinForms.Navigation
         {
             CerrarMenuSinFinalizarAplicacion();
 
-            _sesionActual.Cerrar();
+            CerrarSesionActual();
 
             MostrarLogin();
         }
@@ -546,6 +573,39 @@ namespace SIGEVIP.WinForms.Navigation
             _mainForm = null;
         }
 
+        private void CerrarSesionActual(
+            bool mostrarAdvertencia = true)
+        {
+            if (!_sesionActual.HayUsuarioAutenticado ||
+                _sesionActual.UsuarioActual == null)
+            {
+                _sesionActual.Cerrar();
+                return;
+            }
+
+            try
+            {
+                _sesionAuditoriaService
+                    .RegistrarCierreSesion();
+            }
+            catch (Exception)
+            {
+                if (mostrarAdvertencia)
+                {
+                    MessageBox.Show(
+                        "La sesión se cerrará, pero no fue " +
+                        "posible registrar el evento de auditoría.",
+                        "Advertencia de auditoría",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                }
+            }
+            finally
+            {
+                _sesionActual.Cerrar();
+            }
+        }
+
         private void FinalizarAplicacion()
         {
             if (_finalizandoAplicacion)
@@ -558,14 +618,14 @@ namespace SIGEVIP.WinForms.Navigation
             CerrarLoginSinFinalizarAplicacion();
             CerrarMenuSinFinalizarAplicacion();
 
-            _sesionActual.Cerrar();
+            CerrarSesionActual(false);
 
             ExitThread();
         }
 
         protected override void ExitThreadCore()
         {
-            _sesionActual.Cerrar();
+            CerrarSesionActual(false);
 
             base.ExitThreadCore();
         }

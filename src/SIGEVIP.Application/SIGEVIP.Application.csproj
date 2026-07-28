@@ -126,11 +126,13 @@
     <Compile Include="Security\PerfilSesion.cs" />
     <Compile Include="Security\PerfilSesionService.cs" />
     <Compile Include="Security\ISesionActual.cs" />
+    <Compile Include="Security\ISesionAuditoriaRepository.cs" />
     <Compile Include="Security\IUsuarioAutenticacionRepository.cs" />
     <Compile Include="Security\PasswordHashResult.cs" />
     <Compile Include="Security\ResultadoAutenticacion.cs" />
     <Compile Include="Security\ResultadoInicializacionSeguridad.cs" />
     <Compile Include="Security\SesionActual.cs" />
+    <Compile Include="Security\SesionAuditoriaService.cs" />
   </ItemGroup>
 
   <ItemGroup>
