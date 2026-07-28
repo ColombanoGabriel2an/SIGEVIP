@@ -26,6 +26,7 @@
 - `Domain/ClienteTests.cs`
 - `Domain/GrupoPermisoTests.cs`
 - `Domain/GrupoGestionDomainTests.cs`
+- `Domain/PermisoGestionDomainTests.cs`
 - `Domain/PersonaTests.cs`
 - `Domain/UsuarioTests.cs`
 - `Domain/ViajeTests.cs`
@@ -40,6 +41,7 @@
 - `Application/AutorizacionServiceTests.cs`
 - `Application/ClienteServiceTests.cs`
 - `Application/GrupoGestionServiceTests.cs`
+- `Application/PermisoGestionServiceTests.cs`
 - `Application/ViajeServiceTests.cs`
 - `Application/VisitaServiceTests.cs`
 - `Application/SesionActualTests.cs`
@@ -52,6 +54,7 @@
 
 - `Integration/ClienteRepositoryIntegrationTests.cs`
 - `Integration/GrupoGestionRepositoryIntegrationTests.cs`
+- `Integration/PermisoGestionRepositoryIntegrationTests.cs`
 - `Integration/ViajeRepositoryIntegrationTests.cs`
 - `Integration/VisitaRepositoryIntegrationTests.cs`
 - `Integration/ViajeVisitaRepositoryIntegrationTests.cs`
@@ -64,8 +67,8 @@ El total definitivo se toma del ejecutor VSTest.
 
 Último resultado consolidado:
 
-- 532 pruebas totales;
-- 532 correctas;
+- 594 pruebas totales;
+- 594 correctas;
 - 0 fallidas.
 
 El conjunto incluye pruebas:
@@ -218,8 +221,8 @@ Compilación:
 
 Pruebas:
 
-- Totales: 532.
-- Correctas: 532.
+- Totales: 594.
+- Correctas: 594.
 - Fallidas: 0.
 - Omitidas: 0.
 
@@ -565,3 +568,116 @@ Regresión consolidada:
 - compilación con 0 advertencias;
 - compilación con 0 errores;
 - validación manual aprobada.
+
+## Cobertura específica del módulo Gestión de Permisos
+
+### Domain
+
+Archivo:
+
+`tests/SIGEVIP.Tests/Domain/PermisoGestionDomainTests.cs`
+
+Cantidad:
+
+- 10 pruebas.
+
+Se verifica:
+
+- actualización de Nombre y Descripción;
+- Nombre obligatorio;
+- Descripción opcional;
+- Código inmutable;
+- identificador preservado;
+- estado preservado;
+- activación;
+- desactivación;
+- conservación del estado anterior ante errores.
+
+### Application
+
+Archivo:
+
+`tests/SIGEVIP.Tests/Application/PermisoGestionServiceTests.cs`
+
+Cantidad:
+
+- 30 pruebas.
+
+Se verifica:
+
+- sesión requerida;
+- Usuario activo;
+- permiso `PERMISO_GESTIONAR`;
+- listado;
+- detalle;
+- registro;
+- normalización del Código;
+- Código único;
+- Nombre obligatorio;
+- modificación;
+- Código inmutable;
+- activación;
+- desactivación;
+- protección de `USUARIO_GESTIONAR`;
+- protección de `GRUPO_GESTIONAR`;
+- protección de `PERMISO_GESTIONAR`.
+
+### Integración SQL
+
+Archivo:
+
+`tests/SIGEVIP.Tests/Integration/PermisoGestionRepositoryIntegrationTests.cs`
+
+Cantidad:
+
+- 19 pruebas.
+
+Se verifica:
+
+- listado y filtros;
+- búsqueda por Código, Nombre y Descripción;
+- detalle;
+- cantidad de Grupos;
+- reconstrucción activa e inactiva;
+- comprobación de Código;
+- alta;
+- Descripción nula;
+- Código duplicado;
+- modificación;
+- preservación del Código;
+- preservación del estado;
+- preservación de `GrupoPermiso`;
+- activación y desactivación;
+- registros inexistentes.
+
+### Preservación de Permisos inactivos en Grupos
+
+Se agregaron 3 pruebas a:
+
+`GrupoGestionRepositoryIntegrationTests`
+
+Se verifica:
+
+- inclusión del Permiso inactivo ya seleccionado;
+- exclusión del Permiso inactivo no seleccionado;
+- coexistencia con Permisos activos.
+
+### Resultado del módulo
+
+Pruebas incorporadas:
+
+- Domain: 10;
+- Application: 30;
+- integración del repositorio: 19;
+- preservación en Grupos: 3;
+- total: 62.
+
+Regresión consolidada:
+
+- 594 pruebas totales;
+- 594 correctas;
+- 0 fallidas;
+- compilación con 0 advertencias;
+- compilación con 0 errores;
+- validación manual aprobada;
+- datos temporales eliminados.

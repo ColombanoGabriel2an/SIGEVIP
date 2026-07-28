@@ -32,10 +32,16 @@ El subsistema de seguridad contiene:
 - Asignación y reemplazo de Permisos directos de Grupos.
 - Activación y desactivación lógica de Grupos.
 - Protección de `ADMINISTRADOR_GENERAL`.
+- Mantenimiento funcional del catálogo de Permisos.
+- Listado, búsqueda y filtro por estado de Permisos.
+- Alta y modificación de Permisos.
+- Activación y desactivación lógica de Permisos.
+- Protección de Permisos administrativos críticos.
+- Conservación de asociaciones `GrupoPermiso`.
+- Preservación de Permisos inactivos ya asignados al editar Grupos.
 
 No incluye todavía:
 
-- mantenimiento del catálogo de Permisos;
 - gestión visual de jerarquías `GrupoGrupo`;
 - recuperación por correo;
 - bloqueo por intentos fallidos;
@@ -354,11 +360,11 @@ Características:
 
 ### Pruebas automatizadas
 
-- 532 pruebas totales;
-- 532 correctas;
+- 594 pruebas totales;
+- 594 correctas;
 - 0 fallidas.
 
-La regresión incluye seguridad, Gestión de Usuarios, Gestión de Grupos, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
+La regresión incluye seguridad, Gestión de Usuarios, Gestión de Grupos, Gestión de Permisos, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
 
 ### Interfaz
 
@@ -546,19 +552,16 @@ CUD12: Recuperar clave continúa pendiente.
 ### Application
 
 - recuperación de contraseña;
-- gestión del catálogo de Permisos;
 - gestión visual de jerarquías entre Grupos;
 - auditoría.
 
 ### Infrastructure
 
-- persistencia de cambios del catálogo de Permisos;
 - persistencia visual de relaciones `GrupoGrupo`;
 - auditoría.
 
 ### WinForms
 
-- formulario funcional del catálogo de Permisos;
 - formulario de jerarquías entre Grupos;
 - pantalla de auditoría;
 - recuperación de contraseña.
@@ -579,9 +582,10 @@ La gestión funcional de Usuarios y sus Grupos directos se encuentra implementad
 
 La gestión funcional de Grupos y sus Permisos directos también se encuentra implementada y comprobada.
 
+La gestión funcional del catálogo de Permisos se encuentra implementada y comprobada.
+
 Continúan pendientes para etapas posteriores:
 
-- gestión del catálogo de Permisos;
 - gestión visual de jerarquías `GrupoGrupo`;
 - recuperación de contraseña;
 - auditoría general.
@@ -672,7 +676,7 @@ No modifica:
 
 ### Validación
 
-Resultado:
+Resultado histórico al cerrar Gestión de Grupos:
 
 - 53 pruebas específicas;
 - 532 pruebas totales;
@@ -681,3 +685,111 @@ Resultado:
 - compilación con 0 advertencias;
 - compilación con 0 errores;
 - validación manual aprobada.
+
+## 25. Gestión funcional de Permisos
+
+La gestión funcional del catálogo utiliza:
+
+- `PermisoGestionService`;
+- `IPermisoGestionRepository`;
+- `PermisoGestionRepository`;
+- `PermisosForm`;
+- `PermisoEditForm`.
+
+El acceso requiere:
+
+`PERMISO_GESTIONAR`
+
+La autorización se valida:
+
+- en el menú principal;
+- en `PermisosForm`;
+- nuevamente en Application.
+
+### Reglas principales
+
+El Código:
+
+- es obligatorio;
+- es único;
+- se normaliza;
+- se define durante el alta;
+- es inmutable después del alta.
+
+El Nombre es obligatorio.
+
+La Descripción es opcional.
+
+La modificación permite cambiar exclusivamente:
+
+- Nombre;
+- Descripción.
+
+La activación y desactivación son lógicas.
+
+No existe borrado físico desde el módulo.
+
+Las asociaciones `GrupoPermiso` se conservan.
+
+### Protecciones administrativas
+
+No pueden desactivarse:
+
+- `USUARIO_GESTIONAR`;
+- `GRUPO_GESTIONAR`;
+- `PERMISO_GESTIONAR`.
+
+Estas protecciones evitan que el subsistema pierda las capacidades administrativas mínimas.
+
+### Persistencia
+
+La implementación utiliza:
+
+`PermisoGestionRepository`
+
+El repositorio permite:
+
+- listar;
+- buscar;
+- filtrar por estado;
+- recuperar detalle;
+- contar Grupos asociados;
+- comprobar Código;
+- insertar;
+- modificar;
+- activar;
+- desactivar.
+
+Las escrituras utilizan transacciones ADO.NET.
+
+No fue necesaria una migración nueva porque `dbo.Permiso` y `dbo.GrupoPermiso` ya existían.
+
+### Integración con Grupos
+
+Al crear un Grupo se muestran únicamente Permisos activos.
+
+Al editar un Grupo se muestran:
+
+- todos los Permisos activos;
+- los Permisos inactivos que ya estaban seleccionados.
+
+No se muestran Permisos inactivos ajenos a la selección.
+
+Esta regla evita perder asociaciones durante la edición.
+
+### Validación
+
+Resultado consolidado vigente:
+
+- 62 pruebas incorporadas durante el módulo;
+- 594 pruebas totales;
+- 594 correctas;
+- 0 fallidas;
+- compilación con 0 advertencias;
+- compilación con 0 errores;
+- validación manual aprobada;
+- datos temporales eliminados.
+
+Documento específico:
+
+`docs/20-pruebas-gestion-permisos.md`

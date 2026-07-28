@@ -98,6 +98,14 @@ Se encuentran implementados:
 - activación y desactivación lógica de Grupos;
 - preservación de `GrupoPermiso`, `UsuarioGrupo` y `GrupoGrupo`;
 - protección de `ADMINISTRADOR_GENERAL`;
+- módulo funcional de Gestión de Permisos;
+- listado, búsqueda y filtro por estado de Permisos;
+- alta y modificación del catálogo de Permisos;
+- normalización, unicidad e inmutabilidad del Código;
+- activación y desactivación lógica de Permisos;
+- protección de `USUARIO_GESTIONAR`, `GRUPO_GESTIONAR` y `PERMISO_GESTIONAR`;
+- conservación de asociaciones `GrupoPermiso`;
+- preservación de Permisos inactivos ya asignados al editar Grupos;
 - módulo funcional de Clientes;
 - persistencia SQL de Clientes;
 - alta y modificación de Clientes;
@@ -128,13 +136,12 @@ Se encuentran implementados:
 - aprobación y cancelación de Rendiciones;
 - cálculo de total gastado vigente y saldo pendiente;
 - validación SQL de las migraciones `003` a `006`;
-- 532 pruebas automatizadas correctas;
+- 594 pruebas automatizadas correctas;
 - compilación con 0 advertencias y 0 errores;
-- validación manual de Usuarios, Cambio de clave, Grupos, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
+- validación manual de Usuarios, Cambio de clave, Grupos, Permisos, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
 
 Permanecen pendientes:
 
-- gestión funcional del catálogo de permisos;
 - gestión visual de jerarquías entre grupos;
 - recuperación de contraseña;
 - historial funcional completo del cliente;

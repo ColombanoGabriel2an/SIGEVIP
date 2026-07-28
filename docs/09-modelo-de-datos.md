@@ -500,11 +500,10 @@ Resultado consolidado:
 
 ## 19. Reglas pendientes
 
-- Alta y modificación persistente del catálogo de Permisos.
 - Persistencia visual de relaciones Grupo-Grupo.
 - Auditoría general consultable.
 
-La alta y modificación persistente del catálogo de Grupos y la gestión visual de relaciones `GrupoPermiso` ya se encuentran implementadas.
+La alta y modificación persistente de los catálogos de Grupos y Permisos, junto con la gestión visual de relaciones `GrupoPermiso`, ya se encuentran implementadas.
 
 ## 20. Commits técnicos
 
@@ -1385,8 +1384,8 @@ Se ejecutaron:
 
 Resultado consolidado:
 
-- 532 pruebas totales;
-- 532 correctas;
+- 594 pruebas totales;
+- 594 correctas;
 - 0 fallidas;
 - compilación con 0 advertencias;
 - compilación con 0 errores.
@@ -1396,3 +1395,123 @@ Resultado consolidado:
 - `fcbc5e2` — `Agrego casos de uso de grupos`
 - `5da1e81` — `Agrego persistencia de grupos`
 - `90ec085` — `Completo interfaz de gestion de grupos`
+
+## Gestión persistente del catálogo de Permisos
+
+La gestión funcional reutiliza el esquema creado por:
+
+`database/migrations/002_crear_seguridad.sql`
+
+No fue necesaria una migración adicional.
+
+### Alta de Permiso
+
+`PermisoGestionRepository.Insertar` ejecuta dentro de una transacción:
+
+1. comprobación defensiva de unicidad del Código;
+2. inserción en `dbo.Permiso`;
+3. recuperación del identificador mediante `SCOPE_IDENTITY`;
+4. commit.
+
+La transacción utiliza:
+
+`IsolationLevel.Serializable`
+
+Ante cualquier error se ejecuta rollback.
+
+### Código del Permiso
+
+El Código:
+
+- se normaliza en Application;
+- se almacena en `dbo.Permiso.Codigo`;
+- tiene una longitud máxima de 100 caracteres;
+- es único mediante `UX_Permiso_Codigo`;
+- no se actualiza después del alta.
+
+Infrastructure reconoce los errores SQL:
+
+- 2601;
+- 2627.
+
+Los conflictos se traducen a errores funcionales.
+
+### Modificación
+
+`PermisoGestionRepository.Actualizar` modifica únicamente:
+
+- `Nombre`;
+- `Descripcion`.
+
+No modifica:
+
+- `Codigo`;
+- `Activo`;
+- `GrupoPermiso`.
+
+La Descripción vacía se persiste como `NULL`.
+
+### Activación y desactivación
+
+El estado se modifica mediante:
+
+`UPDATE dbo.Permiso SET Activo = @Activo`
+
+No existe borrado físico desde el módulo.
+
+La operación conserva:
+
+- la fila de `dbo.Permiso`;
+- las filas relacionadas de `dbo.GrupoPermiso`.
+
+### Preservación de asociaciones
+
+La desactivación de un Permiso no elimina sus asociaciones con Grupos.
+
+Un Permiso inactivo deja de aportar autorización efectiva, pero puede reactivarse sin reconstruir su configuración.
+
+Al editar un Grupo:
+
+- se listan todos los Permisos activos;
+- se incluyen los Permisos inactivos ya seleccionados;
+- se excluyen los Permisos inactivos no seleccionados.
+
+### Consultas
+
+El repositorio permite:
+
+- listar con búsqueda general;
+- filtrar por estado;
+- contar Grupos asociados;
+- obtener detalle;
+- reconstruir la entidad;
+- comprobar existencia de Código.
+
+El listado utiliza una consulta agregada sobre `GrupoPermiso` y evita consultas N+1.
+
+### Integridad
+
+SQL Server garantiza:
+
+- clave primaria `PK_Permiso`;
+- unicidad mediante `UX_Permiso_Codigo`;
+- campos obligatorios mediante CHECK;
+- estado predeterminado activo;
+- integridad referencial con `GrupoPermiso`;
+- asociaciones no duplicadas mediante `PK_GrupoPermiso`.
+
+### Validación
+
+Se ejecutaron:
+
+- 19 pruebas de integración específicas del repositorio;
+- 3 pruebas de preservación de Permisos inactivos en Grupos;
+- regresión completa de 594 pruebas;
+- validación manual;
+- comprobación de ausencia de datos temporales.
+
+### Commits
+
+- `3e8401c` — `Agrego casos de uso de permisos`
+- `d61e304` — `Agrego persistencia de permisos`
+- `2c16ef2` — `Completo interfaz de gestion de permisos`

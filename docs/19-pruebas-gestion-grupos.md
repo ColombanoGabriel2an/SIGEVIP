@@ -94,7 +94,11 @@ No se implementaron en este bloque:
 
 - recuperación de contraseña.
 
-La gestión de Grupos trabaja exclusivamente con Permisos ya existentes y activos.
+La gestión de Grupos de este bloque trabajaba con Permisos ya existentes y activos.
+
+Posteriormente se implementó el mantenimiento funcional del catálogo de Permisos, documentado en:
+
+`docs/20-pruebas-gestion-permisos.md`
 
 ## 4. Reglas funcionales comprobadas
 
@@ -780,9 +784,11 @@ El módulo de Gestión de Grupos se considera implementado dentro del alcance ac
 
 - validación manual reproducible.
 
-Permanecen como módulos posteriores:
+Después de este cierre se implementó:
 
-- gestión funcional del catálogo de Permisos;
+- gestión funcional del catálogo de Permisos.
+
+Permanecen como módulos posteriores:
 
 - gestión visual de jerarquías `GrupoGrupo`;
 

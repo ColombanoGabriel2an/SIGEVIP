@@ -4,7 +4,7 @@
 
 Etapa 4: módulos funcionales documentados.
 
-Bloque actual: cierre técnico y documental de Gestión de Grupos.
+Bloque actual: cierre técnico y documental de Gestión de Permisos.
 
 ## Rama de trabajo
 
@@ -12,8 +12,8 @@ Bloque actual: cierre técnico y documental de Gestión de Grupos.
 
 ## Último cierre funcional publicado
 
-- Commit: `90ec085`
-- Mensaje: `Completo interfaz de gestion de grupos`
+- Commit: `2c16ef2`
+- Mensaje: `Completo interfaz de gestion de permisos`
 
 La rama local se encuentra sincronizada con:
 
@@ -259,8 +259,8 @@ Ese formulario solo servía para comprobar la conexión inicial y ya no particip
 
 ### Pruebas
 
-- Totales: 479.
-- Correctas: 479.
+- Totales: 594.
+- Correctas: 594.
 - Fallidas: 0.
 
 Incluyen:
@@ -401,14 +401,13 @@ Se utilizan:
 
 ## Pendiente inmediato
 
-- Completar el cierre documental del módulo Gestión de Grupos.
+- Completar el cierre documental del módulo Gestión de Permisos.
 - Ejecutar regresión documental final.
 - Publicar el cierre documental.
 - Preparar el siguiente módulo funcional.
 
 ## Etapas posteriores
 
-- Gestión funcional del catálogo de Permisos.
 - Gestión visual de jerarquías entre Grupos.
 - Recuperación de contraseña.
 - Historial funcional completo del Cliente.
@@ -1153,8 +1152,141 @@ Se verificó:
 
 ### Alcance posterior
 
+Después del cierre de este módulo se implementó la gestión funcional del catálogo de Permisos.
+
 Permanece pendiente:
 
-- gestión funcional del catálogo de Permisos;
 - gestión visual de relaciones `GrupoGrupo`;
 - auditoría general consultable.
+
+## Módulo funcional de Gestión de Permisos
+
+El catálogo de Permisos se encuentra implementado de extremo a extremo.
+
+La documentación académica no define un CUD numerado específico para este mantenimiento.
+
+Por ese motivo el módulo se registra como una extensión funcional del subsistema de seguridad, sin inventar numeración documental.
+
+### Domain
+
+Se implementaron:
+
+- actualización validada de Nombre y Descripción;
+- Descripción opcional;
+- Código normalizado;
+- Código inmutable;
+- preservación del identificador;
+- preservación del estado durante la modificación;
+- activación y desactivación lógica.
+
+### Application
+
+Se implementaron:
+
+- `PermisoFiltro`;
+- `PermisoListadoDto`;
+- `PermisoDetalleDto`;
+- `RegistrarPermisoCommand`;
+- `ModificarPermisoCommand`;
+- `IPermisoGestionRepository`;
+- `PermisoGestionService`.
+
+Casos de uso:
+
+- listar;
+- obtener detalle;
+- registrar;
+- modificar;
+- activar;
+- desactivar.
+
+Las operaciones requieren:
+
+`PERMISO_GESTIONAR`
+
+Se protegen contra desactivación:
+
+- `USUARIO_GESTIONAR`;
+- `GRUPO_GESTIONAR`;
+- `PERMISO_GESTIONAR`.
+
+### Infrastructure
+
+Se implementó:
+
+`src/SIGEVIP.Infrastructure/Permisos/PermisoGestionRepository.cs`
+
+El repositorio permite:
+
+- listar con búsqueda;
+- filtrar por estado;
+- contar Grupos asociados;
+- recuperar detalle;
+- reconstruir Permisos activos e inactivos;
+- verificar Código;
+- insertar;
+- actualizar Nombre y Descripción;
+- activar;
+- desactivar.
+
+No fue necesaria una migración nueva.
+
+La Descripción vacía se persiste como `NULL`.
+
+El Código no se modifica durante la actualización.
+
+La activación y desactivación conservan `GrupoPermiso`.
+
+### WinForms
+
+Se implementaron:
+
+- `PermisosForm`;
+- `PermisoEditForm`;
+- navegación desde `MainForm`;
+- coordinación desde `SigevipApplicationContext`;
+- composición en `Program`.
+
+La interfaz permite:
+
+- listar;
+- buscar;
+- filtrar;
+- registrar;
+- modificar;
+- activar;
+- desactivar;
+- visualizar cantidad de Grupos;
+- mostrar el Código como inmutable.
+
+### Corrección transversal de Grupos
+
+La edición de Grupos fue ajustada para:
+
+- incluir Permisos inactivos ya seleccionados;
+- conservarlos al guardar;
+- excluir Permisos inactivos no seleccionados;
+- impedir nuevas asignaciones de Permisos inactivos.
+
+### Validación
+
+- 40 pruebas nuevas de Domain y Application;
+- 19 pruebas nuevas de integración del repositorio;
+- 3 pruebas nuevas de preservación en Grupos;
+- 594 pruebas totales;
+- 594 correctas;
+- 0 fallidas;
+- compilación con 0 advertencias;
+- compilación con 0 errores;
+- validación manual completa;
+- datos temporales eliminados.
+
+### Commits
+
+- `3e8401c` — `Agrego casos de uso de permisos`
+- `d61e304` — `Agrego persistencia de permisos`
+- `2c16ef2` — `Completo interfaz de gestion de permisos`
+
+Documento específico:
+
+`docs/20-pruebas-gestion-permisos.md`
