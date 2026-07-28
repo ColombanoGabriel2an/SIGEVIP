@@ -365,6 +365,34 @@ WHERE
             Viaje viaje,
             Viatico viatico)
         {
+            ExcluirViaticoInterno(
+                viaje,
+                viatico,
+                null);
+        }
+
+        public void ExcluirViatico(
+            Viaje viaje,
+            Viatico viatico,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ExcluirViaticoInterno(
+                viaje,
+                viatico,
+                auditoria);
+        }
+
+        private void ExcluirViaticoInterno(
+            Viaje viaje,
+            Viatico viatico,
+            AuditoriaRegistro auditoria)
+        {
             ValidarViaticoPersistido(
                 viaje,
                 viatico);
@@ -435,65 +463,93 @@ WHERE
                 using (
                     SqlConnection connection =
                         _connectionFactory.Create())
-                using (
-                    SqlCommand command =
-                        new SqlCommand(
-                            sql,
-                            connection))
                 {
-                    command.Parameters.Add(
-                        "@EstadoExcluido",
-                        SqlDbType.TinyInt).Value =
-                            Convert.ToByte(
-                                EstadoViatico.Excluido);
-
-                    command.Parameters.Add(
-                        "@MotivoExclusion",
-                        SqlDbType.NVarChar,
-                        500).Value =
-                            viatico.MotivoExclusion;
-
-                    command.Parameters.Add(
-                        "@IdUsuarioExclusion",
-                        SqlDbType.Int).Value =
-                            viatico
-                                .IdUsuarioExclusion
-                                .Value;
-
-                    command.Parameters.Add(
-                        "@FechaExclusion",
-                        SqlDbType.DateTime2).Value =
-                            viatico
-                                .FechaExclusion
-                                .Value;
-
-                    command.Parameters.Add(
-                        "@IdViatico",
-                        SqlDbType.Int).Value =
-                            viatico.IdViatico;
-
-                    command.Parameters.Add(
-                        "@IdViaje",
-                        SqlDbType.Int).Value =
-                            viaje.IdViaje;
-
-                    command.Parameters.Add(
-                        "@EstadoVigente",
-                        SqlDbType.TinyInt).Value =
-                            Convert.ToByte(
-                                EstadoViatico.Vigente);
-
-                    command.Parameters.Add(
-                        "@EstadoEnRendicion",
-                        SqlDbType.TinyInt).Value =
-                            Convert.ToByte(
-                                EstadoViaje.EnRendicion);
-
                     connection.Open();
 
-                    ExigirUnaFila(
-                        command.ExecuteNonQuery(),
-                        "excluir el viático");
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sql,
+                                        connection,
+                                        transaction))
+                            {
+                                command.Parameters.Add(
+                                    "@EstadoExcluido",
+                                    SqlDbType.TinyInt).Value =
+                                        Convert.ToByte(
+                                            EstadoViatico.Excluido);
+
+                                command.Parameters.Add(
+                                    "@MotivoExclusion",
+                                    SqlDbType.NVarChar,
+                                    500).Value =
+                                        viatico.MotivoExclusion;
+
+                                command.Parameters.Add(
+                                    "@IdUsuarioExclusion",
+                                    SqlDbType.Int).Value =
+                                        viatico
+                                            .IdUsuarioExclusion
+                                            .Value;
+
+                                command.Parameters.Add(
+                                    "@FechaExclusion",
+                                    SqlDbType.DateTime2).Value =
+                                        viatico
+                                            .FechaExclusion
+                                            .Value;
+
+                                command.Parameters.Add(
+                                    "@IdViatico",
+                                    SqlDbType.Int).Value =
+                                        viatico.IdViatico;
+
+                                command.Parameters.Add(
+                                    "@IdViaje",
+                                    SqlDbType.Int).Value =
+                                        viaje.IdViaje;
+
+                                command.Parameters.Add(
+                                    "@EstadoVigente",
+                                    SqlDbType.TinyInt).Value =
+                                        Convert.ToByte(
+                                            EstadoViatico.Vigente);
+
+                                command.Parameters.Add(
+                                    "@EstadoEnRendicion",
+                                    SqlDbType.TinyInt).Value =
+                                        Convert.ToByte(
+                                            EstadoViaje.EnRendicion);
+
+                                ExigirUnaFila(
+                                    command.ExecuteNonQuery(),
+                                    "excluir el viático");
+                            }
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
                 }
             }
             catch (PersistenciaException)
@@ -506,11 +562,45 @@ WHERE
                     "No fue posible excluir el viático.",
                     exception);
             }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de exclusión del viático no pudo completarse.",
+                    exception);
+            }
         }
 
         public void ReactivarViatico(
             Viaje viaje,
             Viatico viatico)
+        {
+            ReactivarViaticoInterno(
+                viaje,
+                viatico,
+                null);
+        }
+
+        public void ReactivarViatico(
+            Viaje viaje,
+            Viatico viatico,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ReactivarViaticoInterno(
+                viaje,
+                viatico,
+                auditoria);
+        }
+
+        private void ReactivarViaticoInterno(
+            Viaje viaje,
+            Viatico viatico,
+            AuditoriaRegistro auditoria)
         {
             ValidarViaticoPersistido(
                 viaje,
@@ -573,59 +663,87 @@ WHERE
                 using (
                     SqlConnection connection =
                         _connectionFactory.Create())
-                using (
-                    SqlCommand command =
-                        new SqlCommand(
-                            sql,
-                            connection))
                 {
-                    command.Parameters.Add(
-                        "@EstadoVigente",
-                        SqlDbType.TinyInt).Value =
-                            Convert.ToByte(
-                                EstadoViatico.Vigente);
-
-                    command.Parameters.Add(
-                        "@IdUsuarioReactivacion",
-                        SqlDbType.Int).Value =
-                            viatico
-                                .IdUsuarioReactivacion
-                                .Value;
-
-                    command.Parameters.Add(
-                        "@FechaReactivacion",
-                        SqlDbType.DateTime2).Value =
-                            viatico
-                                .FechaReactivacion
-                                .Value;
-
-                    command.Parameters.Add(
-                        "@IdViatico",
-                        SqlDbType.Int).Value =
-                            viatico.IdViatico;
-
-                    command.Parameters.Add(
-                        "@IdViaje",
-                        SqlDbType.Int).Value =
-                            viaje.IdViaje;
-
-                    command.Parameters.Add(
-                        "@EstadoExcluido",
-                        SqlDbType.TinyInt).Value =
-                            Convert.ToByte(
-                                EstadoViatico.Excluido);
-
-                    command.Parameters.Add(
-                        "@EstadoEnRendicion",
-                        SqlDbType.TinyInt).Value =
-                            Convert.ToByte(
-                                EstadoViaje.EnRendicion);
-
                     connection.Open();
 
-                    ExigirUnaFila(
-                        command.ExecuteNonQuery(),
-                        "reactivar el viático");
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sql,
+                                        connection,
+                                        transaction))
+                            {
+                                command.Parameters.Add(
+                                    "@EstadoVigente",
+                                    SqlDbType.TinyInt).Value =
+                                        Convert.ToByte(
+                                            EstadoViatico.Vigente);
+
+                                command.Parameters.Add(
+                                    "@IdUsuarioReactivacion",
+                                    SqlDbType.Int).Value =
+                                        viatico
+                                            .IdUsuarioReactivacion
+                                            .Value;
+
+                                command.Parameters.Add(
+                                    "@FechaReactivacion",
+                                    SqlDbType.DateTime2).Value =
+                                        viatico
+                                            .FechaReactivacion
+                                            .Value;
+
+                                command.Parameters.Add(
+                                    "@IdViatico",
+                                    SqlDbType.Int).Value =
+                                        viatico.IdViatico;
+
+                                command.Parameters.Add(
+                                    "@IdViaje",
+                                    SqlDbType.Int).Value =
+                                        viaje.IdViaje;
+
+                                command.Parameters.Add(
+                                    "@EstadoExcluido",
+                                    SqlDbType.TinyInt).Value =
+                                        Convert.ToByte(
+                                            EstadoViatico.Excluido);
+
+                                command.Parameters.Add(
+                                    "@EstadoEnRendicion",
+                                    SqlDbType.TinyInt).Value =
+                                        Convert.ToByte(
+                                            EstadoViaje.EnRendicion);
+
+                                ExigirUnaFila(
+                                    command.ExecuteNonQuery(),
+                                    "reactivar el viático");
+                            }
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
                 }
             }
             catch (PersistenciaException)
@@ -638,10 +756,40 @@ WHERE
                     "No fue posible reactivar el viático.",
                     exception);
             }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de reactivación del viático no pudo completarse.",
+                    exception);
+            }
         }
 
         public void AjustarMontoAnticipado(
             Viaje viaje)
+        {
+            AjustarMontoAnticipadoInterno(
+                viaje,
+                null);
+        }
+
+        public void AjustarMontoAnticipado(
+            Viaje viaje,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            AjustarMontoAnticipadoInterno(
+                viaje,
+                auditoria);
+        }
+
+        private void AjustarMontoAnticipadoInterno(
+            Viaje viaje,
+            AuditoriaRegistro auditoria)
         {
             ValidarViajePersistido(
                 viaje);
@@ -673,38 +821,66 @@ WHERE
                 using (
                     SqlConnection connection =
                         _connectionFactory.Create())
-                using (
-                    SqlCommand command =
-                        new SqlCommand(
-                            sql,
-                            connection))
                 {
-                    SqlParameter monto =
-                        command.Parameters.Add(
-                            "@MontoAnticipado",
-                            SqlDbType.Decimal);
-
-                    monto.Precision = 18;
-                    monto.Scale = 2;
-                    monto.Value =
-                        viaje.MontoAnticipado;
-
-                    command.Parameters.Add(
-                        "@IdViaje",
-                        SqlDbType.Int).Value =
-                            viaje.IdViaje;
-
-                    command.Parameters.Add(
-                        "@EstadoEnRendicion",
-                        SqlDbType.TinyInt).Value =
-                            Convert.ToByte(
-                                EstadoViaje.EnRendicion);
-
                     connection.Open();
 
-                    ExigirUnaFila(
-                        command.ExecuteNonQuery(),
-                        "ajustar el monto anticipado");
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sql,
+                                        connection,
+                                        transaction))
+                            {
+                                SqlParameter monto =
+                                    command.Parameters.Add(
+                                        "@MontoAnticipado",
+                                        SqlDbType.Decimal);
+
+                                monto.Precision = 18;
+                                monto.Scale = 2;
+                                monto.Value =
+                                    viaje.MontoAnticipado;
+
+                                command.Parameters.Add(
+                                    "@IdViaje",
+                                    SqlDbType.Int).Value =
+                                        viaje.IdViaje;
+
+                                command.Parameters.Add(
+                                    "@EstadoEnRendicion",
+                                    SqlDbType.TinyInt).Value =
+                                        Convert.ToByte(
+                                            EstadoViaje.EnRendicion);
+
+                                ExigirUnaFila(
+                                    command.ExecuteNonQuery(),
+                                    "ajustar el monto anticipado");
+                            }
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
                 }
             }
             catch (PersistenciaException)
@@ -715,6 +891,12 @@ WHERE
             {
                 throw CrearErrorPersistencia(
                     "No fue posible ajustar el monto anticipado.",
+                    exception);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de ajuste del anticipo no pudo completarse.",
                     exception);
             }
         }

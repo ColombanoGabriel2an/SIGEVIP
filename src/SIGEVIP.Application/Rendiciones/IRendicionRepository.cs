@@ -18,14 +18,17 @@ namespace SIGEVIP.Application.Rendiciones
 
         void ExcluirViatico(
             Viaje viaje,
-            Viatico viatico);
+            Viatico viatico,
+            AuditoriaRegistro auditoria);
 
         void ReactivarViatico(
             Viaje viaje,
-            Viatico viatico);
+            Viatico viatico,
+            AuditoriaRegistro auditoria);
 
         void AjustarMontoAnticipado(
-            Viaje viaje);
+            Viaje viaje,
+            AuditoriaRegistro auditoria);
 
         void Aprobar(
             Viaje viaje);

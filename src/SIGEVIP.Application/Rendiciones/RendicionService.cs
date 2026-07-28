@@ -38,6 +38,9 @@ namespace SIGEVIP.Application.Rendiciones
         private const string EntidadViajeAuditoria =
             "Viaje";
 
+        private const string EntidadViaticoAuditoria =
+            "Viatico";
+
         private readonly IRendicionRepository
             _rendicionRepository;
 
@@ -157,10 +160,18 @@ namespace SIGEVIP.Application.Rendiciones
                 ObtenerIdUsuarioActual(),
                 DateTime.Now);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Exclusion",
+                    EntidadViaticoAuditoria,
+                    viatico.IdViatico,
+                    "Se excluyó un viático de la rendición.");
+
             _rendicionRepository
                 .ExcluirViatico(
                     viaje,
-                    viatico);
+                    viatico,
+                    auditoria);
         }
 
         public void ReactivarViatico(
@@ -189,10 +200,18 @@ namespace SIGEVIP.Application.Rendiciones
                 ObtenerIdUsuarioActual(),
                 DateTime.Now);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Reactivacion",
+                    EntidadViaticoAuditoria,
+                    viatico.IdViatico,
+                    "Se reactivó un viático de la rendición.");
+
             _rendicionRepository
                 .ReactivarViatico(
                     viaje,
-                    viatico);
+                    viatico,
+                    auditoria);
         }
 
         public void AjustarAnticipo(
@@ -214,9 +233,17 @@ namespace SIGEVIP.Application.Rendiciones
             viaje.AjustarMontoAnticipado(
                 command.MontoAnticipado);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "AjusteAnticipo",
+                    EntidadViajeAuditoria,
+                    viaje.IdViaje,
+                    "Se ajustó el anticipo del viaje en rendición.");
+
             _rendicionRepository
                 .AjustarMontoAnticipado(
-                    viaje);
+                    viaje,
+                    auditoria);
         }
 
         public void Aprobar(

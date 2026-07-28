@@ -239,6 +239,25 @@ namespace SIGEVIP.Tests.Application
                 10,
                 repository.ViaticoExcluido
                     .IdUsuarioExclusion);
+
+            Assert.IsNotNull(
+                repository.AuditoriaExclusion);
+
+            Assert.AreEqual(
+                "Rendiciones",
+                repository.AuditoriaExclusion.Modulo);
+
+            Assert.AreEqual(
+                "Exclusion",
+                repository.AuditoriaExclusion.Accion);
+
+            Assert.AreEqual(
+                "Viatico",
+                repository.AuditoriaExclusion.Entidad);
+
+            Assert.AreEqual(
+                20,
+                repository.AuditoriaExclusion.IdEntidad);
         }
 
         [TestMethod]
@@ -301,6 +320,25 @@ namespace SIGEVIP.Tests.Application
                 10,
                 repository.ViaticoReactivado
                     .IdUsuarioReactivacion);
+
+            Assert.IsNotNull(
+                repository.AuditoriaReactivacion);
+
+            Assert.AreEqual(
+                "Rendiciones",
+                repository.AuditoriaReactivacion.Modulo);
+
+            Assert.AreEqual(
+                "Reactivacion",
+                repository.AuditoriaReactivacion.Accion);
+
+            Assert.AreEqual(
+                "Viatico",
+                repository.AuditoriaReactivacion.Entidad);
+
+            Assert.AreEqual(
+                20,
+                repository.AuditoriaReactivacion.IdEntidad);
         }
 
         [TestMethod]
@@ -330,6 +368,25 @@ namespace SIGEVIP.Tests.Application
                 400m,
                 repository.AnticipoAjustado
                     .SaldoPendiente);
+
+            Assert.IsNotNull(
+                repository.AuditoriaAjusteAnticipo);
+
+            Assert.AreEqual(
+                "Rendiciones",
+                repository.AuditoriaAjusteAnticipo.Modulo);
+
+            Assert.AreEqual(
+                "AjusteAnticipo",
+                repository.AuditoriaAjusteAnticipo.Accion);
+
+            Assert.AreEqual(
+                "Viaje",
+                repository.AuditoriaAjusteAnticipo.Entidad);
+
+            Assert.AreEqual(
+                1,
+                repository.AuditoriaAjusteAnticipo.IdEntidad);
         }
 
         [TestMethod]
@@ -720,6 +777,24 @@ namespace SIGEVIP.Tests.Application
                 private set;
             }
 
+            public AuditoriaRegistro AuditoriaExclusion
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaReactivacion
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaAjusteAnticipo
+            {
+                get;
+                private set;
+            }
+
             public Viaje AnticipoAjustado
             {
                 get;
@@ -800,25 +875,37 @@ namespace SIGEVIP.Tests.Application
 
             public void ExcluirViatico(
                 Viaje viaje,
-                Viatico viatico)
+                Viatico viatico,
+                AuditoriaRegistro auditoria)
             {
                 ViaticoExcluido =
                     viatico;
+
+                AuditoriaExclusion =
+                    auditoria;
             }
 
             public void ReactivarViatico(
                 Viaje viaje,
-                Viatico viatico)
+                Viatico viatico,
+                AuditoriaRegistro auditoria)
             {
                 ViaticoReactivado =
                     viatico;
+
+                AuditoriaReactivacion =
+                    auditoria;
             }
 
             public void AjustarMontoAnticipado(
-                Viaje viaje)
+                Viaje viaje,
+                AuditoriaRegistro auditoria)
             {
                 AnticipoAjustado =
                     viaje;
+
+                AuditoriaAjusteAnticipo =
+                    auditoria;
             }
 
             public void Aprobar(
