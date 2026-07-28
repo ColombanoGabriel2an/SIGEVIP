@@ -80,6 +80,14 @@ Se encuentran implementados:
 - utilidad `SIGEVIP.Setup`;
 - login y menú principal WinForms;
 - permisos visuales por autorización efectiva;
+- módulo funcional de Gestión de Usuarios;
+- listado, búsqueda y filtros de Usuarios;
+- alta para Personas activas sin cuenta;
+- contraseña inicial protegida mediante PBKDF2;
+- modificación del nombre de Usuario;
+- asignación y reemplazo transaccional de Grupos directos;
+- activación y desactivación lógica de Usuarios;
+- protección del Usuario autenticado y del último Administrador;
 - módulo funcional de Clientes;
 - persistencia SQL de Clientes;
 - alta y modificación de Clientes;
@@ -110,13 +118,13 @@ Se encuentran implementados:
 - aprobación y cancelación de Rendiciones;
 - cálculo de total gastado vigente y saldo pendiente;
 - validación SQL de las migraciones `003` a `006`;
-- 415 pruebas automatizadas correctas;
+- 462 pruebas automatizadas correctas;
 - compilación con 0 advertencias y 0 errores;
-- validación manual de Clientes, Viajes, Visitas, Viáticos y Rendiciones.
+- validación manual de Usuarios, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
 
 Permanecen pendientes:
 
-- gestión funcional de usuarios, grupos y permisos;
+- gestión funcional de grupos y permisos;
 - historial funcional completo del cliente;
 - auditoría general consultable;
 - reportes;

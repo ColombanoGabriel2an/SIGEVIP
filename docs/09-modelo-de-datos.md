@@ -337,7 +337,7 @@ No se implementó eliminación física como operación funcional.
 
 Las tablas asociativas no contienen columna Activo.
 
-Las asignaciones se podrán agregar o retirar mediante operaciones transaccionales posteriores.
+Las asignaciones de Grupos directos se agregan y reemplazan mediante operaciones transaccionales de `UsuarioGestionRepository`.
 
 ## 12. Política de cascada
 
@@ -500,12 +500,11 @@ Resultado consolidado:
 
 ## 19. Reglas pendientes
 
-- Repositorios de mantenimiento de usuarios.
-- Alta y modificación persistente de grupos.
-- Alta y modificación persistente de permisos.
-- Persistencia funcional de nuevas asociaciones.
-- Auditoría persistente.
-- Integración con WinForms.
+- Alta y modificación persistente del catálogo de Grupos.
+- Alta y modificación persistente del catálogo de Permisos.
+- Persistencia visual de relaciones Grupo-Permiso.
+- Persistencia visual de relaciones Grupo-Grupo.
+- Auditoría general consultable.
 
 ## 20. Commits técnicos
 
@@ -520,6 +519,91 @@ Integración persistente:
 - `514ba5a` — `Agrego inicialización del administrador`
 - `a89c186` — `Agrego herramienta de configuración inicial`
 - `62396ba` — `Pruebo jerarquías persistidas de seguridad`
+
+## Gestión persistente de Usuarios
+
+La gestión funcional reutiliza el esquema creado por:
+
+`database/migrations/002_crear_seguridad.sql`
+
+No fue necesaria una migración adicional.
+
+### Alta de Usuario
+
+`UsuarioGestionRepository.Insertar` persiste dentro de una única transacción:
+
+1. comprobación de la Persona;
+2. comprobación de disponibilidad de la Persona;
+3. comprobación de unicidad del nombre;
+4. comprobación de Grupos activos;
+5. inserción en `dbo.Usuario`;
+6. recuperación del identificador mediante `SCOPE_IDENTITY`;
+7. inserción de una o varias filas en `dbo.UsuarioGrupo`;
+8. commit.
+
+Ante un error se ejecuta rollback.
+
+### Modificación de Usuario
+
+`UsuarioGestionRepository.Actualizar` ejecuta dentro de una única transacción:
+
+1. comprobación de unicidad del nombre;
+2. comprobación de Grupos activos;
+3. actualización de `dbo.Usuario.NombreUsuario`;
+4. eliminación de asignaciones anteriores en `dbo.UsuarioGrupo`;
+5. inserción de la colección completa de Grupos directos;
+6. commit.
+
+El reemplazo completo evita diferencias entre:
+
+- la colección del dominio;
+- la selección de la interfaz;
+- las filas persistidas.
+
+### Activación y desactivación
+
+El estado se modifica mediante:
+
+`UPDATE dbo.Usuario SET Activo = @Activo`
+
+No se realiza borrado físico.
+
+### Concurrencia e integridad
+
+Application realiza validaciones anticipadas.
+
+SQL Server conserva la integridad definitiva mediante:
+
+- `UX_Usuario_NombreUsuario`;
+- `UX_Usuario_IdPersona`;
+- `PK_UsuarioGrupo`;
+- claves foráneas.
+
+Infrastructure reconoce los errores:
+
+- `2601`;
+- `2627`.
+
+Los conflictos se traducen a mensajes funcionales sin exponer detalles técnicos de SQL Server.
+
+### Consulta de Personas disponibles
+
+Una Persona está disponible para el alta cuando:
+
+- se encuentra activa;
+- no existe un Usuario asociado.
+
+La consulta se implementa mediante `NOT EXISTS` sobre `dbo.Usuario`.
+
+### Consulta del último Administrador
+
+La protección administrativa comprueba la existencia de otro Usuario:
+
+- activo;
+- asignado directamente a un Grupo activo;
+- cuyo código sea `ADMINISTRADOR_GENERAL`.
+
+Esta consulta respalda la regla que impide eliminar el último acceso administrativo.
 
 ## Modelo relacional de Clientes
 

@@ -4,16 +4,16 @@
 
 Etapa 4: módulos funcionales documentados.
 
-Bloque actual: cierre técnico y documental del módulo Viáticos y Rendiciones.
+Bloque actual: cierre técnico y documental del módulo de Gestión de Usuarios.
 
 ## Rama de trabajo
 
 `desarrollo/interfaz-funcional`
 
-## Último cierre específico del módulo publicado
+## Último cierre funcional publicado
 
-- Commit: `54f16d4`
-- Mensaje: `Documento modulo de viaticos y rendiciones`
+- Commit: `9460bf9`
+- Mensaje: `Completo interfaz de gestion de usuarios`
 
 La rama local se encuentra sincronizada con:
 
@@ -259,8 +259,8 @@ Ese formulario solo servía para comprobar la conexión inicial y ya no particip
 
 ### Pruebas
 
-- Totales: 415.
-- Correctas: 415.
+- Totales: 462.
+- Correctas: 462.
 - Fallidas: 0.
 
 Incluyen:
@@ -328,35 +328,40 @@ Las operaciones funcionales concretas de cada módulo deberán validar nuevament
 
 ### RF03 — Gestionar usuarios
 
-Parcialmente implementado.
+Implementado.
 
-Implementado:
+Incluye:
 
-- entidad Usuario;
-- persistencia base;
-- grupos;
-- permisos;
-- acceso visual autorizado.
-
-Pendiente:
-
-- casos de uso de mantenimiento;
-- repositorios de mantenimiento;
-- formulario funcional.
+- listado;
+- búsqueda;
+- filtros;
+- detalle;
+- alta;
+- modificación;
+- activación;
+- desactivación lógica;
+- validación de Persona;
+- contraseña inicial segura;
+- repositorio ADO.NET;
+- interfaz funcional;
+- navegación;
+- pruebas unitarias;
+- pruebas de integración SQL;
+- validación manual.
 
 ### RF04 — Asignar uno o más grupos
 
-Parcialmente implementado.
+Implementado.
 
-Implementado:
+Incluye:
 
-- modelo de dominio;
-- tabla `UsuarioGrupo`;
-- asignación inicial del administrador.
-
-Pendiente:
-
-- mantenimiento desde casos de uso e interfaz.
+- selección de uno o varios Grupos activos;
+- rechazo de asignaciones vacías;
+- rechazo de duplicados;
+- reemplazo completo de Grupos directos;
+- persistencia transaccional;
+- protección del último Administrador activo;
+- aplicación de los cambios en la siguiente autenticación.
 
 ### RF37 — Impedir accesos no autorizados
 
@@ -396,10 +401,10 @@ Se utilizan:
 
 ## Pendiente inmediato
 
-- Actualizar la documentación transversal del proyecto.
-- Ejecutar regresión final.
-- Publicar el cierre documental de Viáticos y Rendiciones.
-- Preparar el siguiente incremento funcional.
+- Completar el cierre documental del módulo Usuarios.
+- Ejecutar regresión documental final.
+- Publicar el cierre documental.
+- Preparar el siguiente módulo funcional.
 
 ## Etapas posteriores
 
@@ -788,3 +793,127 @@ Después del cierre de Visitas se completaron:
 - 415 pruebas automatizadas correctas;
 - validación manual aprobada;
 - documentación específica del módulo.
+
+## Módulo funcional de Gestión de Usuarios
+
+El módulo Usuarios se encuentra implementado de extremo a extremo dentro del alcance aprobado.
+
+### Domain
+
+Se implementaron:
+
+- actualización normalizada del nombre de Usuario;
+- reemplazo controlado de Grupos directos;
+- rechazo de colecciones vacías;
+- rechazo de Grupos nulos;
+- rechazo de Grupos duplicados;
+- preservación del estado anterior ante una modificación inválida.
+
+### Application
+
+Se implementaron:
+
+- `UsuarioFiltro`;
+- `UsuarioListadoDto`;
+- `UsuarioDetalleDto`;
+- `PersonaSeleccionUsuarioDto`;
+- `GrupoSeleccionUsuarioDto`;
+- `RegistrarUsuarioCommand`;
+- `ModificarUsuarioCommand`;
+- `IUsuarioGestionRepository`;
+- `UsuarioGestionService`.
+
+Casos de uso disponibles:
+
+- listar;
+- obtener detalle;
+- listar Personas disponibles;
+- listar Grupos activos;
+- registrar;
+- modificar;
+- activar;
+- desactivar.
+
+Las operaciones validan:
+
+- sesión autenticada;
+- Usuario activo;
+- permiso `USUARIO_GESTIONAR`;
+- Persona existente y activa;
+- ausencia de otro Usuario para la Persona;
+- unicidad del nombre de Usuario;
+- contraseña inicial;
+- al menos un Grupo activo;
+- protección del Usuario autenticado;
+- protección del último Administrador activo.
+
+### Infrastructure
+
+Se implementó:
+
+`src/SIGEVIP.Infrastructure/Usuarios/UsuarioGestionRepository.cs`
+
+Responsabilidades:
+
+- listar con búsqueda y filtros;
+- recuperar detalle;
+- reconstruir Usuario y Grupos directos;
+- consultar Personas disponibles;
+- consultar Grupos activos;
+- insertar Usuario y asignaciones dentro de una transacción;
+- modificar nombre y reemplazar asignaciones dentro de una transacción;
+- activar;
+- desactivar;
+- detectar otro Administrador activo;
+- traducir duplicados y errores técnicos.
+
+No fue necesaria una migración nueva porque el esquema de seguridad existente ya contenía:
+
+- `dbo.Persona`;
+- `dbo.Usuario`;
+- `dbo.Grupo`;
+- `dbo.UsuarioGrupo`;
+- índices únicos;
+- claves foráneas;
+- clave primaria compuesta.
+
+### WinForms
+
+Se implementaron:
+
+- `UsuariosForm`;
+- `UsuarioEditForm`;
+- navegación desde `MainForm`;
+- coordinación desde `SigevipApplicationContext`;
+- composición en `Program`.
+
+La interfaz permite:
+
+- listar;
+- buscar;
+- filtrar;
+- registrar;
+- modificar;
+- activar;
+- desactivar;
+- seleccionar una Persona disponible;
+- seleccionar varios Grupos;
+- validar contraseña inicial;
+- visualizar el Usuario autenticado;
+- bloquear visualmente operaciones prohibidas.
+
+### Validación técnica
+
+- compilación con 0 advertencias y 0 errores;
+- 462 pruebas automatizadas correctas;
+- 0 pruebas fallidas;
+- pruebas unitarias de Domain y Application;
+- pruebas de integración real con SQL Server;
+- validación manual completa;
+- limpieza comprobada de los datos temporales.
+
+### Commits del módulo
+
+- `e13d291` — `Agrego casos de uso de usuarios`
+- `ad7772c` — `Agrego persistencia de usuarios`
+- `9460bf9` — `Completo interfaz de gestion de usuarios`

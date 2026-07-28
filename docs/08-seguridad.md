@@ -22,10 +22,14 @@ El subsistema de seguridad contiene:
 - Menú principal autorizado.
 - Cierre de sesión.
 - Ocultamiento de opciones no autorizadas.
+- Mantenimiento funcional de Usuarios.
+- Asignación de uno o varios Grupos directos.
+- Activación y desactivación lógica de Usuarios.
+- Protección del Usuario autenticado.
+- Protección del último Administrador activo.
 
 No incluye todavía:
 
-- mantenimiento funcional de usuarios;
 - mantenimiento de grupos;
 - mantenimiento de permisos;
 - cambio de contraseña;
@@ -346,11 +350,11 @@ Características:
 
 ### Pruebas automatizadas
 
-- 415 pruebas totales;
-- 415 correctas;
+- 462 pruebas totales;
+- 462 correctas;
 - 0 fallidas.
 
-La regresión incluye seguridad, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
+La regresión incluye seguridad, Gestión de Usuarios, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
 
 ### Interfaz
 
@@ -368,11 +372,121 @@ Se verificó:
 - retorno al login;
 - salida controlada.
 
-## 19. Responsabilidades pendientes
+## 19. Gestión funcional de Usuarios
+
+La gestión funcional de Usuarios utiliza:
+
+- `UsuarioGestionService`;
+- `IUsuarioGestionRepository`;
+- `UsuarioGestionRepository`;
+- `UsuariosForm`;
+- `UsuarioEditForm`.
+
+El acceso requiere:
+
+`USUARIO_GESTIONAR`
+
+La autorización se valida tanto en la interfaz como en Application.
+
+### Alta
+
+El alta exige:
+
+- Persona existente;
+- Persona activa;
+- Persona sin otro Usuario;
+- nombre de Usuario único;
+- contraseña inicial;
+- confirmación coincidente;
+- longitud mínima de ocho caracteres;
+- al menos un Grupo activo.
+
+La contraseña inicial se transforma mediante:
+
+`Pbkdf2PasswordHasher`
+
+No se persiste ni registra en texto plano.
+
+### Modificación
+
+La modificación permite:
+
+- cambiar el nombre de Usuario;
+- reemplazar la totalidad de los Grupos directos.
+
+No permite:
+
+- cambiar la Persona asociada;
+- modificar la contraseña;
+- modificar al Usuario autenticado durante la sesión;
+- dejar al Usuario sin Grupos.
+
+### Persistencia transaccional
+
+El alta ejecuta dentro de una transacción:
+
+1. validación defensiva de Persona;
+2. validación de nombre;
+3. validación de Grupos;
+4. inserción de Usuario;
+5. inserción de `UsuarioGrupo`;
+6. commit.
+
+La modificación ejecuta dentro de una transacción:
+
+1. validación de nombre;
+2. validación de Grupos;
+3. actualización del nombre;
+4. eliminación de asignaciones anteriores;
+5. inserción de las nuevas asignaciones;
+6. commit.
+
+Ante cualquier error se ejecuta rollback.
+
+### Protecciones administrativas
+
+Se impide:
+
+- modificar al Usuario autenticado;
+- desactivar al Usuario autenticado;
+- desactivar al último Administrador activo;
+- retirar `ADMINISTRADOR_GENERAL` al último Administrador activo;
+- dejar a un Usuario sin Grupos.
+
+Los cambios de autorización se reflejan al iniciar una nueva sesión.
+
+## 20. Validación del módulo Usuarios
+
+Se ejecutaron:
+
+- pruebas de Domain;
+- pruebas de Application;
+- pruebas de integración SQL;
+- validación manual del ejecutable.
+
+Resultado:
+
+- 0 advertencias;
+- 0 errores;
+- 462 pruebas correctas;
+- 0 pruebas fallidas.
+
+La validación manual comprobó:
+
+- alta;
+- modificación;
+- asignación de Grupos;
+- autenticación con contraseña inicial;
+- ocultamiento de opciones;
+- desactivación;
+- bloqueo de autenticación del Usuario inactivo;
+- reactivación;
+- protecciones sobre el Usuario autenticado.
+
+## 21. Responsabilidades pendientes
 
 ### Application
 
-- casos de uso de mantenimiento de usuarios;
 - cambio de contraseña;
 - recuperación de contraseña;
 - gestión de grupos;
@@ -382,21 +496,19 @@ Se verificó:
 
 ### Infrastructure
 
-- repositorios de mantenimiento;
-- persistencia de cambios de grupos;
+- persistencia de cambios de grupos administrados desde un módulo específico de Grupos;
 - persistencia de cambios de permisos;
 - auditoría.
 
 ### WinForms
 
-- formulario funcional de usuarios;
 - formulario funcional de grupos;
 - formulario funcional de permisos;
 - pantalla de auditoría;
 - cambio de contraseña;
 - recuperación de contraseña.
 
-## 20. Estado académico
+## 22. Estado académico
 
 El flujo de seguridad básico del MVP está implementado y comprobado:
 
@@ -408,4 +520,12 @@ El flujo de seguridad básico del MVP está implementado y comprobado:
 - cierre de sesión;
 - salida.
 
-Las funcionalidades de administración avanzada continúan pendientes para etapas posteriores.
+La gestión funcional de Usuarios y sus Grupos directos se encuentra implementada y comprobada.
+
+Continúan pendientes para etapas posteriores:
+
+- gestión del catálogo de Grupos;
+- gestión del catálogo de Permisos;
+- cambio de contraseña;
+- recuperación de contraseña;
+- auditoría general.

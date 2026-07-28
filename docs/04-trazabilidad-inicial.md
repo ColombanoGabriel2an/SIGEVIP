@@ -5,11 +5,11 @@
 | Aplicación de escritorio | Windows Forms | SIGEVIP.WinForms | Login y menú ejecutados manualmente | Implementado |
 | Lenguaje C# | .NET Framework 4.8 | Todos | 0 advertencias y 0 errores | Implementado |
 | Arquitectura en capas | Domain, Application, Infrastructure y WinForms | Todos | ArchitectureTests | Implementado |
-| Persistencia local | SQL Server y ADO.NET | Infrastructure / database | Base SIGEVIP operativa | Implementado para seguridad, Clientes, Viajes y Visitas |
+| Persistencia local | SQL Server y ADO.NET | Infrastructure / database | Base SIGEVIP operativa | Implementado para seguridad, Usuarios, Clientes, Viajes, Visitas, Viáticos y Rendiciones |
 | RF01: iniciar sesión | `LoginForm`, `AutenticacionService`, PBKDF2 y `UsuarioAutenticacionRepository` | WinForms / Application / Infrastructure / database | Autenticación manual y pruebas automatizadas | Implementado |
 | RF02: validar credenciales y habilitar funciones | `SesionActual`, `SigevipApplicationContext`, `AutorizacionService` y `MainForm` | Application / Infrastructure / WinForms | Inicio de sesión, menú y permisos visuales | Implementado para menú principal |
-| RF03: gestionar usuarios | Entidad Usuario, tablas Persona-Usuario y acceso visual Usuarios | Domain / database / WinForms | Dominio y persistencia base | Parcialmente implementado |
-| RF04: asignar uno o más grupos | Colección de grupos, `UsuarioGrupo` y alta inicial | Domain / Application / Infrastructure / database | Duplicados impedidos y administrador inicial | Parcialmente implementado |
+| RF03: gestionar usuarios | `UsuarioGestionService`, `UsuarioGestionRepository`, `UsuariosForm` y `UsuarioEditForm` | Domain / Application / Infrastructure / database / WinForms | Unitarias, integración SQL y validación manual | Implementado |
+| RF04: asignar uno o más grupos | `Usuario.ReemplazarGrupos`, commands, servicio, transacción sobre `UsuarioGrupo` y selección múltiple | Domain / Application / Infrastructure / database / WinForms | Uno, varios, vacíos, duplicados, reemplazo y último Administrador | Implementado |
 | RF05: registrar clientes | `Cliente`, `ClienteService.Registrar`, `ClienteRepository.Insertar` y `ClienteEditForm` | Domain / Application / Infrastructure / database / WinForms | Pruebas unitarias, integración SQL y validación manual | Implementado |
 | RF06: modificar clientes | `Cliente.ActualizarDatos`, `ClienteService.Modificar`, `ClienteRepository.Actualizar` y `ClienteEditForm` | Domain / Application / Infrastructure / database / WinForms | Pruebas unitarias, integración SQL y validación manual | Implementado |
 | RF07: activar o desactivar clientes | Entidad, servicio, repositorio, campo `Activo` y acciones de `ClientesForm` | Domain / Application / Infrastructure / database / WinForms | Pruebas unitarias, integración SQL y validación manual | Implementado |
@@ -38,14 +38,14 @@
 | RF30: aprobar viaje | `Viaje.Aprobar`, `RendicionService.Aprobar` y persistencia | Domain / Application / Infrastructure / database / WinForms | Unitarias, integración SQL y manual | Implementado |
 | RF31: cancelar rendición | `Viaje.Cancelar`, `RendicionService.Cancelar` y motivo obligatorio | Domain / Application / Infrastructure / database / WinForms | Unitarias, integración SQL y manual | Implementado |
 | RF32: saldo final | Total de Viáticos vigentes menos anticipo | Domain / Application / Infrastructure / WinForms | Pruebas económicas, integración y manual | Implementado |
-| RF37: impedir accesos no autorizados | `AutorizacionService`, validaciones de Cliente, Viaje, Visita, Viático y Rendición | Application / Infrastructure / WinForms | Pruebas de Application y validación manual | Implementado para seguridad y módulos funcionales actuales |
-| RF38: ocultar opciones no habilitadas | `MainForm` y formularios configuran visibilidad y habilitación según permisos efectivos | WinForms | Clientes, Viajes, Visitas, Viáticos y Rendiciones | Implementado |
+| RF37: impedir accesos no autorizados | `AutorizacionService` y validaciones de Usuario, Cliente, Viaje, Visita, Viático y Rendición | Application / Infrastructure / WinForms | Pruebas de Application y validación manual | Implementado para seguridad y módulos funcionales actuales |
+| RF38: ocultar opciones no habilitadas | `MainForm` y formularios configuran visibilidad y habilitación según permisos efectivos | WinForms | Usuarios, Clientes, Viajes, Visitas, Viáticos y Rendiciones | Implementado |
 | RF39: acceso mediante grupos y permisos | Usuario, Grupo, Permiso y Composite persistido | Domain / Application / Infrastructure / database / WinForms | Pruebas unitarias, integración SQL y menú | Implementado |
 | Perfil del usuario autenticado | `PerfilSesion`, servicio y repositorio ADO.NET | Application / Infrastructure / WinForms | Nombre completo y usuario visibles | Implementado |
 | Cierre de sesión | Evento `CerrarSesionSolicitada` y `SesionActual.Cerrar()` | WinForms / Application | Retorno al login | Implementado |
 | Salida controlada | `SalirSolicitado` y `ApplicationContext.ExitThread()` | WinForms | Botón Salir y cruz de ventana | Implementado |
 | Persona 1 a 0..1 Usuario | Entidades separadas e índice único | Domain / database | Restricción SQL | Implementado |
-| Usuario N a N Grupo | Colección y tabla `UsuarioGrupo` | Domain / database | PK compuesta | Implementado |
+| Usuario N a N Grupo | Colección, `ReemplazarGrupos`, servicio y tabla `UsuarioGrupo` | Domain / Application / Infrastructure / database / WinForms | PK compuesta, transacciones, integración SQL y manual | Implementado |
 | Grupo N a N Permiso | Composite y `GrupoPermiso` | Domain / database | 22 asociaciones iniciales | Implementado |
 | Grupo N a N Grupo | Composite y `GrupoGrupo` | Domain / Infrastructure / database | Herencia y ciclos | Implementado |
 | Grupo Composite | Grupo contiene Permiso o Grupo | Domain | Ciclos y duplicados | Implementado |
