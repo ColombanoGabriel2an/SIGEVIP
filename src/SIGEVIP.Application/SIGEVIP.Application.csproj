@@ -50,6 +50,13 @@
     <Compile Include="Grupos\ModificarGrupoCommand.cs" />
     <Compile Include="Grupos\PermisoSeleccionGrupoDto.cs" />
     <Compile Include="Grupos\RegistrarGrupoCommand.cs" />
+    <Compile Include="Permisos\IPermisoGestionRepository.cs" />
+    <Compile Include="Permisos\ModificarPermisoCommand.cs" />
+    <Compile Include="Permisos\PermisoDetalleDto.cs" />
+    <Compile Include="Permisos\PermisoFiltro.cs" />
+    <Compile Include="Permisos\PermisoGestionService.cs" />
+    <Compile Include="Permisos\PermisoListadoDto.cs" />
+    <Compile Include="Permisos\RegistrarPermisoCommand.cs" />
     <Compile Include="Clientes\ClienteFiltro.cs" />
     <Compile Include="Clientes\ClienteListadoDto.cs" />
     <Compile Include="Clientes\ClienteService.cs" />

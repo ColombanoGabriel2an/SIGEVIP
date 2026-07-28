@@ -49,6 +49,7 @@
     <Compile Include="Application\AutorizacionServiceTests.cs" />
     <Compile Include="Application\ClienteServiceTests.cs" />
     <Compile Include="Application\GrupoGestionServiceTests.cs" />
+    <Compile Include="Application\PermisoGestionServiceTests.cs" />
     <Compile Include="Domain\GrupoGestionDomainTests.cs" />
     <Compile Include="Application\UsuarioGestionServiceTests.cs" />
     <Compile Include="Application\InicializacionSeguridadServiceTests.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="Domain\ClienteTests.cs" />
     <Compile Include="Domain\ComprobanteTests.cs" />
     <Compile Include="Domain\GrupoPermisoTests.cs" />
+    <Compile Include="Domain\PermisoGestionDomainTests.cs" />
     <Compile Include="Domain\PersonaTests.cs" />
     <Compile Include="Domain\UsuarioTests.cs" />
     <Compile Include="Domain\UsuarioCredencialesTests.cs" />
