@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Domain.Entities;
 
 namespace SIGEVIP.Application.Viaticos
@@ -14,9 +15,11 @@ namespace SIGEVIP.Application.Viaticos
                 ViaticoFiltro filtro);
 
         int Insertar(
-            Viatico viatico);
+            Viatico viatico,
+            AuditoriaRegistro auditoria);
 
         void Actualizar(
-            Viatico viatico);
+            Viatico viatico,
+            AuditoriaRegistro auditoria);
     }
 }

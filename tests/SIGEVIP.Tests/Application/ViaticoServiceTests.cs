@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Application.Viajes;
@@ -92,6 +93,24 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 1500m,
                 viaticos.Insertado.Monto);
+
+            Assert.IsNotNull(
+                viaticos.AuditoriaInsertada);
+
+            Assert.AreEqual(
+                "Viaticos",
+                viaticos.AuditoriaInsertada.Modulo);
+
+            Assert.AreEqual(
+                "Alta",
+                viaticos.AuditoriaInsertada.Accion);
+
+            Assert.AreEqual(
+                "Viatico",
+                viaticos.AuditoriaInsertada.Entidad);
+
+            Assert.IsNull(
+                viaticos.AuditoriaInsertada.IdEntidad);
         }
 
         [TestMethod]
@@ -264,6 +283,25 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 "Cena comercial",
                 viaticos.Actualizado.Descripcion);
+
+            Assert.IsNotNull(
+                viaticos.AuditoriaActualizacion);
+
+            Assert.AreEqual(
+                "Viaticos",
+                viaticos.AuditoriaActualizacion.Modulo);
+
+            Assert.AreEqual(
+                "Modificacion",
+                viaticos.AuditoriaActualizacion.Accion);
+
+            Assert.AreEqual(
+                "Viatico",
+                viaticos.AuditoriaActualizacion.Entidad);
+
+            Assert.AreEqual(
+                10,
+                viaticos.AuditoriaActualizacion.IdEntidad);
         }
 
         [TestMethod]
@@ -720,6 +758,18 @@ namespace SIGEVIP.Tests.Application
                 private set;
             }
 
+            public AuditoriaRegistro AuditoriaInsertada
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaActualizacion
+            {
+                get;
+                private set;
+            }
+
             public int UltimoIdViaje
             {
                 get;
@@ -767,19 +817,27 @@ namespace SIGEVIP.Tests.Application
             }
 
             public int Insertar(
-                Viatico viatico)
+                Viatico viatico,
+                AuditoriaRegistro auditoria)
             {
                 Insertado =
                     viatico;
+
+                AuditoriaInsertada =
+                    auditoria;
 
                 return 30;
             }
 
             public void Actualizar(
-                Viatico viatico)
+                Viatico viatico,
+                AuditoriaRegistro auditoria)
             {
                 Actualizado =
                     viatico;
+
+                AuditoriaActualizacion =
+                    auditoria;
             }
         }
 

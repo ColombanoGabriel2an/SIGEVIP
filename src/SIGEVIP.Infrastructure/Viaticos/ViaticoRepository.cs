@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Viaticos;
 using SIGEVIP.Domain.Entities;
 using SIGEVIP.Domain.Enums;
 using SIGEVIP.Domain.Exceptions;
+using SIGEVIP.Infrastructure.Auditoria;
 using SIGEVIP.Infrastructure.Data;
 using SIGEVIP.Infrastructure.Exceptions;
 
@@ -328,6 +330,30 @@ ORDER BY
         public int Insertar(
             Viatico viatico)
         {
+            return InsertarInterno(
+                viatico,
+                null);
+        }
+
+        public int Insertar(
+            Viatico viatico,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            return InsertarInterno(
+                viatico,
+                auditoria);
+        }
+
+        private int InsertarInterno(
+            Viatico viatico,
+            AuditoriaRegistro auditoria)
+        {
             ValidarViaticoParaInsertar(
                 viatico);
 
@@ -428,6 +454,15 @@ SELECT
                                     viatico.Comprobante);
                             }
 
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria.ConIdEntidad(
+                                        idViatico));
+                            }
+
                             transaction.Commit();
 
                             return idViatico;
@@ -458,6 +493,30 @@ SELECT
 
         public void Actualizar(
             Viatico viatico)
+        {
+            ActualizarInterno(
+                viatico,
+                null);
+        }
+
+        public void Actualizar(
+            Viatico viatico,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarInterno(
+                viatico,
+                auditoria);
+        }
+
+        private void ActualizarInterno(
+            Viatico viatico,
+            AuditoriaRegistro auditoria)
         {
             ValidarViaticoParaActualizar(
                 viatico);
@@ -534,6 +593,14 @@ WHERE
                                 connection,
                                 transaction,
                                 viatico);
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
 
                             transaction.Commit();
                         }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Application.Viajes;
@@ -19,6 +20,12 @@ namespace SIGEVIP.Application.Viaticos
 
         public const string PermisoModificar =
             "VIATICO_MODIFICAR";
+
+        private const string ModuloAuditoria =
+            "Viaticos";
+
+        private const string EntidadAuditoria =
+            "Viatico";
 
         private readonly IViaticoRepository
             _viaticoRepository;
@@ -174,9 +181,16 @@ namespace SIGEVIP.Application.Viaticos
             viaje.AgregarViatico(
                 viatico);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Alta",
+                    null,
+                    "Se registró un viático y su comprobante asociado.");
+
             return _viaticoRepository
                 .Insertar(
-                    viatico);
+                    viatico,
+                    auditoria);
         }
 
         public void Modificar(
@@ -226,8 +240,33 @@ namespace SIGEVIP.Application.Viaticos
                 command.Descripcion,
                 comprobante);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Modificacion",
+                    viatico.IdViatico,
+                    "Se modificó el viático y su comprobante asociado.");
+
             _viaticoRepository.Actualizar(
-                viatico);
+                viatico,
+                auditoria);
+        }
+
+        private AuditoriaRegistro CrearAuditoria(
+            string accion,
+            int? idEntidad,
+            string descripcion)
+        {
+            Usuario usuarioActual =
+                _sesionActual.UsuarioActual;
+
+            return new AuditoriaRegistro(
+                usuarioActual.IdUsuario,
+                usuarioActual.NombreUsuario,
+                ModuloAuditoria,
+                accion,
+                EntidadAuditoria,
+                idEntidad,
+                descripcion);
         }
 
         private Viaje ObtenerViaje(
