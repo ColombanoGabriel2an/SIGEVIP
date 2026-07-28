@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Rendiciones;
 using SIGEVIP.Domain.Entities;
 using SIGEVIP.Domain.Enums;
@@ -301,6 +302,145 @@ namespace SIGEVIP.Tests.Integration
             }
         }
 
+        [TestMethod]
+        public void Enviar_ConAuditoriaValida_PersisteEstadoYEvento()
+        {
+            DatosPrueba datos =
+                CrearDatosPrueba();
+
+            try
+            {
+                RendicionRepository repository =
+                    CrearRendicionRepository();
+
+                Viaje viaje =
+                    repository.ObtenerPorId(
+                        datos.IdViaje);
+
+                DateTime fechaEnvio =
+                    new DateTime(
+                        2034,
+                        5,
+                        16,
+                        14,
+                        30,
+                        0);
+
+                viaje.EnviarARendicion(
+                    datos.IdUsuario,
+                    fechaEnvio);
+
+                AuditoriaRegistro auditoria =
+                    CrearAuditoriaValida(
+                        datos);
+
+                repository.Enviar(
+                    viaje,
+                    auditoria);
+
+                Viaje recuperado =
+                    repository.ObtenerPorId(
+                        datos.IdViaje);
+
+                Assert.IsNotNull(
+                    recuperado);
+
+                Assert.AreEqual(
+                    EstadoViaje.EnRendicion,
+                    recuperado.EstadoActual);
+
+                Assert.AreEqual(
+                    datos.IdUsuario,
+                    recuperado
+                        .IdUsuarioEnvioRendicion);
+
+                Assert.AreEqual(
+                    fechaEnvio,
+                    recuperado
+                        .FechaEnvioRendicion);
+
+                Assert.AreEqual(
+                    1,
+                    ContarAuditoriasEnvio(
+                        datos));
+
+                Assert.AreEqual(
+                    datos.IdUsuario,
+                    ObtenerIdUsuarioAuditoria(
+                        datos));
+            }
+            finally
+            {
+                EliminarDatosPrueba(
+                    datos);
+            }
+        }
+
+        [TestMethod]
+        public void Enviar_ConActorInexistente_RevierteEstadoYDatosDeEnvio()
+        {
+            DatosPrueba datos =
+                CrearDatosPrueba();
+
+            try
+            {
+                RendicionRepository repository =
+                    CrearRendicionRepository();
+
+                Viaje viaje =
+                    repository.ObtenerPorId(
+                        datos.IdViaje);
+
+                viaje.EnviarARendicion(
+                    datos.IdUsuario,
+                    new DateTime(
+                        2034,
+                        5,
+                        16,
+                        15,
+                        0,
+                        0));
+
+                Assert.ThrowsException<
+                    PersistenciaException>(
+                        () => repository.Enviar(
+                            viaje,
+                            CrearAuditoriaInvalida(
+                                datos)));
+
+                Viaje recuperado =
+                    repository.ObtenerPorId(
+                        datos.IdViaje);
+
+                Assert.IsNotNull(
+                    recuperado);
+
+                Assert.AreEqual(
+                    EstadoViaje.Abierto,
+                    recuperado.EstadoActual);
+
+                Assert.IsFalse(
+                    recuperado
+                        .IdUsuarioEnvioRendicion
+                        .HasValue);
+
+                Assert.IsFalse(
+                    recuperado
+                        .FechaEnvioRendicion
+                        .HasValue);
+
+                Assert.AreEqual(
+                    0,
+                    ContarAuditoriasEnvio(
+                        datos));
+            }
+            finally
+            {
+                EliminarDatosPrueba(
+                    datos);
+            }
+        }
+
         private static RendicionRepository
             CrearRendicionRepository()
         {
@@ -335,6 +475,10 @@ namespace SIGEVIP.Tests.Integration
                         5,
                         15),
                     1250m);
+
+            datos.Marca =
+                "RENDICION_AUDIT_TEST_" +
+                sufijo;
 
             datos.IdPersona =
                 InsertarPersona(
@@ -376,6 +520,134 @@ namespace SIGEVIP.Tests.Integration
                         viaje);
 
             return datos;
+        }
+
+        private static AuditoriaRegistro
+            CrearAuditoriaValida(
+                DatosPrueba datos)
+        {
+            return new AuditoriaRegistro(
+                datos.IdUsuario,
+                "usuario_integracion_rendicion",
+                "Rendiciones",
+                "EnvioARendicion",
+                "Viaje",
+                datos.IdViaje,
+                datos.Marca +
+                    " envio valido");
+        }
+
+        private static AuditoriaRegistro
+            CrearAuditoriaInvalida(
+                DatosPrueba datos)
+        {
+            return new AuditoriaRegistro(
+                int.MaxValue,
+                "actor_rendicion_inexistente",
+                "Rendiciones",
+                "EnvioARendicion",
+                "Viaje",
+                datos.IdViaje,
+                datos.Marca +
+                    " envio invalido");
+        }
+
+        private static int ContarAuditoriasEnvio(
+            DatosPrueba datos)
+        {
+            const string sql = @"
+SELECT COUNT(*)
+FROM dbo.Auditoria
+WHERE
+    Modulo = N'Rendiciones'
+    AND Accion = N'EnvioARendicion'
+    AND Entidad = N'Viaje'
+    AND IdEntidad = @IdViaje
+    AND Descripcion LIKE @Marca;";
+
+            using (
+                SqlConnection connection =
+                    new SqlConnection(
+                        ObtenerConnectionString()))
+            using (
+                SqlCommand command =
+                    new SqlCommand(
+                        sql,
+                        connection))
+            {
+                command.Parameters.Add(
+                    "@IdViaje",
+                    SqlDbType.Int).Value =
+                        datos.IdViaje;
+
+                command.Parameters.Add(
+                    "@Marca",
+                    SqlDbType.NVarChar,
+                    1000).Value =
+                        "%" +
+                        datos.Marca +
+                        "%";
+
+                connection.Open();
+
+                return Convert.ToInt32(
+                    command.ExecuteScalar());
+            }
+        }
+
+        private static int ObtenerIdUsuarioAuditoria(
+            DatosPrueba datos)
+        {
+            const string sql = @"
+SELECT TOP (1)
+    IdUsuario
+FROM dbo.Auditoria
+WHERE
+    Modulo = N'Rendiciones'
+    AND Accion = N'EnvioARendicion'
+    AND Entidad = N'Viaje'
+    AND IdEntidad = @IdViaje
+    AND Descripcion LIKE @Marca
+ORDER BY IdAuditoria DESC;";
+
+            using (
+                SqlConnection connection =
+                    new SqlConnection(
+                        ObtenerConnectionString()))
+            using (
+                SqlCommand command =
+                    new SqlCommand(
+                        sql,
+                        connection))
+            {
+                command.Parameters.Add(
+                    "@IdViaje",
+                    SqlDbType.Int).Value =
+                        datos.IdViaje;
+
+                command.Parameters.Add(
+                    "@Marca",
+                    SqlDbType.NVarChar,
+                    1000).Value =
+                        "%" +
+                        datos.Marca +
+                        "%";
+
+                connection.Open();
+
+                object resultado =
+                    command.ExecuteScalar();
+
+                Assert.IsNotNull(
+                    resultado);
+
+                Assert.AreNotEqual(
+                    DBNull.Value,
+                    resultado);
+
+                return Convert.ToInt32(
+                    resultado);
+            }
         }
 
         private static int ObtenerIdUsuarioActivo()
@@ -499,6 +771,13 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                 connection,
                                 transaction,
                                 @"
+DELETE FROM dbo.Auditoria
+WHERE
+    Modulo = N'Rendiciones'
+    AND Accion = N'EnvioARendicion'
+    AND Entidad = N'Viaje'
+    AND IdEntidad = @Valor;
+
 DELETE FROM dbo.Comprobante
 WHERE IdViatico IN
 (
@@ -612,6 +891,8 @@ WHERE IdPersona = @Valor;",
             public int IdUsuario { get; set; }
 
             public int IdViaje { get; set; }
+
+            public string Marca { get; set; }
 
             public DateTime FechaInicio
             {

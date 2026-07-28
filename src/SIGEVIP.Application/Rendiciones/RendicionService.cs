@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Domain.Entities;
@@ -30,6 +31,12 @@ namespace SIGEVIP.Application.Rendiciones
 
         public const string PermisoCancelar =
             "RENDICION_CANCELAR";
+
+        private const string ModuloAuditoria =
+            "Rendiciones";
+
+        private const string EntidadViajeAuditoria =
+            "Viaje";
 
         private readonly IRendicionRepository
             _rendicionRepository;
@@ -111,8 +118,16 @@ namespace SIGEVIP.Application.Rendiciones
                 ObtenerIdUsuarioActual(),
                 DateTime.Now);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "EnvioARendicion",
+                    EntidadViajeAuditoria,
+                    viaje.IdViaje,
+                    "Se envió el viaje a rendición.");
+
             _rendicionRepository.Enviar(
-                viaje);
+                viaje,
+                auditoria);
         }
 
         public void ExcluirViatico(
@@ -251,6 +266,25 @@ namespace SIGEVIP.Application.Rendiciones
 
             _rendicionRepository.Cancelar(
                 viaje);
+        }
+
+        private AuditoriaRegistro CrearAuditoria(
+            string accion,
+            string entidad,
+            int idEntidad,
+            string descripcion)
+        {
+            Usuario usuarioActual =
+                _sesionActual.UsuarioActual;
+
+            return new AuditoriaRegistro(
+                usuarioActual.IdUsuario,
+                usuarioActual.NombreUsuario,
+                ModuloAuditoria,
+                accion,
+                entidad,
+                idEntidad,
+                descripcion);
         }
 
         private Viaje ObtenerViaje(

@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Rendiciones;
 using SIGEVIP.Domain.Entities;
 using SIGEVIP.Domain.Enums;
 using SIGEVIP.Domain.Exceptions;
+using SIGEVIP.Infrastructure.Auditoria;
 using SIGEVIP.Infrastructure.Data;
 using SIGEVIP.Infrastructure.Exceptions;
 using SIGEVIP.Infrastructure.Viajes;
@@ -199,6 +201,30 @@ ORDER BY
         public void Enviar(
             Viaje viaje)
         {
+            EnviarInterno(
+                viaje,
+                null);
+        }
+
+        public void Enviar(
+            Viaje viaje,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            EnviarInterno(
+                viaje,
+                auditoria);
+        }
+
+        private void EnviarInterno(
+            Viaje viaje,
+            AuditoriaRegistro auditoria)
+        {
             ValidarViajePersistido(
                 viaje);
 
@@ -245,51 +271,76 @@ WHERE
                 using (
                     SqlConnection connection =
                         _connectionFactory.Create())
-                using (
-                    SqlCommand command =
-                        new SqlCommand(
-                            sql,
-                            connection))
                 {
-                    command.Parameters.Add(
-                        "@EstadoEnRendicion",
-                        SqlDbType.TinyInt).Value =
-                            Convert.ToByte(
-                                EstadoViaje.EnRendicion);
-
-                    command.Parameters.Add(
-                        "@IdUsuarioEnvioRendicion",
-                        SqlDbType.Int).Value =
-                            viaje
-                                .IdUsuarioEnvioRendicion
-                                .Value;
-
-                    command.Parameters.Add(
-                        "@FechaEnvioRendicion",
-                        SqlDbType.DateTime2).Value =
-                            viaje
-                                .FechaEnvioRendicion
-                                .Value;
-
-                    command.Parameters.Add(
-                        "@IdViaje",
-                        SqlDbType.Int).Value =
-                            viaje.IdViaje;
-
-                    command.Parameters.Add(
-                        "@EstadoAbierto",
-                        SqlDbType.TinyInt).Value =
-                            Convert.ToByte(
-                                EstadoViaje.Abierto);
-
                     connection.Open();
 
-                    int filas =
-                        command.ExecuteNonQuery();
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sql,
+                                        connection,
+                                        transaction))
+                            {
+                                command.Parameters.Add(
+                                    "@EstadoEnRendicion",
+                                    SqlDbType.TinyInt).Value =
+                                        Convert.ToByte(
+                                            EstadoViaje.EnRendicion);
 
-                    ExigirUnaFila(
-                        filas,
-                        "enviar el viaje a rendición");
+                                command.Parameters.Add(
+                                    "@IdUsuarioEnvioRendicion",
+                                    SqlDbType.Int).Value =
+                                        viaje
+                                            .IdUsuarioEnvioRendicion
+                                            .Value;
+
+                                command.Parameters.Add(
+                                    "@FechaEnvioRendicion",
+                                    SqlDbType.DateTime2).Value =
+                                        viaje
+                                            .FechaEnvioRendicion
+                                            .Value;
+
+                                command.Parameters.Add(
+                                    "@IdViaje",
+                                    SqlDbType.Int).Value =
+                                        viaje.IdViaje;
+
+                                command.Parameters.Add(
+                                    "@EstadoAbierto",
+                                    SqlDbType.TinyInt).Value =
+                                        Convert.ToByte(
+                                            EstadoViaje.Abierto);
+
+                                ExigirUnaFila(
+                                    command.ExecuteNonQuery(),
+                                    "enviar el viaje a rendición");
+                            }
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
                 }
             }
             catch (PersistenciaException)
@@ -300,6 +351,12 @@ WHERE
             {
                 throw CrearErrorPersistencia(
                     "No fue posible enviar el viaje a rendición.",
+                    exception);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de envío a rendición no pudo completarse.",
                     exception);
             }
         }
@@ -947,6 +1004,16 @@ WHERE
                     "No fue posible " +
                     operacion +
                     " porque el viaje no existe o su estado cambió.");
+            }
+        }
+
+        private static void RevertirSiCorresponde(
+            SqlTransaction transaction)
+        {
+            if (transaction != null &&
+                transaction.Connection != null)
+            {
+                transaction.Rollback();
             }
         }
 

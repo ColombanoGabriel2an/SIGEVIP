@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Rendiciones;
 using SIGEVIP.Application.Security;
@@ -100,6 +101,33 @@ namespace SIGEVIP.Tests.Application
                 repository.Enviado
                     .FechaEnvioRendicion
                     .Value <= despues);
+
+            Assert.IsNotNull(
+                repository.AuditoriaEnvio);
+
+            Assert.AreEqual(
+                10,
+                repository.AuditoriaEnvio.IdUsuario);
+
+            Assert.AreEqual(
+                "usuario",
+                repository.AuditoriaEnvio.NombreUsuario);
+
+            Assert.AreEqual(
+                "Rendiciones",
+                repository.AuditoriaEnvio.Modulo);
+
+            Assert.AreEqual(
+                "EnvioARendicion",
+                repository.AuditoriaEnvio.Accion);
+
+            Assert.AreEqual(
+                "Viaje",
+                repository.AuditoriaEnvio.Entidad);
+
+            Assert.AreEqual(
+                1,
+                repository.AuditoriaEnvio.IdEntidad);
         }
 
         [TestMethod]
@@ -686,6 +714,12 @@ namespace SIGEVIP.Tests.Application
                 private set;
             }
 
+            public AuditoriaRegistro AuditoriaEnvio
+            {
+                get;
+                private set;
+            }
+
             public Viaje AnticipoAjustado
             {
                 get;
@@ -754,10 +788,14 @@ namespace SIGEVIP.Tests.Application
             }
 
             public void Enviar(
-                Viaje viaje)
+                Viaje viaje,
+                AuditoriaRegistro auditoria)
             {
                 Enviado =
                     viaje;
+
+                AuditoriaEnvio =
+                    auditoria;
             }
 
             public void ExcluirViatico(

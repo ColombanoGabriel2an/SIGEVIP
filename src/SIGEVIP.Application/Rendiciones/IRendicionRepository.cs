@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Domain.Entities;
 
 namespace SIGEVIP.Application.Rendiciones
@@ -12,7 +13,8 @@ namespace SIGEVIP.Application.Rendiciones
             ListarPendientes();
 
         void Enviar(
-            Viaje viaje);
+            Viaje viaje,
+            AuditoriaRegistro auditoria);
 
         void ExcluirViatico(
             Viaje viaje,
