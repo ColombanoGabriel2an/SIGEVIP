@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Clientes;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
@@ -295,6 +296,32 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 1,
                 viajes.Obtenido.Visitas.Count);
+
+            Assert.IsNotNull(
+                visitas.AuditoriaInsertada);
+
+            Assert.AreEqual(
+                1,
+                visitas.AuditoriaInsertada.IdUsuario);
+
+            Assert.AreEqual(
+                "usuario",
+                visitas.AuditoriaInsertada.NombreUsuario);
+
+            Assert.AreEqual(
+                "Viajes",
+                visitas.AuditoriaInsertada.Modulo);
+
+            Assert.AreEqual(
+                "Alta",
+                visitas.AuditoriaInsertada.Accion);
+
+            Assert.AreEqual(
+                "Visita",
+                visitas.AuditoriaInsertada.Entidad);
+
+            Assert.IsNull(
+                visitas.AuditoriaInsertada.IdEntidad);
         }
 
         [TestMethod]
@@ -765,6 +792,12 @@ namespace SIGEVIP.Tests.Application
                 private set;
             }
 
+            public AuditoriaRegistro AuditoriaInsertada
+            {
+                get;
+                private set;
+            }
+
             public int UltimoIdViaje
             {
                 get;
@@ -792,9 +825,13 @@ namespace SIGEVIP.Tests.Application
             }
 
             public int Insertar(
-                Visita visita)
+                Visita visita,
+                AuditoriaRegistro auditoria)
             {
                 Insertada = visita;
+
+                AuditoriaInsertada =
+                    auditoria;
 
                 return 50;
             }

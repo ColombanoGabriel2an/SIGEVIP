@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Clientes;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
@@ -14,6 +15,12 @@ namespace SIGEVIP.Application.Visitas
     {
         public const string PermisoRegistrar =
             "VISITA_REGISTRAR";
+
+        private const string ModuloAuditoria =
+            "Viajes";
+
+        private const string EntidadAuditoria =
+            "Visita";
 
         private readonly IVisitaRepository
             _visitaRepository;
@@ -124,8 +131,14 @@ namespace SIGEVIP.Application.Visitas
             viaje.AgregarVisita(
                 visita);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Alta",
+                    "Se registr\u00f3 una visita y sus clientes asociados.");
+
             return _visitaRepository.Insertar(
-                visita);
+                visita,
+                auditoria);
         }
 
         public IReadOnlyCollection<VisitaListadoDto>
@@ -193,6 +206,23 @@ namespace SIGEVIP.Application.Visitas
             return resultados
                    ?? new List<VisitaListadoDto>()
                        .AsReadOnly();
+        }
+
+        private AuditoriaRegistro CrearAuditoria(
+            string accion,
+            string descripcion)
+        {
+            Usuario usuarioActual =
+                _sesionActual.UsuarioActual;
+
+            return new AuditoriaRegistro(
+                usuarioActual.IdUsuario,
+                usuarioActual.NombreUsuario,
+                ModuloAuditoria,
+                accion,
+                EntidadAuditoria,
+                null,
+                descripcion);
         }
 
         private IReadOnlyCollection<Cliente>

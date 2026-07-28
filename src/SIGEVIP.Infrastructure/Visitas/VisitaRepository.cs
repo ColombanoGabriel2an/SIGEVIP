@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Visitas;
 using SIGEVIP.Domain.Entities;
 using SIGEVIP.Domain.Exceptions;
+using SIGEVIP.Infrastructure.Auditoria;
 using SIGEVIP.Infrastructure.Data;
 using SIGEVIP.Infrastructure.Exceptions;
 
@@ -27,6 +29,30 @@ namespace SIGEVIP.Infrastructure.Visitas
 
         public int Insertar(
             Visita visita)
+        {
+            return InsertarInterno(
+                visita,
+                null);
+        }
+
+        public int Insertar(
+            Visita visita,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            return InsertarInterno(
+                visita,
+                auditoria);
+        }
+
+        private int InsertarInterno(
+            Visita visita,
+            AuditoriaRegistro auditoria)
         {
             ValidarVisitaPersistible(
                 visita);
@@ -87,6 +113,15 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                                 idVisita,
                                 visita.Clientes);
 
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria.ConIdEntidad(
+                                        idVisita));
+                            }
+
                             transaction.Commit();
 
                             return idVisita;
@@ -111,6 +146,12 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             {
                 throw CrearErrorPersistencia(
                     "No fue posible registrar la visita.",
+                    exception);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transaccion de registro de la visita no pudo completarse.",
                     exception);
             }
         }

@@ -93,6 +93,7 @@
     <Compile Include="Integration\PermisoGestionRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViajeAuditoriaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViajeRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\VisitaAuditoriaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\VisitaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\PersonaConsultaViaticoRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\RendicionRepositoryIntegrationTests.cs" />
