@@ -10,6 +10,9 @@ namespace SIGEVIP.Application.Grupos
         private readonly List<int>
             _idsPermisosDirectos;
 
+        private readonly List<int>
+            _idsGruposHijos;
+
         public GrupoDetalleDto(
             int idGrupo,
             string codigo,
@@ -17,11 +20,36 @@ namespace SIGEVIP.Application.Grupos
             string descripcion,
             bool activo,
             IEnumerable<int> idsPermisosDirectos)
+            : this(
+                idGrupo,
+                codigo,
+                nombre,
+                descripcion,
+                activo,
+                idsPermisosDirectos,
+                Enumerable.Empty<int>())
+        {
+        }
+
+        public GrupoDetalleDto(
+            int idGrupo,
+            string codigo,
+            string nombre,
+            string descripcion,
+            bool activo,
+            IEnumerable<int> idsPermisosDirectos,
+            IEnumerable<int> idsGruposHijos)
         {
             if (idsPermisosDirectos == null)
             {
                 throw new ArgumentNullException(
                     nameof(idsPermisosDirectos));
+            }
+
+            if (idsGruposHijos == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(idsGruposHijos));
             }
 
             IdGrupo = idGrupo;
@@ -32,6 +60,11 @@ namespace SIGEVIP.Application.Grupos
 
             _idsPermisosDirectos =
                 idsPermisosDirectos
+                    .Distinct()
+                    .ToList();
+
+            _idsGruposHijos =
+                idsGruposHijos
                     .Distinct()
                     .ToList();
         }
@@ -73,6 +106,16 @@ namespace SIGEVIP.Application.Grupos
             {
                 return new ReadOnlyCollection<int>(
                     _idsPermisosDirectos);
+            }
+        }
+
+        public IReadOnlyCollection<int>
+            IdsGruposHijos
+        {
+            get
+            {
+                return new ReadOnlyCollection<int>(
+                    _idsGruposHijos);
             }
         }
     }

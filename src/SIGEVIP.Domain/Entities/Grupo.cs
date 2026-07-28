@@ -146,7 +146,8 @@ namespace SIGEVIP.Domain.Entities
                     "El componente ya pertenece al grupo.");
             }
 
-            _componentes.Add(componente);
+            _componentes.Add(
+                componente);
         }
 
         public void ReemplazarPermisosDirectos(
@@ -176,27 +177,11 @@ namespace SIGEVIP.Domain.Entities
                 }
             }
 
-            for (
-                int indiceActual = 0;
-                indiceActual < permisosNuevos.Count;
-                indiceActual++)
-            {
-                for (
-                    int indiceCandidato =
-                        indiceActual + 1;
-                    indiceCandidato <
-                        permisosNuevos.Count;
-                    indiceCandidato++)
-                {
-                    if (SonElMismoComponente(
-                        permisosNuevos[indiceActual],
-                        permisosNuevos[indiceCandidato]))
-                    {
-                        throw new ReglaNegocioException(
-                            "No se pueden asignar permisos duplicados al grupo.");
-                    }
-                }
-            }
+            ValidarComponentesDuplicados(
+                permisosNuevos
+                    .Cast<IPermisoComponente>()
+                    .ToList(),
+                "No se pueden asignar permisos duplicados al grupo.");
 
             List<IPermisoComponente> gruposHijos =
                 _componentes
@@ -206,6 +191,7 @@ namespace SIGEVIP.Domain.Entities
                     .ToList();
 
             _componentes.Clear();
+
             _componentes.AddRange(
                 gruposHijos);
 
@@ -213,6 +199,58 @@ namespace SIGEVIP.Domain.Entities
             {
                 _componentes.Add(
                     permiso);
+            }
+        }
+
+        public void ReemplazarGruposHijos(
+            IEnumerable<Grupo> gruposHijos)
+        {
+            if (gruposHijos == null)
+            {
+                throw new ReglaNegocioException(
+                    "La colección de grupos hijos es obligatoria.");
+            }
+
+            List<Grupo> gruposNuevos =
+                gruposHijos.ToList();
+
+            foreach (Grupo grupoHijo in gruposNuevos)
+            {
+                if (grupoHijo == null)
+                {
+                    throw new ReglaNegocioException(
+                        "Los grupos hijos contienen un elemento inválido.");
+                }
+            }
+
+            ValidarComponentesDuplicados(
+                gruposNuevos
+                    .Cast<IPermisoComponente>()
+                    .ToList(),
+                "No se pueden asignar grupos hijos duplicados.");
+
+            foreach (Grupo grupoHijo in gruposNuevos)
+            {
+                ValidarAusenciaDeCiclo(
+                    grupoHijo);
+            }
+
+            List<IPermisoComponente> permisosDirectos =
+                _componentes
+                    .Where(
+                        componente =>
+                            componente is Permiso)
+                    .ToList();
+
+            _componentes.Clear();
+
+            _componentes.AddRange(
+                permisosDirectos);
+
+            foreach (Grupo grupoHijo in gruposNuevos)
+            {
+                _componentes.Add(
+                    grupoHijo);
             }
         }
 
@@ -303,7 +341,8 @@ namespace SIGEVIP.Domain.Entities
             Grupo grupoBuscado,
             HashSet<Grupo> visitados)
         {
-            if (!visitados.Add(this))
+            if (!visitados.Add(
+                this))
             {
                 return false;
             }
@@ -328,6 +367,33 @@ namespace SIGEVIP.Domain.Entities
             }
 
             return false;
+        }
+
+        private static void ValidarComponentesDuplicados(
+            IList<IPermisoComponente> componentes,
+            string mensaje)
+        {
+            for (
+                int indiceActual = 0;
+                indiceActual < componentes.Count;
+                indiceActual++)
+            {
+                for (
+                    int indiceCandidato =
+                        indiceActual + 1;
+                    indiceCandidato <
+                        componentes.Count;
+                    indiceCandidato++)
+                {
+                    if (SonElMismoComponente(
+                        componentes[indiceActual],
+                        componentes[indiceCandidato]))
+                    {
+                        throw new ReglaNegocioException(
+                            mensaje);
+                    }
+                }
+            }
         }
 
         private static bool SonElMismoComponente(

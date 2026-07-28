@@ -49,6 +49,7 @@
     <Compile Include="Application\AutorizacionServiceTests.cs" />
     <Compile Include="Application\ClienteServiceTests.cs" />
     <Compile Include="Application\GrupoGestionServiceTests.cs" />
+    <Compile Include="Application\GrupoJerarquiaServiceTests.cs" />
     <Compile Include="Application\PermisoGestionServiceTests.cs" />
     <Compile Include="Domain\GrupoGestionDomainTests.cs" />
     <Compile Include="Application\UsuarioGestionServiceTests.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Infrastructure\Pbkdf2PasswordHasherTests.cs" />
     <Compile Include="Integration\ClienteRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\GrupoGestionRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\GrupoJerarquiaGestionRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\InicializacionSeguridadRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\JerarquiaGruposRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\PermisoGestionRepositoryIntegrationTests.cs" />

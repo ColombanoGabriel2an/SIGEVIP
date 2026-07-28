@@ -153,7 +153,13 @@ SELECT
     gp.IdPermiso
 FROM dbo.GrupoPermiso AS gp
 WHERE gp.IdGrupo = @IdGrupo
-ORDER BY gp.IdPermiso;";
+ORDER BY gp.IdPermiso;
+
+SELECT
+    gg.IdGrupoHijo
+FROM dbo.GrupoGrupo AS gg
+WHERE gg.IdGrupoPadre = @IdGrupo
+ORDER BY gg.IdGrupoHijo;";
 
             try
             {
@@ -217,13 +223,29 @@ ORDER BY gp.IdPermiso;";
                                         "IdPermiso")));
                         }
 
+                        ExigirSiguienteResultado(
+                            reader,
+                            "grupos hijos directos");
+
+                        List<int> idsGruposHijos =
+                            new List<int>();
+
+                        while (reader.Read())
+                        {
+                            idsGruposHijos.Add(
+                                reader.GetInt32(
+                                    reader.GetOrdinal(
+                                        "IdGrupoHijo")));
+                        }
+
                         return new GrupoDetalleDto(
                             idGrupo,
                             codigo,
                             nombre,
                             descripcion,
                             activo,
-                            idsPermisos);
+                            idsPermisos,
+                            idsGruposHijos);
                     }
                 }
             }
@@ -464,6 +486,236 @@ ORDER BY
             {
                 throw CrearErrorPersistencia(
                     "No fue posible listar los permisos disponibles.",
+                    exception);
+            }
+        }
+
+        public IReadOnlyCollection<GrupoSeleccionGrupoDto>
+            ListarGruposActivos(
+                int? idGrupoPadre,
+                IReadOnlyCollection<int> idsSeleccionados)
+        {
+            HashSet<int> seleccionados =
+                new HashSet<int>(
+                    idsSeleccionados
+                    ?? new int[0]);
+
+            StringBuilder sql =
+                new StringBuilder(@"
+SELECT
+    g.IdGrupo,
+    g.Codigo,
+    g.Nombre,
+    g.Descripcion,
+    g.Activo
+FROM dbo.Grupo AS g
+WHERE
+    (
+        g.Activo = 1");
+
+            List<SqlParameter> parametros =
+                new List<SqlParameter>();
+
+            if (seleccionados.Count > 0)
+            {
+                sql.Append(@"
+        OR g.IdGrupo IN
+(");
+
+                List<int> idsOrdenados =
+                    seleccionados
+                        .OrderBy(
+                            idGrupo =>
+                                idGrupo)
+                        .ToList();
+
+                parametros.AddRange(
+                    CrearParametrosIds(
+                        idsOrdenados,
+                        "@IdGrupoSeleccionado",
+                        sql));
+
+                sql.Append(@"
+)");
+            }
+
+            sql.Append(@"
+    )");
+
+            if (idGrupoPadre.HasValue)
+            {
+                sql.Append(@"
+    AND g.IdGrupo <> @IdGrupoPadre");
+
+                parametros.Add(
+                    new SqlParameter(
+                        "@IdGrupoPadre",
+                        SqlDbType.Int)
+                    {
+                        Value =
+                            idGrupoPadre.Value
+                    });
+            }
+
+            sql.Append(@"
+ORDER BY
+    g.Codigo,
+    g.IdGrupo;");
+
+            try
+            {
+                using (
+                    SqlConnection connection =
+                        _connectionFactory.Create())
+                using (
+                    SqlCommand command =
+                        new SqlCommand(
+                            sql.ToString(),
+                            connection))
+                {
+                    foreach (
+                        SqlParameter parametro
+                        in parametros)
+                    {
+                        command.Parameters.Add(
+                            parametro);
+                    }
+
+                    connection.Open();
+
+                    List<GrupoSeleccionGrupoDto> resultados =
+                        new List<GrupoSeleccionGrupoDto>();
+
+                    using (
+                        SqlDataReader reader =
+                            command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int idGrupo =
+                                reader.GetInt32(
+                                    reader.GetOrdinal(
+                                        "IdGrupo"));
+
+                            resultados.Add(
+                                new GrupoSeleccionGrupoDto(
+                                    idGrupo,
+                                    LeerTextoObligatorio(
+                                        reader,
+                                        "Codigo"),
+                                    LeerTextoObligatorio(
+                                        reader,
+                                        "Nombre"),
+                                    LeerTextoOpcional(
+                                        reader,
+                                        "Descripcion"),
+                                    reader.GetBoolean(
+                                        reader.GetOrdinal(
+                                            "Activo")),
+                                    seleccionados.Contains(
+                                        idGrupo)));
+                        }
+                    }
+
+                    return resultados.AsReadOnly();
+                }
+            }
+            catch (SqlException exception)
+            {
+                throw CrearErrorPersistencia(
+                    "No fue posible listar los grupos hijos disponibles.",
+                    exception);
+            }
+        }
+
+        public IReadOnlyCollection<Grupo>
+            ObtenerGruposPorIds(
+                IReadOnlyCollection<int> idsGrupos)
+        {
+            List<int> ids =
+                ValidarIds(
+                    idsGrupos,
+                    nameof(idsGrupos));
+
+            if (ids.Count == 0)
+            {
+                return new List<Grupo>()
+                    .AsReadOnly();
+            }
+
+            StringBuilder sql =
+                new StringBuilder(@"
+SELECT
+    g.IdGrupo,
+    g.Codigo,
+    g.Nombre,
+    g.Descripcion,
+    g.Activo
+FROM dbo.Grupo AS g
+WHERE g.IdGrupo IN
+(");
+
+            List<SqlParameter> parametros =
+                CrearParametrosIds(
+                    ids,
+                    "@IdGrupo",
+                    sql);
+
+            sql.Append(@"
+)
+ORDER BY
+    g.Codigo,
+    g.IdGrupo;");
+
+            try
+            {
+                using (
+                    SqlConnection connection =
+                        _connectionFactory.Create())
+                using (
+                    SqlCommand command =
+                        new SqlCommand(
+                            sql.ToString(),
+                            connection))
+                {
+                    foreach (
+                        SqlParameter parametro
+                        in parametros)
+                    {
+                        command.Parameters.Add(
+                            parametro);
+                    }
+
+                    connection.Open();
+
+                    List<Grupo> grupos =
+                        new List<Grupo>();
+
+                    using (
+                        SqlDataReader reader =
+                            command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            grupos.Add(
+                                ReconstruirGrupo(
+                                    reader));
+                        }
+                    }
+
+                    return grupos.AsReadOnly();
+                }
+            }
+            catch (ReglaNegocioException exception)
+            {
+                throw new PersistenciaException(
+                    "Los datos persistidos de los grupos hijos son inválidos.",
+                    exception);
+            }
+            catch (SqlException exception)
+            {
+                throw CrearErrorPersistencia(
+                    "No fue posible consultar los grupos hijos.",
                     exception);
             }
         }
@@ -735,6 +987,117 @@ SELECT
             }
         }
 
+        public int Insertar(
+            Grupo grupo,
+            IReadOnlyCollection<int> idsPermisos,
+            IReadOnlyCollection<int> idsGruposHijos)
+        {
+            if (grupo == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(grupo));
+            }
+
+            List<int> permisos =
+                ValidarIdsObligatorios(
+                    idsPermisos,
+                    nameof(idsPermisos));
+
+            List<int> hijos =
+                ValidarIds(
+                    idsGruposHijos,
+                    nameof(idsGruposHijos));
+
+            try
+            {
+                using (
+                    SqlConnection connection =
+                        _connectionFactory.Create())
+                {
+                    connection.Open();
+
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction(
+                                IsolationLevel.Serializable))
+                    {
+                        try
+                        {
+                            ValidarUnicidadInterna(
+                                connection,
+                                transaction,
+                                grupo.Codigo,
+                                grupo.Nombre,
+                                null);
+
+                            ValidarPermisosActivosInterno(
+                                connection,
+                                transaction,
+                                permisos);
+
+                            ValidarGruposHijosActivosInterno(
+                                connection,
+                                transaction,
+                                hijos);
+
+                            int idGrupo =
+                                InsertarGrupoInterno(
+                                    connection,
+                                    transaction,
+                                    grupo);
+
+                            InsertarGrupoPermisosInterno(
+                                connection,
+                                transaction,
+                                idGrupo,
+                                permisos);
+
+                            InsertarGrupoGruposInterno(
+                                connection,
+                                transaction,
+                                idGrupo,
+                                hijos);
+
+                            transaction.Commit();
+
+                            return idGrupo;
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
+                }
+            }
+            catch (ReglaNegocioException)
+            {
+                throw;
+            }
+            catch (SqlException exception)
+                when (EsErrorDuplicado(
+                    exception))
+            {
+                throw CrearErrorDuplicado(
+                    exception,
+                    false);
+            }
+            catch (SqlException exception)
+            {
+                throw CrearErrorPersistencia(
+                    "No fue posible registrar el grupo y su jerarquía.",
+                    exception);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de registro del grupo no pudo completarse.",
+                    exception);
+            }
+        }
+
         public void Actualizar(
             Grupo grupo,
             IReadOnlyCollection<int> idsPermisos)
@@ -824,6 +1187,141 @@ SELECT
             {
                 throw CrearErrorPersistencia(
                     "No fue posible actualizar el grupo.",
+                    exception);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de actualización del grupo no pudo completarse.",
+                    exception);
+            }
+        }
+
+        public void Actualizar(
+            Grupo grupo,
+            IReadOnlyCollection<int> idsPermisos,
+            IReadOnlyCollection<int> idsGruposHijos)
+        {
+            if (grupo == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(grupo));
+            }
+
+            ValidarIdGrupo(
+                grupo.IdGrupo);
+
+            List<int> permisos =
+                ValidarIdsObligatorios(
+                    idsPermisos,
+                    nameof(idsPermisos));
+
+            List<int> hijos =
+                ValidarIds(
+                    idsGruposHijos,
+                    nameof(idsGruposHijos));
+
+            if (hijos.Contains(
+                grupo.IdGrupo))
+            {
+                throw new ReglaNegocioException(
+                    "Un grupo no puede agregarse a sí mismo.");
+            }
+
+            try
+            {
+                using (
+                    SqlConnection connection =
+                        _connectionFactory.Create())
+                {
+                    connection.Open();
+
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction(
+                                IsolationLevel.Serializable))
+                    {
+                        try
+                        {
+                            ValidarUnicidadInterna(
+                                connection,
+                                transaction,
+                                grupo.Codigo,
+                                grupo.Nombre,
+                                grupo.IdGrupo);
+
+                            ValidarPermisosActivosInterno(
+                                connection,
+                                transaction,
+                                permisos);
+
+                            ValidarGruposHijosDisponiblesInterno(
+                                connection,
+                                transaction,
+                                grupo.IdGrupo,
+                                hijos);
+
+                            ValidarAusenciaDeCicloInterno(
+                                connection,
+                                transaction,
+                                grupo.IdGrupo,
+                                hijos);
+
+                            ActualizarGrupoInterno(
+                                connection,
+                                transaction,
+                                grupo);
+
+                            EliminarGrupoPermisosInterno(
+                                connection,
+                                transaction,
+                                grupo.IdGrupo);
+
+                            InsertarGrupoPermisosInterno(
+                                connection,
+                                transaction,
+                                grupo.IdGrupo,
+                                permisos);
+
+                            EliminarGrupoGruposInterno(
+                                connection,
+                                transaction,
+                                grupo.IdGrupo);
+
+                            InsertarGrupoGruposInterno(
+                                connection,
+                                transaction,
+                                grupo.IdGrupo,
+                                hijos);
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
+                }
+            }
+            catch (ReglaNegocioException)
+            {
+                throw;
+            }
+            catch (SqlException exception)
+                when (EsErrorDuplicado(
+                    exception))
+            {
+                throw CrearErrorDuplicado(
+                    exception,
+                    true);
+            }
+            catch (SqlException exception)
+            {
+                throw CrearErrorPersistencia(
+                    "No fue posible actualizar el grupo y su jerarquía.",
                     exception);
             }
             catch (InvalidOperationException exception)
@@ -1321,6 +1819,306 @@ VALUES
             }
         }
 
+        private static void ValidarGruposHijosActivosInterno(
+            SqlConnection connection,
+            SqlTransaction transaction,
+            IReadOnlyCollection<int> idsGruposHijos)
+        {
+            if (idsGruposHijos.Count == 0)
+            {
+                return;
+            }
+
+            StringBuilder sql =
+                new StringBuilder(@"
+SELECT COUNT(DISTINCT g.IdGrupo)
+FROM dbo.Grupo AS g
+WHERE
+    g.Activo = 1
+    AND g.IdGrupo IN
+(");
+
+            List<SqlParameter> parametros =
+                CrearParametrosIds(
+                    idsGruposHijos.ToList(),
+                    "@IdGrupoHijo",
+                    sql);
+
+            sql.Append(@"
+);");
+
+            using (
+                SqlCommand command =
+                    new SqlCommand(
+                        sql.ToString(),
+                        connection,
+                        transaction))
+            {
+                foreach (
+                    SqlParameter parametro
+                    in parametros)
+                {
+                    command.Parameters.Add(
+                        parametro);
+                }
+
+                int cantidad =
+                    Convert.ToInt32(
+                        command.ExecuteScalar());
+
+                if (cantidad !=
+                    idsGruposHijos.Count)
+                {
+                    throw new ReglaNegocioException(
+                        "Uno o más grupos hijos no existen o se encuentran inactivos.");
+                }
+            }
+        }
+
+        private static void ValidarGruposHijosDisponiblesInterno(
+            SqlConnection connection,
+            SqlTransaction transaction,
+            int idGrupoPadre,
+            IReadOnlyCollection<int> idsGruposHijos)
+        {
+            if (idsGruposHijos.Count == 0)
+            {
+                return;
+            }
+
+            StringBuilder sql =
+                new StringBuilder(@"
+SELECT COUNT(DISTINCT g.IdGrupo)
+FROM dbo.Grupo AS g
+WHERE
+    g.IdGrupo IN
+(");
+
+            List<SqlParameter> parametros =
+                CrearParametrosIds(
+                    idsGruposHijos.ToList(),
+                    "@IdGrupoHijo",
+                    sql);
+
+            sql.Append(@"
+)
+AND
+(
+    g.Activo = 1
+    OR EXISTS
+    (
+        SELECT 1
+        FROM dbo.GrupoGrupo AS gg
+        WHERE
+            gg.IdGrupoPadre = @IdGrupoPadre
+            AND gg.IdGrupoHijo = g.IdGrupo
+    )
+);");
+
+            using (
+                SqlCommand command =
+                    new SqlCommand(
+                        sql.ToString(),
+                        connection,
+                        transaction))
+            {
+                foreach (
+                    SqlParameter parametro
+                    in parametros)
+                {
+                    command.Parameters.Add(
+                        parametro);
+                }
+
+                command.Parameters.Add(
+                    "@IdGrupoPadre",
+                    SqlDbType.Int).Value =
+                        idGrupoPadre;
+
+                int cantidad =
+                    Convert.ToInt32(
+                        command.ExecuteScalar());
+
+                if (cantidad !=
+                    idsGruposHijos.Count)
+                {
+                    throw new ReglaNegocioException(
+                        "Uno o más grupos hijos no existen, están inactivos o no pertenecían a la jerarquía.");
+                }
+            }
+        }
+
+        private static void ValidarAusenciaDeCicloInterno(
+            SqlConnection connection,
+            SqlTransaction transaction,
+            int idGrupoPadre,
+            IReadOnlyCollection<int> idsGruposHijos)
+        {
+            if (idsGruposHijos.Count == 0)
+            {
+                return;
+            }
+
+            StringBuilder sql =
+                new StringBuilder(@"
+;WITH Descendencia AS
+(
+    SELECT
+        g.IdGrupo AS IdGrupoActual,
+        CAST(
+            N'/' +
+            CONVERT(NVARCHAR(20), g.IdGrupo) +
+            N'/'
+            AS NVARCHAR(MAX)
+        ) AS Camino
+    FROM dbo.Grupo AS g
+    WHERE g.IdGrupo IN
+(");
+
+            List<SqlParameter> parametros =
+                CrearParametrosIds(
+                    idsGruposHijos.ToList(),
+                    "@IdGrupoHijo",
+                    sql);
+
+            sql.Append(@"
+)
+
+    UNION ALL
+
+    SELECT
+        gg.IdGrupoHijo,
+        CAST(
+            descendencia.Camino +
+            CONVERT(NVARCHAR(20), gg.IdGrupoHijo) +
+            N'/'
+            AS NVARCHAR(MAX)
+        )
+    FROM Descendencia AS descendencia
+    INNER JOIN dbo.GrupoGrupo AS gg
+        ON gg.IdGrupoPadre =
+            descendencia.IdGrupoActual
+    WHERE CHARINDEX(
+        N'/' +
+        CONVERT(NVARCHAR(20), gg.IdGrupoHijo) +
+        N'/',
+        descendencia.Camino
+    ) = 0
+)
+SELECT
+    CASE
+        WHEN EXISTS
+        (
+            SELECT 1
+            FROM Descendencia
+            WHERE IdGrupoActual = @IdGrupoPadre
+        )
+        THEN CAST(1 AS BIT)
+        ELSE CAST(0 AS BIT)
+    END
+OPTION (MAXRECURSION 32767);");
+
+            using (
+                SqlCommand command =
+                    new SqlCommand(
+                        sql.ToString(),
+                        connection,
+                        transaction))
+            {
+                foreach (
+                    SqlParameter parametro
+                    in parametros)
+                {
+                    command.Parameters.Add(
+                        parametro);
+                }
+
+                command.Parameters.Add(
+                    "@IdGrupoPadre",
+                    SqlDbType.Int).Value =
+                        idGrupoPadre;
+
+                bool produceCiclo =
+                    Convert.ToBoolean(
+                        command.ExecuteScalar());
+
+                if (produceCiclo)
+                {
+                    throw new ReglaNegocioException(
+                        "La asociación produciría un ciclo entre grupos.");
+                }
+            }
+        }
+
+        private static void EliminarGrupoGruposInterno(
+            SqlConnection connection,
+            SqlTransaction transaction,
+            int idGrupoPadre)
+        {
+            const string sql = @"
+DELETE FROM dbo.GrupoGrupo
+WHERE IdGrupoPadre = @IdGrupoPadre;";
+
+            using (
+                SqlCommand command =
+                    new SqlCommand(
+                        sql,
+                        connection,
+                        transaction))
+            {
+                command.Parameters.Add(
+                    "@IdGrupoPadre",
+                    SqlDbType.Int).Value =
+                        idGrupoPadre;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        private static void InsertarGrupoGruposInterno(
+            SqlConnection connection,
+            SqlTransaction transaction,
+            int idGrupoPadre,
+            IEnumerable<int> idsGruposHijos)
+        {
+            const string sql = @"
+INSERT INTO dbo.GrupoGrupo
+(
+    IdGrupoPadre,
+    IdGrupoHijo
+)
+VALUES
+(
+    @IdGrupoPadre,
+    @IdGrupoHijo
+);";
+
+            foreach (
+                int idGrupoHijo
+                in idsGruposHijos)
+            {
+                using (
+                    SqlCommand command =
+                        new SqlCommand(
+                            sql,
+                            connection,
+                            transaction))
+                {
+                    command.Parameters.Add(
+                        "@IdGrupoPadre",
+                        SqlDbType.Int).Value =
+                            idGrupoPadre;
+
+                    command.Parameters.Add(
+                        "@IdGrupoHijo",
+                        SqlDbType.Int).Value =
+                            idGrupoHijo;
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
         private static Grupo ReconstruirGrupo(
             SqlDataReader reader)
         {
@@ -1593,6 +2391,15 @@ VALUES
             {
                 return new ReglaNegocioException(
                     "No se pueden asignar permisos duplicados al grupo.",
+                    exception);
+            }
+
+            if (mensajeSql.IndexOf(
+                "PK_GrupoGrupo",
+                StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return new ReglaNegocioException(
+                    "No se pueden asignar grupos hijos duplicados.",
                     exception);
             }
 

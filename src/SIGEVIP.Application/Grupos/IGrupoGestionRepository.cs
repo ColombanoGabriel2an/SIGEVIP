@@ -18,9 +18,18 @@ namespace SIGEVIP.Application.Grupos
             ListarPermisosActivos(
                 IReadOnlyCollection<int> idsSeleccionados);
 
+        IReadOnlyCollection<GrupoSeleccionGrupoDto>
+            ListarGruposActivos(
+                int? idGrupoPadre,
+                IReadOnlyCollection<int> idsSeleccionados);
+
         IReadOnlyCollection<Permiso>
             ObtenerPermisosPorIds(
                 IReadOnlyCollection<int> idsPermisos);
+
+        IReadOnlyCollection<Grupo>
+            ObtenerGruposPorIds(
+                IReadOnlyCollection<int> idsGrupos);
 
         bool ExisteCodigo(
             string codigo,
@@ -37,9 +46,19 @@ namespace SIGEVIP.Application.Grupos
             Grupo grupo,
             IReadOnlyCollection<int> idsPermisos);
 
+        int Insertar(
+            Grupo grupo,
+            IReadOnlyCollection<int> idsPermisos,
+            IReadOnlyCollection<int> idsGruposHijos);
+
         void Actualizar(
             Grupo grupo,
             IReadOnlyCollection<int> idsPermisos);
+
+        void Actualizar(
+            Grupo grupo,
+            IReadOnlyCollection<int> idsPermisos,
+            IReadOnlyCollection<int> idsGruposHijos);
 
         void Activar(
             int idGrupo);

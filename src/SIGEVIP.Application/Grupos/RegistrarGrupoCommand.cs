@@ -10,10 +10,26 @@ namespace SIGEVIP.Application.Grupos
         private readonly List<int>
             _idsPermisos;
 
+        private readonly List<int>
+            _idsGruposHijos;
+
         public RegistrarGrupoCommand(
             string nombre,
             string descripcion,
             IEnumerable<int> idsPermisos)
+            : this(
+                nombre,
+                descripcion,
+                idsPermisos,
+                Enumerable.Empty<int>())
+        {
+        }
+
+        public RegistrarGrupoCommand(
+            string nombre,
+            string descripcion,
+            IEnumerable<int> idsPermisos,
+            IEnumerable<int> idsGruposHijos)
         {
             if (idsPermisos == null)
             {
@@ -21,11 +37,20 @@ namespace SIGEVIP.Application.Grupos
                     nameof(idsPermisos));
             }
 
+            if (idsGruposHijos == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(idsGruposHijos));
+            }
+
             Nombre = nombre;
             Descripcion = descripcion;
 
             _idsPermisos =
                 idsPermisos.ToList();
+
+            _idsGruposHijos =
+                idsGruposHijos.ToList();
         }
 
         public string Nombre
@@ -47,6 +72,16 @@ namespace SIGEVIP.Application.Grupos
             {
                 return new ReadOnlyCollection<int>(
                     _idsPermisos);
+            }
+        }
+
+        public IReadOnlyCollection<int>
+            IdsGruposHijos
+        {
+            get
+            {
+                return new ReadOnlyCollection<int>(
+                    _idsGruposHijos);
             }
         }
     }

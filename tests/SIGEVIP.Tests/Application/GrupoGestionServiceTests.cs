@@ -781,6 +781,9 @@ namespace SIGEVIP.Tests.Application
                 PermisosDisponibles =
                     new List<Permiso>();
 
+                GruposDisponibles =
+                    new List<Grupo>();
+
                 IdInsertado = 25;
             }
 
@@ -791,6 +794,26 @@ namespace SIGEVIP.Tests.Application
             }
 
             public List<Permiso> PermisosDisponibles
+            {
+                get;
+                private set;
+            }
+
+            public List<Grupo> GruposDisponibles
+            {
+                get;
+                private set;
+            }
+
+            public IReadOnlyCollection<int>
+                IdsGruposInsertados
+            {
+                get;
+                private set;
+            }
+
+            public IReadOnlyCollection<int>
+                IdsGruposActualizados
             {
                 get;
                 private set;
@@ -911,7 +934,12 @@ namespace SIGEVIP.Tests.Application
                         .OfType<Permiso>()
                         .Select(
                             permiso =>
-                                permiso.IdPermiso));
+                                permiso.IdPermiso),
+                    GrupoObtenido.Componentes
+                        .OfType<Grupo>()
+                        .Select(
+                            grupo =>
+                                grupo.IdGrupo));
             }
 
             public Grupo ObtenerPorId(
@@ -949,6 +977,60 @@ namespace SIGEVIP.Tests.Application
                                 permiso.Descripcion,
                                 seleccionados.Contains(
                                     permiso.IdPermiso)))
+                    .ToList()
+                    .AsReadOnly();
+            }
+
+            public IReadOnlyCollection<GrupoSeleccionGrupoDto>
+                ListarGruposActivos(
+                    int? idGrupoPadre,
+                    IReadOnlyCollection<int> idsSeleccionados)
+            {
+                HashSet<int> seleccionados =
+                    new HashSet<int>(
+                        idsSeleccionados
+                        ?? new int[0]);
+
+                return GruposDisponibles
+                    .Where(
+                        grupo =>
+                            (
+                                grupo.Activo
+                                || seleccionados.Contains(
+                                    grupo.IdGrupo)
+                            )
+                            && (
+                                !idGrupoPadre.HasValue
+                                || grupo.IdGrupo !=
+                                    idGrupoPadre.Value
+                            ))
+                    .Select(
+                        grupo =>
+                            new GrupoSeleccionGrupoDto(
+                                grupo.IdGrupo,
+                                grupo.Codigo,
+                                grupo.Nombre,
+                                grupo.Descripcion,
+                                grupo.Activo,
+                                seleccionados.Contains(
+                                    grupo.IdGrupo)))
+                    .ToList()
+                    .AsReadOnly();
+            }
+
+            public IReadOnlyCollection<Grupo>
+                ObtenerGruposPorIds(
+                    IReadOnlyCollection<int> idsGrupos)
+            {
+                HashSet<int> ids =
+                    new HashSet<int>(
+                        idsGrupos);
+
+                return GruposDisponibles
+                    .Where(
+                        grupo =>
+                            ids.Contains(
+                                grupo.IdGrupo))
                     .ToList()
                     .AsReadOnly();
             }
@@ -1011,6 +1093,27 @@ namespace SIGEVIP.Tests.Application
                 return IdInsertado;
             }
 
+            public int Insertar(
+                Grupo grupo,
+                IReadOnlyCollection<int> idsPermisos,
+                IReadOnlyCollection<int> idsGruposHijos)
+            {
+                GrupoInsertado =
+                    grupo;
+
+                IdsPermisosInsertados =
+                    idsPermisos
+                        .ToList()
+                        .AsReadOnly();
+
+                IdsGruposInsertados =
+                    idsGruposHijos
+                        .ToList()
+                        .AsReadOnly();
+
+                return IdInsertado;
+            }
+
             public void Actualizar(
                 Grupo grupo,
                 IReadOnlyCollection<int> idsPermisos)
@@ -1020,6 +1123,25 @@ namespace SIGEVIP.Tests.Application
 
                 IdsPermisosActualizados =
                     idsPermisos
+                        .ToList()
+                        .AsReadOnly();
+            }
+
+            public void Actualizar(
+                Grupo grupo,
+                IReadOnlyCollection<int> idsPermisos,
+                IReadOnlyCollection<int> idsGruposHijos)
+            {
+                GrupoActualizado =
+                    grupo;
+
+                IdsPermisosActualizados =
+                    idsPermisos
+                        .ToList()
+                        .AsReadOnly();
+
+                IdsGruposActualizados =
+                    idsGruposHijos
                         .ToList()
                         .AsReadOnly();
             }

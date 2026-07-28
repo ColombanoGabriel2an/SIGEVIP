@@ -46,6 +46,7 @@
     <Compile Include="Grupos\GrupoFiltro.cs" />
     <Compile Include="Grupos\GrupoGestionService.cs" />
     <Compile Include="Grupos\GrupoListadoDto.cs" />
+    <Compile Include="Grupos\GrupoSeleccionGrupoDto.cs" />
     <Compile Include="Grupos\IGrupoGestionRepository.cs" />
     <Compile Include="Grupos\ModificarGrupoCommand.cs" />
     <Compile Include="Grupos\PermisoSeleccionGrupoDto.cs" />

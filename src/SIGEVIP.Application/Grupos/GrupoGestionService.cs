@@ -103,6 +103,26 @@ namespace SIGEVIP.Application.Grupos
                     ?? new List<int>().AsReadOnly());
         }
 
+        public IReadOnlyCollection<GrupoSeleccionGrupoDto>
+            ListarGruposHijos(
+                int? idGrupoPadre,
+                IReadOnlyCollection<int> idsSeleccionados)
+        {
+            ExigirPermisoGestionar();
+
+            if (idGrupoPadre.HasValue)
+            {
+                ValidarIdGrupo(
+                    idGrupoPadre.Value);
+            }
+
+            return _grupoRepository
+                .ListarGruposActivos(
+                    idGrupoPadre,
+                    idsSeleccionados
+                    ?? new List<int>().AsReadOnly());
+        }
+
         public int Registrar(
             RegistrarGrupoCommand command)
         {
@@ -156,6 +176,16 @@ namespace SIGEVIP.Application.Grupos
                 ObtenerYValidarPermisos(
                     idsPermisos);
 
+            List<int> idsGruposHijos =
+                ValidarIdsGruposHijos(
+                    command.IdsGruposHijos,
+                    null);
+
+            List<Grupo> gruposHijos =
+                ObtenerYValidarGruposHijos(
+                    idsGruposHijos,
+                    new int[0]);
+
             Grupo grupo =
                 new Grupo(
                     0,
@@ -166,9 +196,13 @@ namespace SIGEVIP.Application.Grupos
             grupo.ReemplazarPermisosDirectos(
                 permisos);
 
+            grupo.ReemplazarGruposHijos(
+                gruposHijos);
+
             return _grupoRepository.Insertar(
                 grupo,
-                idsPermisos.AsReadOnly());
+                idsPermisos.AsReadOnly(),
+                idsGruposHijos.AsReadOnly());
         }
 
         public void Modificar(
@@ -231,6 +265,37 @@ namespace SIGEVIP.Application.Grupos
 
             grupo.ReemplazarPermisosDirectos(
                 permisos);
+
+            if (command.ReemplazarGruposHijos)
+            {
+                List<int> idsGruposHijos =
+                    ValidarIdsGruposHijos(
+                        command.IdsGruposHijos,
+                        command.IdGrupo);
+
+                List<int> idsGruposHijosActuales =
+                    grupo.Componentes
+                        .OfType<Grupo>()
+                        .Select(
+                            grupoHijo =>
+                                grupoHijo.IdGrupo)
+                        .ToList();
+
+                List<Grupo> gruposHijos =
+                    ObtenerYValidarGruposHijos(
+                        idsGruposHijos,
+                        idsGruposHijosActuales);
+
+                grupo.ReemplazarGruposHijos(
+                    gruposHijos);
+
+                _grupoRepository.Actualizar(
+                    grupo,
+                    idsPermisos.AsReadOnly(),
+                    idsGruposHijos.AsReadOnly());
+
+                return;
+            }
 
             _grupoRepository.Actualizar(
                 grupo,
@@ -416,6 +481,109 @@ namespace SIGEVIP.Application.Grupos
             }
 
             return permisos;
+        }
+
+        private List<Grupo> ObtenerYValidarGruposHijos(
+            IReadOnlyCollection<int> idsGruposHijos,
+            IReadOnlyCollection<int> idsGruposHijosActuales)
+        {
+            if (idsGruposHijos.Count == 0)
+            {
+                return new List<Grupo>();
+            }
+
+            IReadOnlyCollection<Grupo> resultado =
+                _grupoRepository
+                    .ObtenerGruposPorIds(
+                        idsGruposHijos);
+
+            List<Grupo> grupos =
+                resultado == null
+                    ? new List<Grupo>()
+                    : resultado.ToList();
+
+            if (grupos.Count !=
+                idsGruposHijos.Count ||
+                grupos.Any(
+                    grupo =>
+                        grupo == null))
+            {
+                throw new ReglaNegocioException(
+                    "Uno o más grupos hijos indicados no existen.");
+            }
+
+            HashSet<int> idsRecuperados =
+                new HashSet<int>(
+                    grupos.Select(
+                        grupo =>
+                            grupo.IdGrupo));
+
+            foreach (int idGrupo in idsGruposHijos)
+            {
+                if (!idsRecuperados.Contains(
+                    idGrupo))
+                {
+                    throw new ReglaNegocioException(
+                        "Uno o más grupos hijos indicados no existen.");
+                }
+            }
+
+            HashSet<int> idsActuales =
+                new HashSet<int>(
+                    idsGruposHijosActuales
+                    ?? new int[0]);
+
+            foreach (Grupo grupo in grupos)
+            {
+                if (!grupo.Activo &&
+                    !idsActuales.Contains(
+                        grupo.IdGrupo))
+                {
+                    throw new ReglaNegocioException(
+                        "Uno o más grupos hijos indicados se encuentran inactivos.");
+                }
+            }
+
+            return grupos;
+        }
+
+        private static List<int> ValidarIdsGruposHijos(
+            IEnumerable<int> idsGruposHijos,
+            int? idGrupoPadre)
+        {
+            if (idsGruposHijos == null)
+            {
+                throw new ReglaNegocioException(
+                    "La colección de grupos hijos es obligatoria.");
+            }
+
+            List<int> ids =
+                idsGruposHijos.ToList();
+
+            if (ids.Any(
+                idGrupo =>
+                    idGrupo <= 0))
+            {
+                throw new ReglaNegocioException(
+                    "Los grupos hijos contienen identificadores inválidos.");
+            }
+
+            if (ids.Distinct().Count() !=
+                ids.Count)
+            {
+                throw new ReglaNegocioException(
+                    "No se pueden asignar grupos hijos duplicados.");
+            }
+
+            if (idGrupoPadre.HasValue &&
+                ids.Contains(
+                    idGrupoPadre.Value))
+            {
+                throw new ReglaNegocioException(
+                    "Un grupo no puede agregarse a sí mismo.");
+            }
+
+            return ids;
         }
 
         private void ValidarPermisosAdministrador(

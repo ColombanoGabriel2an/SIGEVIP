@@ -140,11 +140,9 @@ namespace SIGEVIP.Tests.Domain
                 CrearGrupo();
 
             Grupo hijo =
-                new Grupo(
+                CrearGrupo(
                     2,
-                    "GRUPO_HIJO",
-                    "Grupo hijo",
-                    "Descripción del grupo hijo");
+                    "GRUPO_HIJO");
 
             padre.AgregarComponente(
                 hijo);
@@ -182,18 +180,14 @@ namespace SIGEVIP.Tests.Domain
                 CrearGrupo();
 
             Grupo hijo =
-                new Grupo(
+                CrearGrupo(
                     2,
-                    "GRUPO_HIJO",
-                    "Grupo hijo",
-                    "Descripción del grupo hijo");
+                    "GRUPO_HIJO");
 
             Grupo nieto =
-                new Grupo(
+                CrearGrupo(
                     3,
-                    "GRUPO_NIETO",
-                    "Grupo nieto",
-                    "Descripción del grupo nieto");
+                    "GRUPO_NIETO");
 
             hijo.AgregarComponente(
                 nieto);
@@ -216,13 +210,235 @@ namespace SIGEVIP.Tests.Domain
                     .Single());
         }
 
+        [TestMethod]
+        public void ReemplazarGruposHijos_ConGruposValidos_ReemplazaAnteriores()
+        {
+            Grupo padre =
+                CrearGrupo();
+
+            padre.AgregarComponente(
+                CrearGrupo(
+                    2,
+                    "HIJO_ANTERIOR"));
+
+            Grupo primero =
+                CrearGrupo(
+                    3,
+                    "HIJO_PRIMERO");
+
+            Grupo segundo =
+                CrearGrupo(
+                    4,
+                    "HIJO_SEGUNDO");
+
+            padre.ReemplazarGruposHijos(
+                new[]
+                {
+                    primero,
+                    segundo
+                });
+
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    "HIJO_PRIMERO",
+                    "HIJO_SEGUNDO"
+                },
+                padre.Componentes
+                    .OfType<Grupo>()
+                    .Select(
+                        grupo => grupo.Codigo)
+                    .ToArray());
+        }
+
+        [TestMethod]
+        public void ReemplazarGruposHijos_SinGrupos_EliminaHijos()
+        {
+            Grupo padre =
+                CrearGrupo();
+
+            Permiso permiso =
+                CrearPermiso(
+                    1,
+                    "CLIENTE_CONSULTAR");
+
+            padre.AgregarComponente(
+                permiso);
+
+            padre.AgregarComponente(
+                CrearGrupo(
+                    2,
+                    "GRUPO_HIJO"));
+
+            padre.ReemplazarGruposHijos(
+                new Grupo[0]);
+
+            Assert.AreEqual(
+                0,
+                padre.Componentes
+                    .OfType<Grupo>()
+                    .Count());
+
+            Assert.AreSame(
+                permiso,
+                padre.Componentes
+                    .OfType<Permiso>()
+                    .Single());
+        }
+
+        [TestMethod]
+        public void ReemplazarGruposHijos_ColeccionNula_RechazaOperacion()
+        {
+            Grupo padre =
+                CrearGrupo();
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => padre.ReemplazarGruposHijos(
+                    null));
+        }
+
+        [TestMethod]
+        public void ReemplazarGruposHijos_ConGrupoNulo_RechazaSinModificarEstado()
+        {
+            Grupo padre =
+                CrearGrupo();
+
+            Grupo anterior =
+                CrearGrupo(
+                    2,
+                    "HIJO_ANTERIOR");
+
+            padre.AgregarComponente(
+                anterior);
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => padre.ReemplazarGruposHijos(
+                    new Grupo[]
+                    {
+                        null
+                    }));
+
+            Assert.AreSame(
+                anterior,
+                padre.Componentes
+                    .OfType<Grupo>()
+                    .Single());
+        }
+
+        [TestMethod]
+        public void ReemplazarGruposHijos_ConDuplicados_RechazaOperacion()
+        {
+            Grupo padre =
+                CrearGrupo();
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => padre.ReemplazarGruposHijos(
+                    new[]
+                    {
+                        CrearGrupo(
+                            2,
+                            "HIJO_UNO"),
+                        CrearGrupo(
+                            2,
+                            "HIJO_DOS")
+                    }));
+        }
+
+        [TestMethod]
+        public void ReemplazarGruposHijos_ConElMismoGrupo_RechazaOperacion()
+        {
+            Grupo padre =
+                CrearGrupo();
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => padre.ReemplazarGruposHijos(
+                    new[]
+                    {
+                        padre
+                    }));
+        }
+
+        [TestMethod]
+        public void ReemplazarGruposHijos_QueGeneraCicloIndirecto_RechazaOperacion()
+        {
+            Grupo padre =
+                CrearGrupo();
+
+            Grupo hijo =
+                CrearGrupo(
+                    2,
+                    "GRUPO_HIJO");
+
+            hijo.AgregarComponente(
+                padre);
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => padre.ReemplazarGruposHijos(
+                    new[]
+                    {
+                        hijo
+                    }));
+        }
+
+        [TestMethod]
+        public void ReemplazarGruposHijos_ConservaPermisosDirectos()
+        {
+            Grupo padre =
+                CrearGrupo();
+
+            Permiso primero =
+                CrearPermiso(
+                    1,
+                    "CLIENTE_CONSULTAR");
+
+            Permiso segundo =
+                CrearPermiso(
+                    2,
+                    "VIAJE_CONSULTAR");
+
+            padre.AgregarComponente(
+                primero);
+
+            padre.AgregarComponente(
+                segundo);
+
+            padre.ReemplazarGruposHijos(
+                new[]
+                {
+                    CrearGrupo(
+                        3,
+                        "GRUPO_HIJO")
+                });
+
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    "CLIENTE_CONSULTAR",
+                    "VIAJE_CONSULTAR"
+                },
+                padre.Componentes
+                    .OfType<Permiso>()
+                    .Select(
+                        permiso => permiso.Codigo)
+                    .ToArray());
+        }
+
         private static Grupo CrearGrupo()
         {
-            return new Grupo(
+            return CrearGrupo(
                 1,
-                "GRUPO_PRUEBA",
-                "Grupo de prueba",
-                "Descripción inicial");
+                "GRUPO_PRUEBA");
+        }
+
+        private static Grupo CrearGrupo(
+            int idGrupo,
+            string codigo)
+        {
+            return new Grupo(
+                idGrupo,
+                codigo,
+                "Grupo " + codigo,
+                "Descripción " + codigo);
         }
 
         private static Permiso CrearPermiso(
