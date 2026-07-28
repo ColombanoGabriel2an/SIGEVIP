@@ -46,6 +46,15 @@
     <Compile Include="Clientes\ClienteListadoDto.cs" />
     <Compile Include="Clientes\ClienteService.cs" />
     <Compile Include="Clientes\IClienteRepository.cs" />
+    <Compile Include="Usuarios\GrupoSeleccionUsuarioDto.cs" />
+    <Compile Include="Usuarios\IUsuarioGestionRepository.cs" />
+    <Compile Include="Usuarios\ModificarUsuarioCommand.cs" />
+    <Compile Include="Usuarios\PersonaSeleccionUsuarioDto.cs" />
+    <Compile Include="Usuarios\RegistrarUsuarioCommand.cs" />
+    <Compile Include="Usuarios\UsuarioDetalleDto.cs" />
+    <Compile Include="Usuarios\UsuarioFiltro.cs" />
+    <Compile Include="Usuarios\UsuarioListadoDto.cs" />
+    <Compile Include="Usuarios\UsuarioGestionService.cs" />
     <Compile Include="Rendiciones\AjustarAnticipoCommand.cs" />
     <Compile Include="Rendiciones\AprobarRendicionCommand.cs" />
     <Compile Include="Rendiciones\CancelarRendicionCommand.cs" />
