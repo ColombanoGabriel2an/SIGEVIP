@@ -137,9 +137,12 @@ Se encuentran implementados:
 - exclusión y reactivación lógica de Viáticos;
 - ajuste de anticipos;
 - aprobación y cancelación de Rendiciones;
+- auditoría general consultable de cambios de seguridad, Clientes, Viajes, Visitas, Viáticos y Rendiciones;
+- persistencia atómica de cada operación y su evento mediante la misma `SqlConnection` y `SqlTransaction`;
+- rollback comprobado cuando no puede persistirse el evento de Auditoría;
 - cálculo de total gastado vigente y saldo pendiente;
 - validación SQL de las migraciones `003` a `006`;
-- 627 pruebas automatizadas correctas;
+- 682 pruebas automatizadas correctas;
 - compilación con 0 advertencias y 0 errores;
 - validación manual de Usuarios, Cambio de clave, Grupos, jerarquías de Grupos, Permisos, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
 

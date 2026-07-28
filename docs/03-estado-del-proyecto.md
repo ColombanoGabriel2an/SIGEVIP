@@ -4,7 +4,7 @@
 
 Etapa 4: módulos funcionales documentados.
 
-Bloque actual: cierre técnico y documental de Gestión de Permisos.
+Bloque actual: cierre técnico y documental de la Auditoría general.
 
 ## Rama de trabajo
 
@@ -12,8 +12,8 @@ Bloque actual: cierre técnico y documental de Gestión de Permisos.
 
 ## Último cierre funcional publicado
 
-- Commit: `2c16ef2`
-- Mensaje: `Completo interfaz de gestion de permisos`
+- Commit: `f6360f1`
+- Mensaje: `Integro auditoria transaccional en revision de rendiciones`
 
 La rama local se encuentra sincronizada con:
 
@@ -235,6 +235,59 @@ Incluye:
 - cancelación;
 - permisos visuales y autorización en Application.
 
+### Auditoría general consultable
+
+Se encuentra implementada la Auditoría general persistente del sistema.
+
+Componentes principales:
+
+- migración `007_crear_auditoria.sql`;
+- tabla `dbo.Auditoria`;
+- repositorio consultable;
+- autorización mediante `AUDITORIA_CONSULTAR`;
+- integración desde Application;
+- escritura coordinada desde Infrastructure.
+
+La Auditoría cubre cambios exitosos de:
+
+- Clientes;
+- Usuarios;
+- Grupos;
+- Permisos;
+- Viajes;
+- Visitas;
+- Viáticos;
+- Rendiciones.
+
+En Rendiciones se auditan:
+
+- envío a rendición;
+- exclusión de Viáticos;
+- reactivación de Viáticos;
+- ajuste del anticipo;
+- aprobación;
+- cancelación.
+
+La modificación de negocio y el evento de Auditoría utilizan la misma
+`SqlConnection` y la misma `SqlTransaction`.
+
+Si no puede persistirse el evento, se revierte también la modificación de
+negocio.
+
+No se auditan:
+
+- consultas o listados;
+- contraseñas;
+- hashes;
+- salts;
+- secretos temporales;
+- cadenas de conexión;
+- excepciones completas;
+- contenido binario de Comprobantes.
+
+La Auditoría general comienza con la migración `007`. No se realizó una
+reconstrucción retroactiva de eventos anteriores.
+
 ### Eliminación del formulario técnico
 
 Se eliminaron:
@@ -261,8 +314,8 @@ Ese formulario solo servía para comprobar la conexión inicial y ya no particip
 
 ### Pruebas
 
-- Totales: 627.
-- Correctas: 627.
+- Totales: 682.
+- Correctas: 682.
 - Fallidas: 0.
 
 Incluyen:

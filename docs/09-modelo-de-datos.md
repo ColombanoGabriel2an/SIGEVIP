@@ -1448,7 +1448,7 @@ Se ejecutaron:
 
 Resultado consolidado:
 
-- 627 pruebas totales;
+- 682 pruebas totales;
 - 627 correctas;
 - 0 fallidas;
 - compilación con 0 advertencias;
@@ -1579,3 +1579,104 @@ Se ejecutaron:
 - `3e8401c` — `Agrego casos de uso de permisos`
 - `d61e304` — `Agrego persistencia de permisos`
 - `2c16ef2` — `Completo interfaz de gestion de permisos`
+
+## Auditoría general consultable
+
+### Migración
+
+`database/migrations/007_crear_auditoria.sql`
+
+La migración:
+
+- crea `dbo.Auditoria`;
+- registra la versión `007`;
+- se ejecuta dentro de una transacción;
+- exige la existencia previa de `dbo.Usuario`;
+- puede reejecutarse sin duplicar el esquema.
+
+### Tabla Auditoria
+
+Nombre:
+
+`dbo.Auditoria`
+
+Columnas principales:
+
+| Columna | Tipo | Nulo | Finalidad |
+|---|---|---:|---|
+| IdAuditoria | BIGINT IDENTITY | No | Clave primaria |
+| FechaHora | DATETIME2(0) | No | Momento del evento |
+| IdUsuario | INT | No | Usuario actor |
+| NombreUsuario | NVARCHAR(100) | No | Identidad conservada |
+| Modulo | NVARCHAR(50) | No | Módulo funcional |
+| Accion | NVARCHAR(50) | No | Operación ejecutada |
+| Entidad | NVARCHAR(100) | No | Tipo de entidad afectada |
+| IdEntidad | INT | Sí | Identificador funcional |
+| Descripcion | NVARCHAR(1000) | No | Descripción controlada |
+
+Restricciones principales:
+
+- `PK_Auditoria`;
+- `FK_Auditoria_Usuario`;
+- campos textuales no vacíos;
+- `IdEntidad` nulo o mayor que cero.
+
+Índices:
+
+- `IX_Auditoria_FechaHora`;
+- `IX_Auditoria_IdUsuario_FechaHora`;
+- `IX_Auditoria_Modulo_Accion_FechaHora`.
+
+### Atomicidad
+
+Las escrituras funcionales auditadas comparten:
+
+- una `SqlConnection`;
+- una `SqlTransaction`;
+- la actualización de negocio;
+- la inserción en `dbo.Auditoria`;
+- un único commit.
+
+Ante cualquier error se revierte la operación completa.
+
+La atomicidad se comprobó mediante pruebas que provocan el fallo de la clave
+foránea `FK_Auditoria_Usuario` utilizando un actor inexistente.
+
+### Cobertura funcional
+
+La tabla registra cambios exitosos de:
+
+- Clientes;
+- Usuarios;
+- Grupos;
+- Permisos;
+- Viajes;
+- Visitas;
+- Viáticos;
+- Rendiciones.
+
+En Rendiciones se registran:
+
+- envío a rendición;
+- exclusión de Viático;
+- reactivación de Viático;
+- ajuste del anticipo;
+- aprobación;
+- cancelación.
+
+### Alcance histórico y datos excluidos
+
+Los eventos comienzan a registrarse desde la aplicación de la migración `007`.
+
+No se realizó backfill de operaciones anteriores.
+
+No se registran:
+
+- consultas;
+- contraseñas;
+- hashes;
+- salts;
+- credenciales temporales;
+- cadenas de conexión;
+- contenido binario de Comprobantes;
+- excepciones completas.

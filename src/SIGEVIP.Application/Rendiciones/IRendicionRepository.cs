@@ -31,9 +31,11 @@ namespace SIGEVIP.Application.Rendiciones
             AuditoriaRegistro auditoria);
 
         void Aprobar(
-            Viaje viaje);
+            Viaje viaje,
+            AuditoriaRegistro auditoria);
 
         void Cancelar(
-            Viaje viaje);
+            Viaje viaje,
+            AuditoriaRegistro auditoria);
     }
 }

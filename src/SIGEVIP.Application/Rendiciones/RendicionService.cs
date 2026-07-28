@@ -266,8 +266,16 @@ namespace SIGEVIP.Application.Rendiciones
                 ObtenerIdUsuarioActual(),
                 DateTime.Now);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Aprobacion",
+                    EntidadViajeAuditoria,
+                    viaje.IdViaje,
+                    "Se aprobó la rendición del viaje.");
+
             _rendicionRepository.Aprobar(
-                viaje);
+                viaje,
+                auditoria);
         }
 
         public void Cancelar(
@@ -291,8 +299,16 @@ namespace SIGEVIP.Application.Rendiciones
                 ObtenerIdUsuarioActual(),
                 DateTime.Now);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Cancelacion",
+                    EntidadViajeAuditoria,
+                    viaje.IdViaje,
+                    "Se canceló la rendición del viaje.");
+
             _rendicionRepository.Cancelar(
-                viaje);
+                viaje,
+                auditoria);
         }
 
         private AuditoriaRegistro CrearAuditoria(

@@ -453,3 +453,30 @@ Pendientes relacionados:
 - adjuntar archivos digitales de Comprobantes;
 - auditoría general consultable;
 - mejoras visuales opcionales.
+
+## Actualización final de Auditoría
+
+El módulo quedó integrado con la Auditoría general consultable.
+
+Operaciones cubiertas:
+
+- envío a rendición;
+- exclusión de Viáticos;
+- reactivación de Viáticos;
+- ajuste del anticipo;
+- aprobación;
+- cancelación.
+
+Cada operación persiste el cambio funcional y el evento central dentro de una
+única transacción SQL.
+
+Las descripciones centrales son deliberadamente acotadas. No duplican:
+
+- motivos completos;
+- importes;
+- credenciales;
+- contenido de Comprobantes.
+
+La trazabilidad operativa específica continúa disponible en las columnas de
+`Viaje` y `Viatico`, mientras que `dbo.Auditoria` proporciona la consulta
+transversal del sistema.

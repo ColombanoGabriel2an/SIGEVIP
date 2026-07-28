@@ -60,6 +60,9 @@
 - `Integration/ViajeVisitaRepositoryIntegrationTests.cs`
 - `Integration/InicializacionSeguridadRepositoryIntegrationTests.cs`
 - `Integration/UsuarioAutenticacionRepositoryIntegrationTests.cs`
+- `Integration/RendicionRepositoryIntegrationTests.cs`
+- `Integration/RendicionRevisionRepositoryIntegrationTests.cs`
+- `Integration/RendicionRevisionAuditoriaRepositoryIntegrationTests.cs`
 
 ## 4. Distribución acumulada
 
@@ -67,8 +70,8 @@ El total definitivo se toma del ejecutor VSTest.
 
 Último resultado consolidado:
 
-- 594 pruebas totales;
-- 594 correctas;
+- 682 pruebas totales;
+- 682 correctas;
 - 0 fallidas.
 
 El conjunto incluye pruebas:
@@ -221,11 +224,50 @@ Compilación:
 
 Pruebas:
 
-- Totales: 594.
-- Correctas: 594.
+- Totales: 682.
+- Correctas: 682.
 - Fallidas: 0.
 - Omitidas: 0.
 
+
+## Cobertura de Auditoría general
+
+La regresión vigente incluye Auditoría central para cambios de:
+
+- Clientes;
+- Usuarios;
+- Grupos;
+- Permisos;
+- Viajes;
+- Visitas;
+- Viáticos;
+- Rendiciones.
+
+Las pruebas de integración SQL verifican:
+
+- persistencia del cambio de negocio;
+- persistencia de un único evento;
+- módulo, acción, entidad e identificador;
+- Usuario actor;
+- uso de una única transacción;
+- rollback del cambio cuando el actor de Auditoría no existe;
+- ausencia de eventos parciales;
+- eliminación de todos los datos temporales.
+
+La revisión de Rendiciones agrega diez pruebas SQL:
+
+- exclusión válida y rollback;
+- reactivación válida y rollback;
+- ajuste del anticipo válido y rollback;
+- aprobación válida y rollback;
+- cancelación válida y rollback.
+
+Resultado consolidado:
+
+- 682 pruebas totales;
+- 682 correctas;
+- 0 fallidas;
+- 0 residuos SQL de Auditoría.
 
 ## 16. Criterio de cierre del módulo Clientes
 

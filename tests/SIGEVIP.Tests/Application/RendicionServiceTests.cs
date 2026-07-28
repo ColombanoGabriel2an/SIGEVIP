@@ -418,6 +418,25 @@ namespace SIGEVIP.Tests.Application
                 repository.Aprobado
                     .FechaAprobacion
                     .HasValue);
+
+            Assert.IsNotNull(
+                repository.AuditoriaAprobacion);
+
+            Assert.AreEqual(
+                "Rendiciones",
+                repository.AuditoriaAprobacion.Modulo);
+
+            Assert.AreEqual(
+                "Aprobacion",
+                repository.AuditoriaAprobacion.Accion);
+
+            Assert.AreEqual(
+                "Viaje",
+                repository.AuditoriaAprobacion.Entidad);
+
+            Assert.AreEqual(
+                1,
+                repository.AuditoriaAprobacion.IdEntidad);
         }
 
         [TestMethod]
@@ -471,6 +490,25 @@ namespace SIGEVIP.Tests.Application
                 10,
                 repository.Cancelado
                     .IdUsuarioCancelacion);
+
+            Assert.IsNotNull(
+                repository.AuditoriaCancelacion);
+
+            Assert.AreEqual(
+                "Rendiciones",
+                repository.AuditoriaCancelacion.Modulo);
+
+            Assert.AreEqual(
+                "Cancelacion",
+                repository.AuditoriaCancelacion.Accion);
+
+            Assert.AreEqual(
+                "Viaje",
+                repository.AuditoriaCancelacion.Entidad);
+
+            Assert.AreEqual(
+                1,
+                repository.AuditoriaCancelacion.IdEntidad);
         }
 
         [TestMethod]
@@ -795,6 +833,18 @@ namespace SIGEVIP.Tests.Application
                 private set;
             }
 
+            public AuditoriaRegistro AuditoriaAprobacion
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaCancelacion
+            {
+                get;
+                private set;
+            }
+
             public Viaje AnticipoAjustado
             {
                 get;
@@ -909,17 +959,25 @@ namespace SIGEVIP.Tests.Application
             }
 
             public void Aprobar(
-                Viaje viaje)
+                Viaje viaje,
+                AuditoriaRegistro auditoria)
             {
                 Aprobado =
                     viaje;
+
+                AuditoriaAprobacion =
+                    auditoria;
             }
 
             public void Cancelar(
-                Viaje viaje)
+                Viaje viaje,
+                AuditoriaRegistro auditoria)
             {
                 Cancelado =
                     viaje;
+
+                AuditoriaCancelacion =
+                    auditoria;
             }
         }
     }

@@ -39,6 +39,7 @@ El subsistema de seguridad contiene:
 - Protección de Permisos administrativos críticos.
 - Conservación de asociaciones `GrupoPermiso`.
 - Preservación de Permisos inactivos ya asignados al editar Grupos.
+- Auditoría general consultable y persistente.
 
 No incluye todavía:
 
@@ -48,6 +49,34 @@ No incluye todavía:
 - autenticación multifactor;
 - auditoría persistente;
 - autorización dentro de todos los casos de uso funcionales.
+
+## 1.1. Auditoría general
+
+La Auditoría general utiliza:
+
+- `dbo.Auditoria`;
+- `AuditoriaRegistro`;
+- `AuditoriaSqlWriter`;
+- repositorio consultable;
+- permiso `AUDITORIA_CONSULTAR`;
+- migración `007_crear_auditoria.sql`.
+
+Cada servicio construye el evento desde el Usuario autenticado.
+
+Infrastructure persiste la modificación funcional y el evento utilizando la
+misma conexión y transacción SQL.
+
+Ante una violación de integridad o un actor inexistente:
+
+1. falla la inserción de Auditoría;
+2. se ejecuta rollback;
+3. no permanece el cambio funcional;
+4. no permanece un evento parcial.
+
+La Auditoría no registra credenciales ni secretos. Tampoco registra el contenido
+binario de los Comprobantes ni excepciones completas.
+
+Las consultas y listados no generan eventos.
 
 ## 2. Persona y Usuario
 

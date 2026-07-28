@@ -904,6 +904,30 @@ WHERE
         public void Aprobar(
             Viaje viaje)
         {
+            AprobarInterno(
+                viaje,
+                null);
+        }
+
+        public void Aprobar(
+            Viaje viaje,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            AprobarInterno(
+                viaje,
+                auditoria);
+        }
+
+        private void AprobarInterno(
+            Viaje viaje,
+            AuditoriaRegistro auditoria)
+        {
             ValidarViajePersistido(
                 viaje);
 
@@ -950,48 +974,76 @@ WHERE
                 using (
                     SqlConnection connection =
                         _connectionFactory.Create())
-                using (
-                    SqlCommand command =
-                        new SqlCommand(
-                            sql,
-                            connection))
                 {
-                    command.Parameters.Add(
-                        "@EstadoAprobado",
-                        SqlDbType.TinyInt).Value =
-                            Convert.ToByte(
-                                EstadoViaje.Aprobado);
-
-                    command.Parameters.Add(
-                        "@IdUsuarioAprobador",
-                        SqlDbType.Int).Value =
-                            viaje
-                                .IdUsuarioAprobador
-                                .Value;
-
-                    command.Parameters.Add(
-                        "@FechaAprobacion",
-                        SqlDbType.DateTime2).Value =
-                            viaje
-                                .FechaAprobacion
-                                .Value;
-
-                    command.Parameters.Add(
-                        "@IdViaje",
-                        SqlDbType.Int).Value =
-                            viaje.IdViaje;
-
-                    command.Parameters.Add(
-                        "@EstadoEnRendicion",
-                        SqlDbType.TinyInt).Value =
-                            Convert.ToByte(
-                                EstadoViaje.EnRendicion);
-
                     connection.Open();
 
-                    ExigirUnaFila(
-                        command.ExecuteNonQuery(),
-                        "aprobar la rendición");
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sql,
+                                        connection,
+                                        transaction))
+                            {
+                                command.Parameters.Add(
+                                    "@EstadoAprobado",
+                                    SqlDbType.TinyInt).Value =
+                                        Convert.ToByte(
+                                            EstadoViaje.Aprobado);
+
+                                command.Parameters.Add(
+                                    "@IdUsuarioAprobador",
+                                    SqlDbType.Int).Value =
+                                        viaje
+                                            .IdUsuarioAprobador
+                                            .Value;
+
+                                command.Parameters.Add(
+                                    "@FechaAprobacion",
+                                    SqlDbType.DateTime2).Value =
+                                        viaje
+                                            .FechaAprobacion
+                                            .Value;
+
+                                command.Parameters.Add(
+                                    "@IdViaje",
+                                    SqlDbType.Int).Value =
+                                        viaje.IdViaje;
+
+                                command.Parameters.Add(
+                                    "@EstadoEnRendicion",
+                                    SqlDbType.TinyInt).Value =
+                                        Convert.ToByte(
+                                            EstadoViaje.EnRendicion);
+
+                                ExigirUnaFila(
+                                    command.ExecuteNonQuery(),
+                                    "aprobar la rendición");
+                            }
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
                 }
             }
             catch (PersistenciaException)
@@ -1004,10 +1056,40 @@ WHERE
                     "No fue posible aprobar la rendición.",
                     exception);
             }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de aprobación de la rendición no pudo completarse.",
+                    exception);
+            }
         }
 
         public void Cancelar(
             Viaje viaje)
+        {
+            CancelarInterno(
+                viaje,
+                null);
+        }
+
+        public void Cancelar(
+            Viaje viaje,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            CancelarInterno(
+                viaje,
+                auditoria);
+        }
+
+        private void CancelarInterno(
+            Viaje viaje,
+            AuditoriaRegistro auditoria)
         {
             ValidarViajePersistido(
                 viaje);
@@ -1069,54 +1151,82 @@ WHERE
                 using (
                     SqlConnection connection =
                         _connectionFactory.Create())
-                using (
-                    SqlCommand command =
-                        new SqlCommand(
-                            sql,
-                            connection))
                 {
-                    command.Parameters.Add(
-                        "@EstadoCancelado",
-                        SqlDbType.TinyInt).Value =
-                            Convert.ToByte(
-                                EstadoViaje.Cancelado);
-
-                    command.Parameters.Add(
-                        "@MotivoCancelacion",
-                        SqlDbType.NVarChar,
-                        500).Value =
-                            viaje.MotivoCancelacion;
-
-                    command.Parameters.Add(
-                        "@IdUsuarioCancelacion",
-                        SqlDbType.Int).Value =
-                            viaje
-                                .IdUsuarioCancelacion
-                                .Value;
-
-                    command.Parameters.Add(
-                        "@FechaCancelacion",
-                        SqlDbType.DateTime2).Value =
-                            viaje
-                                .FechaCancelacion
-                                .Value;
-
-                    command.Parameters.Add(
-                        "@IdViaje",
-                        SqlDbType.Int).Value =
-                            viaje.IdViaje;
-
-                    command.Parameters.Add(
-                        "@EstadoEnRendicion",
-                        SqlDbType.TinyInt).Value =
-                            Convert.ToByte(
-                                EstadoViaje.EnRendicion);
-
                     connection.Open();
 
-                    ExigirUnaFila(
-                        command.ExecuteNonQuery(),
-                        "cancelar la rendición");
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sql,
+                                        connection,
+                                        transaction))
+                            {
+                                command.Parameters.Add(
+                                    "@EstadoCancelado",
+                                    SqlDbType.TinyInt).Value =
+                                        Convert.ToByte(
+                                            EstadoViaje.Cancelado);
+
+                                command.Parameters.Add(
+                                    "@MotivoCancelacion",
+                                    SqlDbType.NVarChar,
+                                    500).Value =
+                                        viaje.MotivoCancelacion;
+
+                                command.Parameters.Add(
+                                    "@IdUsuarioCancelacion",
+                                    SqlDbType.Int).Value =
+                                        viaje
+                                            .IdUsuarioCancelacion
+                                            .Value;
+
+                                command.Parameters.Add(
+                                    "@FechaCancelacion",
+                                    SqlDbType.DateTime2).Value =
+                                        viaje
+                                            .FechaCancelacion
+                                            .Value;
+
+                                command.Parameters.Add(
+                                    "@IdViaje",
+                                    SqlDbType.Int).Value =
+                                        viaje.IdViaje;
+
+                                command.Parameters.Add(
+                                    "@EstadoEnRendicion",
+                                    SqlDbType.TinyInt).Value =
+                                        Convert.ToByte(
+                                            EstadoViaje.EnRendicion);
+
+                                ExigirUnaFila(
+                                    command.ExecuteNonQuery(),
+                                    "cancelar la rendición");
+                            }
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
                 }
             }
             catch (PersistenciaException)
@@ -1127,6 +1237,12 @@ WHERE
             {
                 throw CrearErrorPersistencia(
                     "No fue posible cancelar la rendición.",
+                    exception);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de cancelación de la rendición no pudo completarse.",
                     exception);
             }
         }

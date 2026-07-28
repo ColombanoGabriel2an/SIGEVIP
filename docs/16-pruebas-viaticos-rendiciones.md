@@ -130,7 +130,8 @@ Archivos:
 - `tests/SIGEVIP.Tests/Integration/ViaticoRepositoryIntegrationTests.cs`;
 - `tests/SIGEVIP.Tests/Integration/ViajeViaticoRepositoryIntegrationTests.cs`;
 - `tests/SIGEVIP.Tests/Integration/RendicionRepositoryIntegrationTests.cs`;
-- `tests/SIGEVIP.Tests/Integration/RendicionRevisionRepositoryIntegrationTests.cs`.
+- `tests/SIGEVIP.Tests/Integration/RendicionRevisionRepositoryIntegrationTests.cs`;
+- `tests/SIGEVIP.Tests/Integration/RendicionRevisionAuditoriaRepositoryIntegrationTests.cs`.
 
 Cobertura:
 
@@ -316,3 +317,37 @@ No forman parte de este cierre:
 - consulta global de auditoría;
 - integración contable;
 - mapa y geolocalización.
+
+## Cierre de pruebas de Auditoría de Rendiciones
+
+Se agregaron diez pruebas de integración SQL para comprobar la atomicidad de:
+
+- exclusión de Viático;
+- reactivación de Viático;
+- ajuste del anticipo;
+- aprobación;
+- cancelación.
+
+Cada operación posee:
+
+1. una prueba de persistencia correcta del cambio y el evento;
+2. una prueba con actor inexistente que exige rollback completo.
+
+También se mantiene la cobertura previa del envío a rendición, con persistencia
+correcta y rollback.
+
+Resultado consolidado:
+
+- 682 pruebas totales;
+- 682 correctas;
+- 0 fallidas;
+- 0 advertencias de compilación;
+- 0 errores de compilación;
+- 0 Auditorías temporales;
+- 0 Viajes temporales;
+- 0 Viáticos temporales;
+- 0 Personas temporales.
+
+Archivo principal:
+
+`tests/SIGEVIP.Tests/Integration/RendicionRevisionAuditoriaRepositoryIntegrationTests.cs`

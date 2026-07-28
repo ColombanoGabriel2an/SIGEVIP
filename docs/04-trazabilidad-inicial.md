@@ -37,12 +37,12 @@
 | RF23: identificar persona pagadora | Reglas de método de pago, consulta de Personas y selector visual | Domain / Application / Infrastructure / WinForms | Unitarias, integración SQL y manual | Implementado |
 | RF24: consultar viáticos | `ViaticoService.ListarPorViaje`, filtros ADO.NET y `ViaticosForm` | Application / Infrastructure / database / WinForms | Filtros, integración SQL y manual | Implementado |
 | RF25: bloquear modificaciones | Estados de Viaje y Viático, validaciones de servicios y controles visuales | Domain / Application / Infrastructure / WinForms | Unitarias, integración y manual | Implementado |
-| RF26: enviar a rendición | `Viaje.EnviarARendicion`, `RendicionService.Enviar` y persistencia de auditoría | Domain / Application / Infrastructure / database / WinForms | Unitarias, integración SQL y manual | Implementado |
+| RF26: enviar a rendición | `Viaje.EnviarARendicion`, `RendicionService.Enviar` y Auditoría general transaccional | Domain / Application / Infrastructure / database / WinForms | Unitarias, integración SQL, rollback y manual | Implementado |
 | RF27: impedir modificaciones | Estado EnRendicion, validación de Application y control de concurrencia | Domain / Application / Infrastructure | Unitarias e integración SQL | Implementado |
 | RF28: revisar rendición | `RendicionService.ObtenerDetalle`, reconstrucción completa y `RendicionesForm` | Application / Infrastructure / database / WinForms | Integración SQL y validación manual | Implementado |
-| RF29: excluir viáticos | Exclusión y reactivación lógica con motivo y auditoría | Domain / Application / Infrastructure / database / WinForms | Unitarias, integración SQL y manual | Implementado |
-| RF30: aprobar viaje | `Viaje.Aprobar`, `RendicionService.Aprobar` y persistencia | Domain / Application / Infrastructure / database / WinForms | Unitarias, integración SQL y manual | Implementado |
-| RF31: cancelar rendición | `Viaje.Cancelar`, `RendicionService.Cancelar` y motivo obligatorio | Domain / Application / Infrastructure / database / WinForms | Unitarias, integración SQL y manual | Implementado |
+| RF29: excluir viáticos | Exclusión y reactivación lógica con motivo y Auditoría general transaccional | Domain / Application / Infrastructure / database / WinForms | Unitarias, integración SQL, rollback y manual | Implementado |
+| RF30: aprobar viaje | `Viaje.Aprobar`, `RendicionService.Aprobar` y Auditoría general transaccional | Domain / Application / Infrastructure / database / WinForms | Unitarias, integración SQL, rollback y manual | Implementado |
+| RF31: cancelar rendición | `Viaje.Cancelar`, `RendicionService.Cancelar`, motivo obligatorio y Auditoría general transaccional | Domain / Application / Infrastructure / database / WinForms | Unitarias, integración SQL, rollback y manual | Implementado |
 | RF32: saldo final | Total de Viáticos vigentes menos anticipo | Domain / Application / Infrastructure / WinForms | Pruebas económicas, integración y manual | Implementado |
 | RF37: impedir accesos no autorizados | `AutorizacionService` y validaciones de Usuario, Grupo, Permiso, Cliente, Viaje, Visita, Viático y Rendición | Application / Infrastructure / WinForms | Pruebas de Application y validación manual | Implementado para seguridad y módulos funcionales actuales |
 | RF38: ocultar opciones no habilitadas | `MainForm` y formularios configuran visibilidad y habilitación según permisos efectivos | WinForms | Usuarios, Grupos, Permisos, Clientes, Viajes, Visitas, Viáticos y Rendiciones | Implementado |
@@ -70,5 +70,5 @@
 | Usuario administrador inicial | Servicio, repositorio y `SIGEVIP.Setup` | Application / Infrastructure / tools | Creación e idempotencia | Implementado |
 | State en Viaje | `IEstadoViaje` y estados concretos | Domain | Transiciones | Implementado |
 | Composite en seguridad | `IPermisoComponente`, Grupo y Permiso | Domain | Anidamiento y ciclos | Implementado |
-| Auditoría básica | Persistencia y servicios | Infrastructure / Application | Pendiente | Pendiente |
-| SQL reproducible | Migraciones, seeds y validaciones de seguridad, Clientes, Viajes, Visitas, Viáticos y Rendiciones | database | Migraciones `001` a `006`, seeds reejecutables y validaciones correctas | Implementado para los módulos funcionales actuales |
+| Auditoría general consultable | Migración `007`, `dbo.Auditoria`, servicios, repositorios y escritura transaccional | Application / Infrastructure / database / WinForms | Unitarias, integración SQL, atomicidad, rollback y consulta autorizada | Implementado |
+| SQL reproducible | Migraciones, seeds y validaciones de seguridad, Clientes, Viajes, Visitas, Viáticos, Rendiciones y Auditoría | database | Migraciones `001` a `007`, seeds reejecutables y validaciones correctas | Implementado para los módulos funcionales actuales |
