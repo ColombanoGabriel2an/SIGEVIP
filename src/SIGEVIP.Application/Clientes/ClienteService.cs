@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Domain.Entities;
@@ -14,6 +15,12 @@ namespace SIGEVIP.Application.Clientes
 
         public const string PermisoGestionar =
             "CLIENTE_GESTIONAR";
+
+        private const string ModuloAuditoria =
+            "Clientes";
+
+        private const string EntidadAuditoria =
+            "Cliente";
 
         private readonly IClienteRepository
             _clienteRepository;
@@ -62,7 +69,8 @@ namespace SIGEVIP.Application.Clientes
             ExigirPermiso(
                 PermisoConsultar);
 
-            ValidarIdCliente(idCliente);
+            ValidarIdCliente(
+                idCliente);
 
             Cliente cliente =
                 _clienteRepository.ObtenerPorId(
@@ -106,8 +114,17 @@ namespace SIGEVIP.Application.Clientes
                     "Ya existe un cliente con el CUIT indicado.");
             }
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Alta",
+                    null,
+                    "Se registró el cliente " +
+                    cliente.RazonSocial +
+                    ".");
+
             return _clienteRepository.Insertar(
-                cliente);
+                cliente,
+                auditoria);
         }
 
         public void Modificar(
@@ -122,7 +139,8 @@ namespace SIGEVIP.Application.Clientes
             ExigirPermiso(
                 PermisoGestionar);
 
-            ValidarIdCliente(idCliente);
+            ValidarIdCliente(
+                idCliente);
 
             Cliente clienteActual =
                 _clienteRepository.ObtenerPorId(
@@ -160,8 +178,17 @@ namespace SIGEVIP.Application.Clientes
                 datosValidados.Localidad,
                 datosValidados.Provincia);
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Modificacion",
+                    idCliente,
+                    "Se modificaron los datos del cliente " +
+                    clienteActual.RazonSocial +
+                    ".");
+
             _clienteRepository.Actualizar(
-                clienteActual);
+                clienteActual,
+                auditoria);
         }
 
         public void Activar(
@@ -170,7 +197,8 @@ namespace SIGEVIP.Application.Clientes
             ExigirPermiso(
                 PermisoGestionar);
 
-            ValidarIdCliente(idCliente);
+            ValidarIdCliente(
+                idCliente);
 
             Cliente cliente =
                 ObtenerClienteGestionable(
@@ -178,8 +206,17 @@ namespace SIGEVIP.Application.Clientes
 
             cliente.Activar();
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Activacion",
+                    idCliente,
+                    "Se activó el cliente " +
+                    cliente.RazonSocial +
+                    ".");
+
             _clienteRepository.Activar(
-                idCliente);
+                idCliente,
+                auditoria);
         }
 
         public void Desactivar(
@@ -188,7 +225,8 @@ namespace SIGEVIP.Application.Clientes
             ExigirPermiso(
                 PermisoGestionar);
 
-            ValidarIdCliente(idCliente);
+            ValidarIdCliente(
+                idCliente);
 
             Cliente cliente =
                 ObtenerClienteGestionable(
@@ -196,8 +234,17 @@ namespace SIGEVIP.Application.Clientes
 
             cliente.Desactivar();
 
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Desactivacion",
+                    idCliente,
+                    "Se desactivó el cliente " +
+                    cliente.RazonSocial +
+                    ".");
+
             _clienteRepository.Desactivar(
-                idCliente);
+                idCliente,
+                auditoria);
         }
 
         private Cliente ObtenerClienteGestionable(
@@ -214,6 +261,24 @@ namespace SIGEVIP.Application.Clientes
             }
 
             return cliente;
+        }
+
+        private AuditoriaRegistro CrearAuditoria(
+            string accion,
+            int? idEntidad,
+            string descripcion)
+        {
+            Usuario usuario =
+                _sesionActual.UsuarioActual;
+
+            return new AuditoriaRegistro(
+                usuario.IdUsuario,
+                usuario.NombreUsuario,
+                ModuloAuditoria,
+                accion,
+                EntidadAuditoria,
+                idEntidad,
+                descripcion);
         }
 
         private void ExigirPermiso(

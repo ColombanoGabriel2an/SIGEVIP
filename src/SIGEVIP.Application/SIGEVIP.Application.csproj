@@ -44,6 +44,7 @@
     <Compile Include="Class1.cs" />
     <Compile Include="Auditoria\AuditoriaFiltro.cs" />
     <Compile Include="Auditoria\AuditoriaListadoDto.cs" />
+    <Compile Include="Auditoria\AuditoriaRegistro.cs" />
     <Compile Include="Auditoria\AuditoriaService.cs" />
     <Compile Include="Auditoria\IAuditoriaRepository.cs" />
     <Compile Include="Grupos\GrupoDetalleDto.cs" />

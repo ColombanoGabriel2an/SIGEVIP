@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Clientes;
 using SIGEVIP.Domain.Entities;
 using SIGEVIP.Domain.Exceptions;
+using SIGEVIP.Infrastructure.Auditoria;
 using SIGEVIP.Infrastructure.Data;
 using SIGEVIP.Infrastructure.Exceptions;
 
@@ -288,6 +290,30 @@ ORDER BY
         public int Insertar(
             Cliente cliente)
         {
+            return InsertarInterno(
+                cliente,
+                null);
+        }
+
+        public int Insertar(
+            Cliente cliente,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            return InsertarInterno(
+                cliente,
+                auditoria);
+        }
+
+        private int InsertarInterno(
+            Cliente cliente,
+            AuditoriaRegistro auditoria)
+        {
             if (cliente == null)
             {
                 throw new ArgumentNullException(
@@ -323,24 +349,67 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                 using (
                     SqlConnection connection =
                         _connectionFactory.Create())
-                using (
-                    SqlCommand command =
-                        new SqlCommand(
-                            sql,
-                            connection))
                 {
-                    AgregarParametrosCliente(
-                        command,
-                        cliente);
-
                     connection.Open();
 
-                    return Convert.ToInt32(
-                        command.ExecuteScalar());
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            int idCliente;
+
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sql,
+                                        connection,
+                                        transaction))
+                            {
+                                AgregarParametrosCliente(
+                                    command,
+                                    cliente);
+
+                                idCliente =
+                                    Convert.ToInt32(
+                                        command.ExecuteScalar());
+                            }
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria.ConIdEntidad(
+                                        idCliente));
+                            }
+
+                            transaction.Commit();
+
+                            return idCliente;
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
                 }
             }
+            catch (ReglaNegocioException)
+            {
+                throw;
+            }
+            catch (PersistenciaException)
+            {
+                throw;
+            }
             catch (SqlException exception)
-                when (EsErrorCuitDuplicado(exception))
+                when (EsErrorCuitDuplicado(
+                    exception))
             {
                 throw new ReglaNegocioException(
                     "Ya existe un cliente con el CUIT indicado.",
@@ -352,10 +421,40 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
                     "No fue posible registrar el cliente.",
                     exception);
             }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de registro del cliente no pudo completarse.",
+                    exception);
+            }
         }
 
         public void Actualizar(
             Cliente cliente)
+        {
+            ActualizarInterno(
+                cliente,
+                null);
+        }
+
+        public void Actualizar(
+            Cliente cliente,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarInterno(
+                cliente,
+                auditoria);
+        }
+
+        private void ActualizarInterno(
+            Cliente cliente,
+            AuditoriaRegistro auditoria)
         {
             if (cliente == null)
             {
@@ -379,33 +478,67 @@ WHERE IdCliente = @IdCliente;";
                 using (
                     SqlConnection connection =
                         _connectionFactory.Create())
-                using (
-                    SqlCommand command =
-                        new SqlCommand(
-                            sql,
-                            connection))
                 {
-                    AgregarParametrosCliente(
-                        command,
-                        cliente);
-
-                    command.Parameters.Add(
-                        "@IdCliente",
-                        SqlDbType.Int).Value =
-                            cliente.IdCliente;
-
                     connection.Open();
 
-                    int filas =
-                        command.ExecuteNonQuery();
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sql,
+                                        connection,
+                                        transaction))
+                            {
+                                AgregarParametrosCliente(
+                                    command,
+                                    cliente);
 
-                    ExigirUnaFila(
-                        filas,
-                        "actualizar");
+                                command.Parameters.Add(
+                                    "@IdCliente",
+                                    SqlDbType.Int).Value =
+                                        cliente.IdCliente;
+
+                                ExigirUnaFila(
+                                    command.ExecuteNonQuery(),
+                                    "actualizar");
+                            }
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
                 }
             }
+            catch (ReglaNegocioException)
+            {
+                throw;
+            }
+            catch (PersistenciaException)
+            {
+                throw;
+            }
             catch (SqlException exception)
-                when (EsErrorCuitDuplicado(exception))
+                when (EsErrorCuitDuplicado(
+                    exception))
             {
                 throw new ReglaNegocioException(
                     "Ya existe otro cliente con el CUIT indicado.",
@@ -417,27 +550,68 @@ WHERE IdCliente = @IdCliente;";
                     "No fue posible actualizar el cliente.",
                     exception);
             }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de actualización del cliente no pudo completarse.",
+                    exception);
+            }
         }
 
         public void Activar(
             int idCliente)
         {
-            ActualizarEstado(
+            ActualizarEstadoInterno(
                 idCliente,
-                true);
+                true,
+                null);
+        }
+
+        public void Activar(
+            int idCliente,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarEstadoInterno(
+                idCliente,
+                true,
+                auditoria);
         }
 
         public void Desactivar(
             int idCliente)
         {
-            ActualizarEstado(
+            ActualizarEstadoInterno(
                 idCliente,
-                false);
+                false,
+                null);
         }
 
-        private void ActualizarEstado(
+        public void Desactivar(
             int idCliente,
-            bool activo)
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarEstadoInterno(
+                idCliente,
+                false,
+                auditoria);
+        }
+
+        private void ActualizarEstadoInterno(
+            int idCliente,
+            bool activo,
+            AuditoriaRegistro auditoria)
         {
             if (idCliente <= 0)
             {
@@ -455,38 +629,73 @@ WHERE IdCliente = @IdCliente;";
                 using (
                     SqlConnection connection =
                         _connectionFactory.Create())
-                using (
-                    SqlCommand command =
-                        new SqlCommand(
-                            sql,
-                            connection))
                 {
-                    command.Parameters.Add(
-                        "@Activo",
-                        SqlDbType.Bit).Value =
-                            activo;
-
-                    command.Parameters.Add(
-                        "@IdCliente",
-                        SqlDbType.Int).Value =
-                            idCliente;
-
                     connection.Open();
 
-                    int filas =
-                        command.ExecuteNonQuery();
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sql,
+                                        connection,
+                                        transaction))
+                            {
+                                command.Parameters.Add(
+                                    "@Activo",
+                                    SqlDbType.Bit).Value =
+                                        activo;
 
-                    ExigirUnaFila(
-                        filas,
-                        activo
-                            ? "activar"
-                            : "desactivar");
+                                command.Parameters.Add(
+                                    "@IdCliente",
+                                    SqlDbType.Int).Value =
+                                        idCliente;
+
+                                ExigirUnaFila(
+                                    command.ExecuteNonQuery(),
+                                    activo
+                                        ? "activar"
+                                        : "desactivar");
+                            }
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria);
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            RevertirSiCorresponde(
+                                transaction);
+
+                            throw;
+                        }
+                    }
                 }
+            }
+            catch (PersistenciaException)
+            {
+                throw;
             }
             catch (SqlException exception)
             {
                 throw CrearErrorPersistencia(
                     "No fue posible actualizar el estado del cliente.",
+                    exception);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de estado del cliente no pudo completarse.",
                     exception);
             }
         }
@@ -676,6 +885,27 @@ WHERE IdCliente = @IdCliente;";
                         valor.Trim() +
                         "%"
                 });
+        }
+
+        private static void RevertirSiCorresponde(
+            SqlTransaction transaction)
+        {
+            if (transaction == null ||
+                transaction.Connection == null)
+            {
+                return;
+            }
+
+            try
+            {
+                transaction.Rollback();
+            }
+            catch (InvalidOperationException)
+            {
+            }
+            catch (SqlException)
+            {
+            }
         }
 
         private static void ExigirUnaFila(

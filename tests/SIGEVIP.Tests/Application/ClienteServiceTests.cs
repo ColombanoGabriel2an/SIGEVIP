@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Clientes;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
@@ -148,6 +149,26 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 "30123456789",
                 repository.ClienteInsertado.Cuit);
+
+            Assert.IsNotNull(
+                repository.AuditoriaInsertada);
+
+            Assert.AreEqual(
+                "Clientes",
+                repository.AuditoriaInsertada.Modulo);
+
+            Assert.AreEqual(
+                "Alta",
+                repository.AuditoriaInsertada.Accion);
+
+            Assert.IsNull(
+                repository.AuditoriaInsertada.IdEntidad);
+
+            Assert.IsFalse(
+                repository.AuditoriaInsertada
+                    .Descripcion
+                    .Contains(
+                        "30123456789"));
         }
 
         [TestMethod]
@@ -219,6 +240,21 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 "Empresa modificada",
                 repository.ClienteActualizado.RazonSocial);
+
+            Assert.IsNotNull(
+                repository.AuditoriaActualizacion);
+
+            Assert.AreEqual(
+                "Modificacion",
+                repository
+                    .AuditoriaActualizacion
+                    .Accion);
+
+            Assert.AreEqual(
+                1,
+                repository
+                    .AuditoriaActualizacion
+                    .IdEntidad);
         }
 
         [TestMethod]
@@ -272,6 +308,15 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 1,
                 repository.IdDesactivado);
+
+            Assert.IsNotNull(
+                repository.AuditoriaDesactivacion);
+
+            Assert.AreEqual(
+                "Desactivacion",
+                repository
+                    .AuditoriaDesactivacion
+                    .Accion);
         }
 
         [TestMethod]
@@ -299,6 +344,15 @@ namespace SIGEVIP.Tests.Application
             Assert.AreEqual(
                 1,
                 repository.IdActivado);
+
+            Assert.IsNotNull(
+                repository.AuditoriaActivacion);
+
+            Assert.AreEqual(
+                "Activacion",
+                repository
+                    .AuditoriaActivacion
+                    .Accion);
         }
 
         [TestMethod]
@@ -482,6 +536,30 @@ namespace SIGEVIP.Tests.Application
 
             public Cliente ClienteActualizado { get; private set; }
 
+            public AuditoriaRegistro AuditoriaInsertada
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaActualizacion
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaActivacion
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaDesactivacion
+            {
+                get;
+                private set;
+            }
+
             public int? UltimoIdExcluido { get; private set; }
 
             public ClienteFiltro UltimoFiltro { get; private set; }
@@ -524,29 +602,49 @@ namespace SIGEVIP.Tests.Application
             }
 
             public int Insertar(
-                Cliente cliente)
+                Cliente cliente,
+                AuditoriaRegistro auditoria)
             {
-                ClienteInsertado = cliente;
+                ClienteInsertado =
+                    cliente;
+
+                AuditoriaInsertada =
+                    auditoria;
 
                 return IdInsertado;
             }
 
             public void Actualizar(
-                Cliente cliente)
+                Cliente cliente,
+                AuditoriaRegistro auditoria)
             {
-                ClienteActualizado = cliente;
+                ClienteActualizado =
+                    cliente;
+
+                AuditoriaActualizacion =
+                    auditoria;
             }
 
             public void Activar(
-                int idCliente)
+                int idCliente,
+                AuditoriaRegistro auditoria)
             {
-                IdActivado = idCliente;
+                IdActivado =
+                    idCliente;
+
+                AuditoriaActivacion =
+                    auditoria;
             }
 
             public void Desactivar(
-                int idCliente)
+                int idCliente,
+                AuditoriaRegistro auditoria)
             {
-                IdDesactivado = idCliente;
+                IdDesactivado =
+                    idCliente;
+
+                AuditoriaDesactivacion =
+                    auditoria;
             }
         }
     }

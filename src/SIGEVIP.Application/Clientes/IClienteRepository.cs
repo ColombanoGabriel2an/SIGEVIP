@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Domain.Entities;
 
 namespace SIGEVIP.Application.Clientes
@@ -16,15 +17,19 @@ namespace SIGEVIP.Application.Clientes
             ClienteFiltro filtro);
 
         int Insertar(
-            Cliente cliente);
+            Cliente cliente,
+            AuditoriaRegistro auditoria);
 
         void Actualizar(
-            Cliente cliente);
+            Cliente cliente,
+            AuditoriaRegistro auditoria);
 
         void Activar(
-            int idCliente);
+            int idCliente,
+            AuditoriaRegistro auditoria);
 
         void Desactivar(
-            int idCliente);
+            int idCliente,
+            AuditoriaRegistro auditoria);
     }
 }
