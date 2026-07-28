@@ -41,6 +41,9 @@ namespace SIGEVIP.WinForms.Navigation
         private readonly UsuarioGestionService
             _usuarioGestionService;
 
+        private readonly CambiarClaveService
+            _cambiarClaveService;
+
         private readonly ISesionActual
             _sesionActual;
 
@@ -58,6 +61,7 @@ namespace SIGEVIP.WinForms.Navigation
             ViaticoService viaticoService,
             RendicionService rendicionService,
             UsuarioGestionService usuarioGestionService,
+            CambiarClaveService cambiarClaveService,
             ISesionActual sesionActual)
         {
             _autenticacionService =
@@ -104,6 +108,11 @@ namespace SIGEVIP.WinForms.Navigation
                 usuarioGestionService
                 ?? throw new ArgumentNullException(
                     nameof(usuarioGestionService));
+
+            _cambiarClaveService =
+                cambiarClaveService
+                ?? throw new ArgumentNullException(
+                    nameof(cambiarClaveService));
 
             _sesionActual =
                 sesionActual
@@ -220,6 +229,9 @@ namespace SIGEVIP.WinForms.Navigation
 
             _mainForm.UsuariosSolicitados +=
                 MainForm_UsuariosSolicitados;
+
+            _mainForm.CambiarClaveSolicitada +=
+                MainForm_CambiarClaveSolicitada;
 
             _mainForm.CerrarSesionSolicitada +=
                 MainForm_CerrarSesionSolicitada;
@@ -341,6 +353,38 @@ namespace SIGEVIP.WinForms.Navigation
             }
         }
 
+        private void MainForm_CambiarClaveSolicitada(
+            object sender,
+            EventArgs e)
+        {
+            if (_mainForm == null)
+            {
+                return;
+            }
+
+            using (
+                var formulario =
+                    new CambiarClaveForm(
+                        _cambiarClaveService))
+            {
+                DialogResult resultado =
+                    formulario.ShowDialog(
+                        _mainForm);
+
+                if (resultado !=
+                    DialogResult.OK)
+                {
+                    return;
+                }
+            }
+
+            CerrarMenuSinFinalizarAplicacion();
+
+            _sesionActual.Cerrar();
+
+            MostrarLogin();
+        }
+
         private void MainForm_CerrarSesionSolicitada(
             object sender,
             EventArgs e)
@@ -410,6 +454,9 @@ namespace SIGEVIP.WinForms.Navigation
 
             _mainForm.UsuariosSolicitados -=
                 MainForm_UsuariosSolicitados;
+
+            _mainForm.CambiarClaveSolicitada -=
+                MainForm_CambiarClaveSolicitada;
 
             _mainForm.CerrarSesionSolicitada -=
                 MainForm_CerrarSesionSolicitada;

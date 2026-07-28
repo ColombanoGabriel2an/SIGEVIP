@@ -64,6 +64,10 @@ namespace SIGEVIP.WinForms
                     new UsuarioGestionRepository(
                         connectionFactory);
 
+                var usuarioClaveRepository =
+                    new UsuarioClaveRepository(
+                        connectionFactory);
+
                 var clienteRepository =
                     new ClienteRepository(
                         connectionFactory);
@@ -118,6 +122,12 @@ namespace SIGEVIP.WinForms
                         sesionActual,
                         autorizacionService);
 
+                var cambiarClaveService =
+                    new CambiarClaveService(
+                        usuarioClaveRepository,
+                        passwordHasher,
+                        sesionActual);
+
                 var clienteService =
                     new ClienteService(
                         clienteRepository,
@@ -164,6 +174,7 @@ namespace SIGEVIP.WinForms
                         viaticoService,
                         rendicionService,
                         usuarioGestionService,
+                        cambiarClaveService,
                         sesionActual);
 
                 System.Windows.Forms.Application.Run(

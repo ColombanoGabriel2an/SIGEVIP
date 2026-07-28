@@ -66,6 +66,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+                <Compile Include="Forms\CambiarClaveForm.cs">
+                        <SubType>Form</SubType>
+                </Compile>
+
                 <Compile Include="Forms\ClienteEditForm.cs">
                         <SubType>Form</SubType>
                 </Compile>

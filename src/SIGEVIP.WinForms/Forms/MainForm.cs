@@ -57,6 +57,7 @@ namespace SIGEVIP.WinForms.Forms
         private Button _btnGrupos;
         private Button _btnPermisos;
         private Button _btnAuditoria;
+        private Button _btnCambiarClave;
         private Button _btnCerrarSesion;
         private Button _btnSalir;
 
@@ -107,6 +108,9 @@ namespace SIGEVIP.WinForms.Forms
 
         public event EventHandler
             UsuariosSolicitados;
+
+        public event EventHandler
+            CambiarClaveSolicitada;
 
         public event EventHandler
             CerrarSesionSolicitada;
@@ -275,8 +279,8 @@ namespace SIGEVIP.WinForms.Forms
                 new TableLayoutPanel
                 {
                     Dock = DockStyle.Right,
-                    Width = 390,
-                    ColumnCount = 2,
+                    Width = 540,
+                    ColumnCount = 3,
                     RowCount = 2,
                     Padding =
                         new Padding(
@@ -290,12 +294,17 @@ namespace SIGEVIP.WinForms.Forms
             panelAcciones.ColumnStyles.Add(
                 new ColumnStyle(
                     SizeType.Percent,
-                    50F));
+                    40F));
 
             panelAcciones.ColumnStyles.Add(
                 new ColumnStyle(
                     SizeType.Percent,
-                    50F));
+                    30F));
+
+            panelAcciones.ColumnStyles.Add(
+                new ColumnStyle(
+                    SizeType.Percent,
+                    30F));
 
             panelAcciones.RowStyles.Add(
                 new RowStyle(
@@ -318,6 +327,18 @@ namespace SIGEVIP.WinForms.Forms
                         FontStyle.Bold),
                     TextAlign =
                         ContentAlignment.MiddleRight
+                };
+
+            _btnCambiarClave =
+                new Button
+                {
+                    Dock = DockStyle.Fill,
+                    Margin =
+                        new Padding(4),
+                    Text =
+                        "Cambiar clave",
+                    UseVisualStyleBackColor =
+                        true
                 };
 
             _btnCerrarSesion =
@@ -344,6 +365,9 @@ namespace SIGEVIP.WinForms.Forms
                         true
                 };
 
+            _btnCambiarClave.Click +=
+                BtnCambiarClave_Click;
+
             _btnCerrarSesion.Click +=
                 BtnCerrarSesion_Click;
 
@@ -357,16 +381,21 @@ namespace SIGEVIP.WinForms.Forms
 
             panelAcciones.SetColumnSpan(
                 _lblUsuario,
-                2);
+                3);
 
             panelAcciones.Controls.Add(
-                _btnCerrarSesion,
+                _btnCambiarClave,
                 0,
                 1);
 
             panelAcciones.Controls.Add(
-                _btnSalir,
+                _btnCerrarSesion,
                 1,
+                1);
+
+            panelAcciones.Controls.Add(
+                _btnSalir,
+                2,
                 1);
 
             panelEncabezado.Controls.Add(
@@ -720,6 +749,18 @@ namespace SIGEVIP.WinForms.Forms
                 "Modulo pendiente",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
+        }
+
+        private void BtnCambiarClave_Click(
+            object sender,
+            EventArgs e)
+        {
+            EventHandler handler =
+                CambiarClaveSolicitada;
+
+            handler?.Invoke(
+                this,
+                EventArgs.Empty);
         }
 
         private void BtnCerrarSesion_Click(
