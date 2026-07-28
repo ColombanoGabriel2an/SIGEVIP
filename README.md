@@ -90,6 +90,14 @@ Se encuentran implementados:
 - protección del Usuario autenticado y del último Administrador;
 - cambio seguro de contraseña por el propio Usuario;
 - cierre automático de sesión después del cambio;
+- módulo funcional de Gestión de Grupos;
+- listado, búsqueda y filtro por estado de Grupos;
+- alta y modificación de Grupos;
+- generación automática e inmutabilidad del Código;
+- asignación y reemplazo transaccional de Permisos directos;
+- activación y desactivación lógica de Grupos;
+- preservación de `GrupoPermiso`, `UsuarioGrupo` y `GrupoGrupo`;
+- protección de `ADMINISTRADOR_GENERAL`;
 - módulo funcional de Clientes;
 - persistencia SQL de Clientes;
 - alta y modificación de Clientes;
@@ -120,13 +128,14 @@ Se encuentran implementados:
 - aprobación y cancelación de Rendiciones;
 - cálculo de total gastado vigente y saldo pendiente;
 - validación SQL de las migraciones `003` a `006`;
-- 479 pruebas automatizadas correctas;
+- 532 pruebas automatizadas correctas;
 - compilación con 0 advertencias y 0 errores;
-- validación manual de Usuarios, Cambio de clave, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
+- validación manual de Usuarios, Cambio de clave, Grupos, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
 
 Permanecen pendientes:
 
-- gestión funcional de grupos y permisos;
+- gestión funcional del catálogo de permisos;
+- gestión visual de jerarquías entre grupos;
 - recuperación de contraseña;
 - historial funcional completo del cliente;
 - auditoría general consultable;

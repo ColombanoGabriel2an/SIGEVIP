@@ -25,6 +25,7 @@
 
 - `Domain/ClienteTests.cs`
 - `Domain/GrupoPermisoTests.cs`
+- `Domain/GrupoGestionDomainTests.cs`
 - `Domain/PersonaTests.cs`
 - `Domain/UsuarioTests.cs`
 - `Domain/ViajeTests.cs`
@@ -38,6 +39,7 @@
 - `Application/AutenticacionServiceTests.cs`
 - `Application/AutorizacionServiceTests.cs`
 - `Application/ClienteServiceTests.cs`
+- `Application/GrupoGestionServiceTests.cs`
 - `Application/ViajeServiceTests.cs`
 - `Application/VisitaServiceTests.cs`
 - `Application/SesionActualTests.cs`
@@ -49,6 +51,7 @@
 ### Integración SQL
 
 - `Integration/ClienteRepositoryIntegrationTests.cs`
+- `Integration/GrupoGestionRepositoryIntegrationTests.cs`
 - `Integration/ViajeRepositoryIntegrationTests.cs`
 - `Integration/VisitaRepositoryIntegrationTests.cs`
 - `Integration/ViajeVisitaRepositoryIntegrationTests.cs`
@@ -61,8 +64,8 @@ El total definitivo se toma del ejecutor VSTest.
 
 Último resultado consolidado:
 
-- 291 pruebas totales;
-- 291 correctas;
+- 532 pruebas totales;
+- 532 correctas;
 - 0 fallidas.
 
 El conjunto incluye pruebas:
@@ -215,8 +218,8 @@ Compilación:
 
 Pruebas:
 
-- Totales: 291.
-- Correctas: 291.
+- Totales: 532.
+- Correctas: 532.
 - Fallidas: 0.
 - Omitidas: 0.
 
@@ -460,3 +463,105 @@ Se verificó manualmente:
 - compilación con 0 advertencias;
 - compilación con 0 errores;
 - validación manual satisfactoria.
+
+## Cobertura específica del módulo Gestión de Grupos
+
+### Domain
+
+Archivo:
+
+`tests/SIGEVIP.Tests/Domain/GrupoGestionDomainTests.cs`
+
+Se verifica:
+
+- actualización de Nombre y Descripción;
+- campos obligatorios;
+- normalización;
+- reemplazo de Permisos directos;
+- selección no vacía;
+- rechazo de Permiso nulo;
+- rechazo de Permisos duplicados;
+- preservación de Grupos hijos;
+- conservación del estado anterior ante errores.
+
+Cantidad:
+
+- 9 pruebas.
+
+### Application
+
+Archivo:
+
+`tests/SIGEVIP.Tests/Application/GrupoGestionServiceTests.cs`
+
+Se verifica:
+
+- sesión requerida;
+- Usuario activo;
+- permiso `GRUPO_GESTIONAR`;
+- listado;
+- detalle;
+- alta;
+- generación de Código;
+- unicidad de Código;
+- unicidad de Nombre;
+- Permisos activos;
+- rechazo de selección vacía;
+- rechazo de duplicados;
+- modificación;
+- Código inmutable;
+- activación;
+- desactivación;
+- protección de `ADMINISTRADOR_GENERAL`;
+- conservación de Permisos administrativos mínimos.
+
+Cantidad:
+
+- 25 pruebas.
+
+### Integración SQL
+
+Archivo:
+
+`tests/SIGEVIP.Tests/Integration/GrupoGestionRepositoryIntegrationTests.cs`
+
+Se verifica:
+
+- listado y cantidades agregadas;
+- búsqueda;
+- filtro por estado;
+- detalle;
+- reconstrucción de Permisos directos;
+- reconstrucción de Grupos hijos;
+- listado de Permisos activos;
+- inserción transaccional;
+- Código duplicado;
+- rollback;
+- modificación transaccional;
+- reemplazo de `GrupoPermiso`;
+- preservación de `GrupoGrupo`;
+- activación;
+- desactivación;
+- tratamiento de registros inexistentes.
+
+Cantidad:
+
+- 19 pruebas.
+
+### Resultado del módulo
+
+Pruebas específicas nuevas:
+
+- Domain: 9;
+- Application: 25;
+- integración SQL: 19;
+- total: 53.
+
+Regresión consolidada:
+
+- 532 pruebas totales;
+- 532 correctas;
+- 0 fallidas;
+- compilación con 0 advertencias;
+- compilación con 0 errores;
+- validación manual aprobada.

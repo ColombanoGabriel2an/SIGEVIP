@@ -500,11 +500,11 @@ Resultado consolidado:
 
 ## 19. Reglas pendientes
 
-- Alta y modificación persistente del catálogo de Grupos.
 - Alta y modificación persistente del catálogo de Permisos.
-- Persistencia visual de relaciones Grupo-Permiso.
 - Persistencia visual de relaciones Grupo-Grupo.
 - Auditoría general consultable.
+
+La alta y modificación persistente del catálogo de Grupos y la gestión visual de relaciones `GrupoPermiso` ya se encuentran implementadas.
 
 ## 20. Commits técnicos
 
@@ -1199,3 +1199,200 @@ La validación comprueba:
 Resultado:
 
 `VALIDACIÓN CORRECTA`
+
+## Gestión persistente de Grupos
+
+La gestión funcional reutiliza el esquema creado por:
+
+`database/migrations/002_crear_seguridad.sql`
+
+No fue necesaria una migración adicional.
+
+### Alta de Grupo
+
+`GrupoGestionRepository.Insertar` persiste dentro de una única transacción:
+
+1. comprobación defensiva de unicidad del Código;
+2. comprobación defensiva de unicidad del Nombre;
+3. comprobación de existencia y actividad de Permisos;
+4. inserción en `dbo.Grupo`;
+5. recuperación del identificador mediante `SCOPE_IDENTITY`;
+6. inserción de una o varias filas en `dbo.GrupoPermiso`;
+7. commit.
+
+Ante cualquier error se ejecuta rollback.
+
+### Generación del Código
+
+Application genera el Código desde el Nombre.
+
+La normalización:
+
+- elimina espacios exteriores;
+- transforma caracteres a mayúsculas;
+- elimina acentos;
+- transforma espacios y separadores en guion bajo;
+- evita separadores consecutivos inválidos.
+
+La unicidad definitiva se conserva mediante:
+
+`UX_Grupo_Codigo`
+
+Después del alta el Código es inmutable.
+
+### Modificación de Grupo
+
+`GrupoGestionRepository.Actualizar` ejecuta dentro de una transacción:
+
+1. comprobación de existencia del Grupo;
+2. comprobación de unicidad del Nombre;
+3. comprobación de Permisos activos;
+4. actualización de `Nombre`;
+5. actualización de `Descripcion`;
+6. eliminación de asociaciones directas anteriores en `dbo.GrupoPermiso`;
+7. inserción de la nueva colección de Permisos directos;
+8. commit.
+
+No se actualiza:
+
+- `Codigo`;
+- `Activo`;
+- `UsuarioGrupo`;
+- `GrupoGrupo`.
+
+### Reemplazo de GrupoPermiso
+
+La relación:
+
+`Grupo N -------- N Permiso`
+
+se administra mediante reemplazo transaccional completo.
+
+Este enfoque mantiene correspondencia entre:
+
+- selección de la interfaz;
+- colección del dominio;
+- filas de `dbo.GrupoPermiso`.
+
+La clave primaria compuesta:
+
+`PK_GrupoPermiso`
+
+impide asociaciones duplicadas.
+
+### Preservación de GrupoGrupo
+
+La modificación de Permisos directos no elimina Grupos hijos.
+
+`GrupoGestionRepository` reconstruye:
+
+- Permisos directos;
+- Grupos hijos directos.
+
+Durante la actualización solo reemplaza filas de:
+
+`dbo.GrupoPermiso`
+
+Las filas de:
+
+`dbo.GrupoGrupo`
+
+permanecen sin cambios.
+
+### Activación y desactivación
+
+El estado se modifica mediante:
+
+`UPDATE dbo.Grupo SET Activo = @Activo`
+
+No se realiza borrado físico.
+
+La desactivación conserva:
+
+- `UsuarioGrupo`;
+- `GrupoPermiso`;
+- `GrupoGrupo`.
+
+Un Grupo inactivo deja de intervenir en los Permisos efectivos, pero sus asociaciones quedan disponibles para una reactivación posterior.
+
+### Protección de ADMINISTRADOR_GENERAL
+
+Application impide:
+
+- desactivar `ADMINISTRADOR_GENERAL`;
+- modificar su Código;
+- retirar `GRUPO_GESTIONAR`;
+- retirar `USUARIO_GESTIONAR`;
+- retirar `PERMISO_GESTIONAR`.
+
+La protección es funcional.
+
+Las restricciones SQL continúan garantizando:
+
+- integridad referencial;
+- unicidad de Código;
+- asociaciones no duplicadas.
+
+### Concurrencia e integridad
+
+Las escrituras utilizan:
+
+`IsolationLevel.Serializable`
+
+Application realiza validaciones anticipadas.
+
+SQL Server conserva la integridad definitiva mediante:
+
+- `UX_Grupo_Codigo`;
+- `PK_GrupoPermiso`;
+- claves foráneas;
+- restricciones de campos no vacíos.
+
+Infrastructure reconoce los errores:
+
+- `2601`;
+- `2627`.
+
+Los conflictos se traducen a excepciones funcionales sin exponer detalles internos de SQL Server.
+
+### Consultas del módulo
+
+El repositorio permite:
+
+- listar con búsqueda;
+- filtrar por estado;
+- contar Permisos directos;
+- contar Usuarios directos;
+- obtener detalle;
+- reconstruir Permisos;
+- reconstruir Grupos hijos;
+- listar Permisos activos;
+- obtener Permisos por identificadores;
+- verificar Código;
+- verificar Nombre;
+- verificar actividad de Permisos.
+
+El listado utiliza consultas agregadas y evita el problema N+1.
+
+### Validación
+
+Se ejecutaron:
+
+- pruebas de Domain;
+- pruebas de Application;
+- 19 pruebas de integración real con SQL Server;
+- validación manual del ejecutable.
+
+Resultado consolidado:
+
+- 532 pruebas totales;
+- 532 correctas;
+- 0 fallidas;
+- compilación con 0 advertencias;
+- compilación con 0 errores.
+
+### Commits
+
+- `fcbc5e2` — `Agrego casos de uso de grupos`
+- `5da1e81` — `Agrego persistencia de grupos`
+- `90ec085` — `Completo interfaz de gestion de grupos`

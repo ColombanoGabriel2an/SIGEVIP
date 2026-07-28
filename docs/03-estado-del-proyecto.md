@@ -4,7 +4,7 @@
 
 Etapa 4: módulos funcionales documentados.
 
-Bloque actual: cierre técnico y documental de Gestión de Usuarios y Cambio de clave.
+Bloque actual: cierre técnico y documental de Gestión de Grupos.
 
 ## Rama de trabajo
 
@@ -12,8 +12,8 @@ Bloque actual: cierre técnico y documental de Gestión de Usuarios y Cambio de 
 
 ## Último cierre funcional publicado
 
-- Commit: `74dec4b`
-- Mensaje: `Agrego interfaz de cambio de clave`
+- Commit: `90ec085`
+- Mensaje: `Completo interfaz de gestion de grupos`
 
 La rama local se encuentra sincronizada con:
 
@@ -401,16 +401,15 @@ Se utilizan:
 
 ## Pendiente inmediato
 
-- Completar el cierre documental del módulo Usuarios.
+- Completar el cierre documental del módulo Gestión de Grupos.
 - Ejecutar regresión documental final.
 - Publicar el cierre documental.
 - Preparar el siguiente módulo funcional.
 
 ## Etapas posteriores
 
-- Gestión visual de usuarios.
-- Gestión visual de grupos.
-- Gestión visual de permisos.
+- Gestión funcional del catálogo de Permisos.
+- Gestión visual de jerarquías entre Grupos.
 - Recuperación de contraseña.
 - Historial funcional completo del Cliente.
 - Auditoría general consultable.
@@ -1002,3 +1001,160 @@ Después de un cambio correcto:
 - `74dec4b` — `Agrego interfaz de cambio de clave`
 
 CUD12: Recuperar clave permanece pendiente.
+
+## Módulo funcional de Gestión de Grupos
+
+El módulo Grupos se encuentra implementado de extremo a extremo dentro del alcance aprobado.
+
+### Domain
+
+Se implementaron:
+
+- actualización validada de Nombre y Descripción;
+- reemplazo controlado de Permisos directos;
+- rechazo de colecciones vacías;
+- rechazo de Permisos nulos;
+- rechazo de Permisos duplicados;
+- preservación de Grupos hijos;
+- conservación del estado anterior ante modificaciones inválidas.
+
+### Application
+
+Se implementaron:
+
+- `GrupoFiltro`;
+- `GrupoListadoDto`;
+- `GrupoDetalleDto`;
+- `PermisoSeleccionGrupoDto`;
+- `RegistrarGrupoCommand`;
+- `ModificarGrupoCommand`;
+- `IGrupoGestionRepository`;
+- `GrupoGestionService`.
+
+Casos de uso disponibles:
+
+- listar;
+- obtener detalle;
+- listar Permisos activos;
+- registrar;
+- modificar;
+- activar;
+- desactivar.
+
+Las operaciones validan:
+
+- sesión autenticada;
+- Usuario activo;
+- permiso `GRUPO_GESTIONAR`;
+- Código generado y único;
+- Nombre obligatorio y único;
+- Descripción obligatoria;
+- al menos un Permiso activo;
+- ausencia de Permisos duplicados;
+- protección de `ADMINISTRADOR_GENERAL`;
+- conservación de los Permisos administrativos mínimos.
+
+### Infrastructure
+
+Se implementó:
+
+`src/SIGEVIP.Infrastructure/Grupos/GrupoGestionRepository.cs`
+
+Responsabilidades:
+
+- listar con búsqueda y filtro de estado;
+- recuperar detalle;
+- reconstruir Permisos directos;
+- reconstruir Grupos hijos directos;
+- consultar Permisos activos;
+- consultar Permisos por identificadores;
+- verificar Código;
+- verificar Nombre;
+- verificar actividad de Permisos;
+- insertar Grupo y Permisos dentro de una transacción;
+- actualizar Nombre y Descripción;
+- reemplazar `GrupoPermiso` dentro de una transacción;
+- preservar `GrupoGrupo`;
+- activar;
+- desactivar;
+- traducir duplicados y errores técnicos.
+
+No fue necesaria una migración nueva porque el esquema de seguridad existente ya contenía:
+
+- `dbo.Grupo`;
+- `dbo.Permiso`;
+- `dbo.GrupoPermiso`;
+- `dbo.GrupoGrupo`;
+- `dbo.UsuarioGrupo`;
+- claves primarias;
+- claves foráneas;
+- índice único de Código.
+
+### WinForms
+
+Se implementaron:
+
+- `GruposForm`;
+- `GrupoEditForm`;
+- navegación desde `MainForm`;
+- coordinación desde `SigevipApplicationContext`;
+- composición en `Program`.
+
+La interfaz permite:
+
+- listar;
+- buscar;
+- filtrar;
+- registrar;
+- modificar;
+- activar;
+- desactivar;
+- generar el Código;
+- visualizar el Código inmutable;
+- seleccionar varios Permisos;
+- visualizar cantidades de Permisos y Usuarios;
+- mostrar validaciones y errores controlados.
+
+### Validación técnica
+
+- compilación con 0 advertencias y 0 errores;
+- 53 pruebas específicas nuevas;
+- 532 pruebas automatizadas correctas;
+- 0 pruebas fallidas;
+- pruebas de Domain;
+- pruebas de Application;
+- pruebas de integración real con SQL Server;
+- validación manual completa.
+
+### Validación manual
+
+Se verificó:
+
+- listado;
+- búsqueda;
+- filtros;
+- alta;
+- generación del Código;
+- modificación;
+- reemplazo de Permisos;
+- Código inmutable;
+- desactivación lógica;
+- conservación de asociaciones;
+- reactivación;
+- protección de `ADMINISTRADOR_GENERAL`;
+- protección de los Permisos administrativos mínimos;
+- validación de campos obligatorios.
+
+### Commits del módulo
+
+- `fcbc5e2` — `Agrego casos de uso de grupos`
+- `5da1e81` — `Agrego persistencia de grupos`
+- `90ec085` — `Completo interfaz de gestion de grupos`
+
+### Alcance posterior
+
+Permanece pendiente:
+
+- gestión funcional del catálogo de Permisos;
+- gestión visual de relaciones `GrupoGrupo`;
+- auditoría general consultable.

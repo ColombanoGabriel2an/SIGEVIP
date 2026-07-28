@@ -28,11 +28,15 @@ El subsistema de seguridad contiene:
 - Protección del Usuario autenticado.
 - Protección del último Administrador activo.
 - Cambio seguro de clave del Usuario autenticado.
+- Mantenimiento funcional de Grupos.
+- Asignación y reemplazo de Permisos directos de Grupos.
+- Activación y desactivación lógica de Grupos.
+- Protección de `ADMINISTRADOR_GENERAL`.
 
 No incluye todavía:
 
-- mantenimiento de grupos;
-- mantenimiento de permisos;
+- mantenimiento del catálogo de Permisos;
+- gestión visual de jerarquías `GrupoGrupo`;
 - recuperación por correo;
 - bloqueo por intentos fallidos;
 - autenticación multifactor;
@@ -350,11 +354,11 @@ Características:
 
 ### Pruebas automatizadas
 
-- 479 pruebas totales;
-- 479 correctas;
+- 532 pruebas totales;
+- 532 correctas;
 - 0 fallidas.
 
-La regresión incluye seguridad, Gestión de Usuarios, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
+La regresión incluye seguridad, Gestión de Usuarios, Gestión de Grupos, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
 
 ### Interfaz
 
@@ -542,21 +546,20 @@ CUD12: Recuperar clave continúa pendiente.
 ### Application
 
 - recuperación de contraseña;
-- gestión de grupos;
-- gestión de permisos;
-- auditoría;
-- autorización dentro de cada operación funcional.
+- gestión del catálogo de Permisos;
+- gestión visual de jerarquías entre Grupos;
+- auditoría.
 
 ### Infrastructure
 
-- persistencia de cambios de grupos administrados desde un módulo específico de Grupos;
-- persistencia de cambios de permisos;
+- persistencia de cambios del catálogo de Permisos;
+- persistencia visual de relaciones `GrupoGrupo`;
 - auditoría.
 
 ### WinForms
 
-- formulario funcional de grupos;
-- formulario funcional de permisos;
+- formulario funcional del catálogo de Permisos;
+- formulario de jerarquías entre Grupos;
 - pantalla de auditoría;
 - recuperación de contraseña.
 
@@ -574,9 +577,107 @@ El flujo de seguridad básico del MVP está implementado y comprobado:
 
 La gestión funcional de Usuarios y sus Grupos directos se encuentra implementada y comprobada.
 
+La gestión funcional de Grupos y sus Permisos directos también se encuentra implementada y comprobada.
+
 Continúan pendientes para etapas posteriores:
 
-- gestión del catálogo de Grupos;
 - gestión del catálogo de Permisos;
+- gestión visual de jerarquías `GrupoGrupo`;
 - recuperación de contraseña;
 - auditoría general.
+
+## 24. Gestión funcional de Grupos
+
+La gestión funcional de Grupos utiliza:
+
+- `GrupoGestionService`;
+- `IGrupoGestionRepository`;
+- `GrupoGestionRepository`;
+- `GruposForm`;
+- `GrupoEditForm`.
+
+El acceso requiere:
+
+`GRUPO_GESTIONAR`
+
+La autorización se valida:
+
+- en el menú principal;
+- en `GruposForm`;
+- nuevamente en Application.
+
+### Alta
+
+El alta exige:
+
+- Nombre obligatorio;
+- Descripción obligatoria;
+- Código generado y único;
+- Nombre único;
+- al menos un Permiso activo;
+- ausencia de Permisos duplicados.
+
+El Grupo se crea activo.
+
+### Modificación
+
+La modificación permite:
+
+- cambiar el Nombre;
+- cambiar la Descripción;
+- reemplazar todos los Permisos directos.
+
+No permite:
+
+- modificar el Código;
+- dejar al Grupo sin Permisos;
+- asignar Permisos inexistentes;
+- asignar Permisos inactivos;
+- alterar relaciones `GrupoGrupo`.
+
+### Desactivación lógica
+
+La desactivación:
+
+- cambia únicamente el campo `Activo`;
+- no elimina el Grupo;
+- conserva `GrupoPermiso`;
+- conserva `UsuarioGrupo`;
+- conserva `GrupoGrupo`;
+- deja de aportar Permisos efectivos;
+- permite reactivación.
+
+### Protección administrativa
+
+`ADMINISTRADOR_GENERAL` no puede:
+
+- desactivarse;
+- cambiar su Código;
+- perder `GRUPO_GESTIONAR`;
+- perder `USUARIO_GESTIONAR`;
+- perder `PERMISO_GESTIONAR`.
+
+### Persistencia
+
+El alta y la modificación se ejecutan mediante transacciones ADO.NET.
+
+El reemplazo de Permisos modifica exclusivamente:
+
+`dbo.GrupoPermiso`
+
+No modifica:
+
+- `dbo.UsuarioGrupo`;
+- `dbo.GrupoGrupo`.
+
+### Validación
+
+Resultado:
+
+- 53 pruebas específicas;
+- 532 pruebas totales;
+- 532 correctas;
+- 0 fallidas;
+- compilación con 0 advertencias;
+- compilación con 0 errores;
+- validación manual aprobada.
