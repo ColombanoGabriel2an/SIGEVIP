@@ -298,10 +298,14 @@ La base impide:
 - autorreferencia directa;
 - relación padre-hijo duplicada.
 
-Application deberá impedir:
+Application e Infrastructure impiden:
 
+- autorreferencia funcional;
 - ciclos indirectos;
+- nuevas asociaciones con Grupos inactivos;
 - reconstrucciones inconsistentes.
+
+La interfaz permite administrar estas relaciones desde `GrupoEditForm`.
 
 ## 10. Persistencia del Composite
 
@@ -500,10 +504,17 @@ Resultado consolidado:
 
 ## 19. Reglas pendientes
 
-- Persistencia visual de relaciones Grupo-Grupo.
 - Auditoría general consultable.
 
-La alta y modificación persistente de los catálogos de Grupos y Permisos, junto con la gestión visual de relaciones `GrupoPermiso`, ya se encuentran implementadas.
+La alta y modificación persistente de los catálogos de Grupos y Permisos se encuentra implementada.
+
+También se encuentran implementadas:
+
+- gestión visual de `GrupoPermiso`;
+- gestión visual de `GrupoGrupo`;
+- reemplazo transaccional de jerarquías;
+- detección de ciclos indirectos;
+- vista previa de Permisos efectivos.
 
 ## 20. Commits técnicos
 
@@ -1241,23 +1252,36 @@ Después del alta el Código es inmutable.
 
 ### Modificación de Grupo
 
-`GrupoGestionRepository.Actualizar` ejecuta dentro de una transacción:
+`GrupoGestionRepository.Actualizar` puede ejecutar dentro de una única transacción:
 
 1. comprobación de existencia del Grupo;
 2. comprobación de unicidad del Nombre;
-3. comprobación de Permisos activos;
-4. actualización de `Nombre`;
-5. actualización de `Descripcion`;
-6. eliminación de asociaciones directas anteriores en `dbo.GrupoPermiso`;
-7. inserción de la nueva colección de Permisos directos;
-8. commit.
+3. comprobación de Permisos seleccionados;
+4. comprobación de Grupos hijos seleccionados;
+5. validación de actividad para nuevas asociaciones;
+6. detección de autorreferencia;
+7. detección de ciclos indirectos;
+8. actualización de `Nombre`;
+9. actualización de `Descripcion`;
+10. eliminación de asociaciones anteriores en `dbo.GrupoPermiso`;
+11. inserción de la nueva colección de Permisos directos;
+12. eliminación de relaciones anteriores en `dbo.GrupoGrupo`;
+13. inserción de la nueva colección de Grupos hijos;
+14. commit.
+
+Ante cualquier error se ejecuta rollback de:
+
+- datos del Grupo;
+- `GrupoPermiso`;
+- `GrupoGrupo`.
 
 No se actualiza:
 
 - `Codigo`;
 - `Activo`;
-- `UsuarioGrupo`;
-- `GrupoGrupo`.
+- `UsuarioGrupo`.
+
+La sobrecarga anterior de actualización continúa disponible y preserva `GrupoGrupo`, evitando romper llamadas existentes.
 
 ### Reemplazo de GrupoPermiso
 
@@ -1279,24 +1303,62 @@ La clave primaria compuesta:
 
 impide asociaciones duplicadas.
 
-### Preservación de GrupoGrupo
+### Reemplazo de GrupoGrupo
 
-La modificación de Permisos directos no elimina Grupos hijos.
+La relación:
 
-`GrupoGestionRepository` reconstruye:
+`Grupo N -------- N Grupo`
 
-- Permisos directos;
-- Grupos hijos directos.
+se administra mediante reemplazo transaccional completo.
 
-Durante la actualización solo reemplaza filas de:
+El Grupo que se modifica actúa como padre y los Grupos seleccionados actúan como hijos.
 
-`dbo.GrupoPermiso`
+La dirección de herencia es:
 
-Las filas de:
+> El Grupo padre incorpora los Permisos efectivos de sus Grupos hijos.
 
-`dbo.GrupoGrupo`
+Se permite:
 
-permanecen sin cambios.
+- cero hijos;
+- un hijo;
+- varios hijos;
+- jerarquías de varios niveles;
+- conservar un hijo inactivo ya relacionado.
+
+Se impide:
+
+- asignar el propio Grupo como hijo;
+- asignar identificadores duplicados;
+- agregar un hijo inactivo nuevo;
+- crear ciclos indirectos.
+
+La base garantiza:
+
+- integridad referencial;
+- ausencia de autorreferencia directa;
+- ausencia de relaciones duplicadas.
+
+Application y el repositorio validan los ciclos que una restricción relacional simple no puede impedir.
+
+### Cálculo de Permisos efectivos
+
+La vista previa combina:
+
+- Permisos directos seleccionados;
+- Permisos de los Grupos hijos;
+- Permisos heredados en niveles posteriores.
+
+La consulta recursiva:
+
+- recorre `dbo.GrupoGrupo`;
+- utiliza una ruta visitada para evitar recorridos repetidos;
+- excluye Grupos inactivos;
+- excluye Permisos inactivos;
+- agrupa por Permiso;
+- elimina duplicados;
+- prioriza el origen directo cuando un Permiso también es heredado.
+
+La vista previa no copia filas a `GrupoPermiso`. Es un cálculo informativo basado en la configuración vigente y la selección del formulario.
 
 ### Activación y desactivación
 
@@ -1365,6 +1427,8 @@ El repositorio permite:
 - obtener detalle;
 - reconstruir Permisos;
 - reconstruir Grupos hijos;
+- listar Grupos hijos disponibles;
+- calcular Permisos efectivos directos y heredados;
 - listar Permisos activos;
 - obtener Permisos por identificadores;
 - verificar Código;
@@ -1384,8 +1448,8 @@ Se ejecutaron:
 
 Resultado consolidado:
 
-- 594 pruebas totales;
-- 594 correctas;
+- 627 pruebas totales;
+- 627 correctas;
 - 0 fallidas;
 - compilación con 0 advertencias;
 - compilación con 0 errores.

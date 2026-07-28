@@ -69,6 +69,8 @@ Los proyectos utilizan archivos `.csproj` clásicos con inclusiones explícitas.
 - Persistencia SQL del modelo de seguridad.
 - Reconstrucción de grupos y permisos desde SQL Server.
 - Detección de ciclos persistidos.
+- Gestión visual de jerarquías entre Grupos.
+- Vista previa de Permisos efectivos directos y heredados.
 - Inicialización del administrador.
 - Herramienta `SIGEVIP.Setup`.
 
@@ -259,8 +261,8 @@ Ese formulario solo servía para comprobar la conexión inicial y ya no particip
 
 ### Pruebas
 
-- Totales: 594.
-- Correctas: 594.
+- Totales: 627.
+- Correctas: 627.
 - Fallidas: 0.
 
 Incluyen:
@@ -401,14 +403,11 @@ Se utilizan:
 
 ## Pendiente inmediato
 
-- Completar el cierre documental del módulo Gestión de Permisos.
-- Ejecutar regresión documental final.
-- Publicar el cierre documental.
+- Publicar el cierre documental de jerarquías de Grupos.
 - Preparar el siguiente módulo funcional.
 
 ## Etapas posteriores
 
-- Gestión visual de jerarquías entre Grupos.
 - Recuperación de contraseña.
 - Historial funcional completo del Cliente.
 - Auditoría general consultable.
@@ -1003,7 +1002,18 @@ CUD12: Recuperar clave permanece pendiente.
 
 ## Módulo funcional de Gestión de Grupos
 
-El módulo Grupos se encuentra implementado de extremo a extremo dentro del alcance aprobado.
+El módulo Grupos se encuentra implementado de extremo a extremo, incluida la gestión visual y persistente de jerarquías `GrupoGrupo`.
+
+### Trazabilidad
+
+La funcionalidad se vincula con:
+
+- CUD07 — Gestionar Grupos;
+- CUD08 — Agregar Grupo;
+- CUD09 — Modificar Grupo;
+- RN-SEG-10 — un Grupo puede contener otros Grupos;
+- RN-SEG-13 — un Grupo no puede contenerse a sí mismo;
+- RN-SEG-14 — un Grupo no puede formar ciclos indirectos.
 
 ### Domain
 
@@ -1011,11 +1021,13 @@ Se implementaron:
 
 - actualización validada de Nombre y Descripción;
 - reemplazo controlado de Permisos directos;
-- rechazo de colecciones vacías;
-- rechazo de Permisos nulos;
-- rechazo de Permisos duplicados;
-- preservación de Grupos hijos;
-- conservación del estado anterior ante modificaciones inválidas.
+- reemplazo controlado de Grupos hijos;
+- rechazo de colecciones nulas;
+- rechazo de Permisos y Grupos duplicados;
+- rechazo de autorreferencia;
+- rechazo de ciclos indirectos;
+- preservación del estado anterior ante una modificación inválida;
+- cálculo de Permisos efectivos mediante el patrón Composite.
 
 ### Application
 
@@ -1025,6 +1037,8 @@ Se implementaron:
 - `GrupoListadoDto`;
 - `GrupoDetalleDto`;
 - `PermisoSeleccionGrupoDto`;
+- `GrupoSeleccionGrupoDto`;
+- `PermisoEfectivoGrupoDto`;
 - `RegistrarGrupoCommand`;
 - `ModificarGrupoCommand`;
 - `IGrupoGestionRepository`;
@@ -1034,7 +1048,9 @@ Casos de uso disponibles:
 
 - listar;
 - obtener detalle;
-- listar Permisos activos;
+- listar Permisos disponibles;
+- listar Grupos hijos disponibles;
+- obtener vista previa de Permisos efectivos;
 - registrar;
 - modificar;
 - activar;
@@ -1048,10 +1064,16 @@ Las operaciones validan:
 - Código generado y único;
 - Nombre obligatorio y único;
 - Descripción obligatoria;
-- al menos un Permiso activo;
-- ausencia de Permisos duplicados;
+- al menos un Permiso directo;
+- ausencia de identificadores inválidos o duplicados;
+- existencia de Permisos y Grupos;
+- actividad de nuevas asignaciones;
+- autorreferencia;
+- ciclos indirectos;
 - protección de `ADMINISTRADOR_GENERAL`;
-- conservación de los Permisos administrativos mínimos.
+- conservación de Permisos administrativos mínimos.
+
+Los Grupos hijos inactivos ya asociados pueden conservarse, pero no pueden agregarse como nuevas asignaciones.
 
 ### Infrastructure
 
@@ -1061,24 +1083,27 @@ Se implementó:
 
 Responsabilidades:
 
-- listar con búsqueda y filtro de estado;
+- listar Grupos con búsqueda y filtro de estado;
 - recuperar detalle;
 - reconstruir Permisos directos;
 - reconstruir Grupos hijos directos;
-- consultar Permisos activos;
-- consultar Permisos por identificadores;
-- verificar Código;
-- verificar Nombre;
-- verificar actividad de Permisos;
-- insertar Grupo y Permisos dentro de una transacción;
-- actualizar Nombre y Descripción;
-- reemplazar `GrupoPermiso` dentro de una transacción;
-- preservar `GrupoGrupo`;
-- activar;
-- desactivar;
-- traducir duplicados y errores técnicos.
+- consultar Permisos activos e inactivos ya seleccionados;
+- consultar Grupos activos e inactivos ya seleccionados;
+- excluir al propio Grupo de la selección;
+- insertar `Grupo`, `GrupoPermiso` y `GrupoGrupo` en una transacción;
+- reemplazar `GrupoPermiso` y `GrupoGrupo` en una transacción;
+- preservar la jerarquía en llamadas de actualización anteriores;
+- validar hijos nuevos activos;
+- detectar ciclos indirectos mediante consulta recursiva;
+- ejecutar rollback ante una jerarquía inválida;
+- calcular Permisos efectivos directos y heredados;
+- recorrer jerarquías de varios niveles;
+- eliminar duplicados;
+- priorizar visualmente el origen directo;
+- excluir Grupos y Permisos inactivos del cálculo efectivo;
+- traducir conflictos y errores técnicos.
 
-No fue necesaria una migración nueva porque el esquema de seguridad existente ya contenía:
+No fue necesaria una migración nueva porque el esquema ya contenía:
 
 - `dbo.Grupo`;
 - `dbo.Permiso`;
@@ -1087,7 +1112,8 @@ No fue necesaria una migración nueva porque el esquema de seguridad existente y
 - `dbo.UsuarioGrupo`;
 - claves primarias;
 - claves foráneas;
-- índice único de Código.
+- restricción de autorreferencia directa;
+- índices auxiliares.
 
 ### WinForms
 
@@ -1099,65 +1125,98 @@ Se implementaron:
 - coordinación desde `SigevipApplicationContext`;
 - composición en `Program`.
 
+`GrupoEditForm` contiene tres pestañas:
+
+1. `Permisos directos`;
+2. `Grupos hijos`;
+3. `Permisos efectivos`.
+
 La interfaz permite:
 
-- listar;
-- buscar;
-- filtrar;
-- registrar;
-- modificar;
-- activar;
-- desactivar;
-- generar el Código;
-- visualizar el Código inmutable;
-- seleccionar varios Permisos;
-- visualizar cantidades de Permisos y Usuarios;
-- mostrar validaciones y errores controlados.
+- registrar y modificar Grupos;
+- seleccionar uno o varios Permisos directos;
+- seleccionar cero, uno o varios Grupos hijos;
+- conservar Grupos hijos inactivos ya asignados;
+- impedir nuevas asignaciones inactivas;
+- excluir al propio Grupo;
+- visualizar Permisos directos;
+- visualizar Permisos heredados;
+- eliminar duplicados en la vista previa;
+- identificar el origen `Directo` o `Heredado`;
+- actualizar la vista previa al marcar o desmarcar;
+- guardar Permisos y jerarquías en una única operación.
 
-### Validación técnica
+La dirección de herencia es:
 
-- compilación con 0 advertencias y 0 errores;
-- 53 pruebas específicas nuevas;
-- 532 pruebas automatizadas correctas;
-- 0 pruebas fallidas;
-- pruebas de Domain;
-- pruebas de Application;
-- pruebas de integración real con SQL Server;
-- validación manual completa.
+> El Grupo padre incorpora los Permisos efectivos de los Grupos hijos seleccionados.
+
+El Grupo hijo no hereda los Permisos del padre.
+
+### Validación automatizada
+
+Se verificaron:
+
+- reemplazo atómico de Grupos hijos en Domain;
+- colecciones nulas;
+- elementos nulos;
+- duplicados;
+- autorreferencia;
+- ciclos indirectos;
+- autorización del caso de uso;
+- alta con hijos;
+- modificación con reemplazo;
+- compatibilidad con la actualización anterior;
+- conservación de hijos inactivos existentes;
+- rechazo de hijos inactivos nuevos;
+- recuperación de hijos desde SQL;
+- selección de Grupos activos;
+- inclusión de inactivos seleccionados;
+- exclusión de inactivos no seleccionados;
+- alta transaccional;
+- reemplazo transaccional;
+- eliminación de relaciones;
+- rollback ante hijos inválidos;
+- rollback ante ciclos;
+- vista previa directa;
+- herencia multinivel;
+- eliminación de duplicados;
+- prioridad de origen directo;
+- exclusión de componentes inactivos.
+
+Resultado consolidado:
+
+- 627 pruebas totales;
+- 627 correctas;
+- 0 fallidas;
+- compilación con 0 advertencias;
+- compilación con 0 errores;
+- integración real con SQL Server;
+- validación manual aprobada.
 
 ### Validación manual
 
-Se verificó:
+Se comprobó:
 
-- listado;
-- búsqueda;
-- filtros;
-- alta;
-- generación del Código;
-- modificación;
-- reemplazo de Permisos;
-- Código inmutable;
-- desactivación lógica;
-- conservación de asociaciones;
-- reactivación;
-- protección de `ADMINISTRADOR_GENERAL`;
-- protección de los Permisos administrativos mínimos;
-- validación de campos obligatorios.
+- visualización de las tres pestañas;
+- selección de Permisos directos;
+- selección de Grupos hijos;
+- selección opcional de cero hijos;
+- exclusión del propio Grupo;
+- actualización de contadores;
+- vista previa inmediata;
+- identificación de Permisos directos y heredados;
+- eliminación de duplicados;
+- persistencia al cerrar y reabrir;
+- ausencia de problemas visuales.
 
 ### Commits del módulo
 
 - `fcbc5e2` — `Agrego casos de uso de grupos`
 - `5da1e81` — `Agrego persistencia de grupos`
 - `90ec085` — `Completo interfaz de gestion de grupos`
+- `cd67fab` — `Agrego casos de uso y persistencia de jerarquias de grupos`
 
-### Alcance posterior
-
-Después del cierre de este módulo se implementó la gestión funcional del catálogo de Permisos.
-
-Permanece pendiente:
-
-- gestión visual de relaciones `GrupoGrupo`;
-- auditoría general consultable.
+El commit de interfaz y cierre documental se agregará después de confirmar esta documentación.
 
 ## Módulo funcional de Gestión de Permisos
 

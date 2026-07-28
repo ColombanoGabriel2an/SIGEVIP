@@ -1035,6 +1035,33 @@ namespace SIGEVIP.Tests.Application
                     .AsReadOnly();
             }
 
+            public IReadOnlyCollection<PermisoEfectivoGrupoDto>
+                ObtenerPermisosEfectivosVistaPrevia(
+                    IReadOnlyCollection<int> idsPermisosDirectos,
+                    IReadOnlyCollection<int> idsGruposHijos)
+            {
+                HashSet<int> idsDirectos =
+                    new HashSet<int>(
+                        idsPermisosDirectos
+                        ?? new int[0]);
+
+                return PermisosDisponibles
+                    .Where(
+                        permiso =>
+                            idsDirectos.Contains(
+                                permiso.IdPermiso))
+                    .Select(
+                        permiso =>
+                            new PermisoEfectivoGrupoDto(
+                                permiso.IdPermiso,
+                                permiso.Codigo,
+                                permiso.Nombre,
+                                permiso.Descripcion,
+                                true))
+                    .ToList()
+                    .AsReadOnly();
+            }
+
             public IReadOnlyCollection<Permiso>
                 ObtenerPermisosPorIds(
                     IReadOnlyCollection<int> idsPermisos)

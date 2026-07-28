@@ -123,6 +123,29 @@ namespace SIGEVIP.Application.Grupos
                     ?? new List<int>().AsReadOnly());
         }
 
+        public IReadOnlyCollection<PermisoEfectivoGrupoDto>
+            ObtenerVistaPreviaPermisosEfectivos(
+                IReadOnlyCollection<int> idsPermisosDirectos,
+                IReadOnlyCollection<int> idsGruposHijos)
+        {
+            ExigirPermisoGestionar();
+
+            List<int> permisos =
+                ValidarIdsOpcionales(
+                    idsPermisosDirectos,
+                    "permisos directos");
+
+            List<int> grupos =
+                ValidarIdsOpcionales(
+                    idsGruposHijos,
+                    "grupos hijos");
+
+            return _grupoRepository
+                .ObtenerPermisosEfectivosVistaPrevia(
+                    permisos.AsReadOnly(),
+                    grupos.AsReadOnly());
+        }
+
         public int Registrar(
             RegistrarGrupoCommand command)
         {
@@ -646,6 +669,43 @@ namespace SIGEVIP.Application.Grupos
                 throw new AccesoDenegadoException(
                     "No posee permisos para realizar esta operación.");
             }
+        }
+
+        private static List<int> ValidarIdsOpcionales(
+            IEnumerable<int> ids,
+            string descripcion)
+        {
+            if (ids == null)
+            {
+                throw new ReglaNegocioException(
+                    "La colección de " +
+                    descripcion +
+                    " es obligatoria.");
+            }
+
+            List<int> resultado =
+                ids.ToList();
+
+            if (resultado.Any(
+                id =>
+                    id <= 0))
+            {
+                throw new ReglaNegocioException(
+                    "La selección de " +
+                    descripcion +
+                    " contiene identificadores inválidos.");
+            }
+
+            if (resultado.Distinct().Count() !=
+                resultado.Count)
+            {
+                throw new ReglaNegocioException(
+                    "La selección de " +
+                    descripcion +
+                    " contiene identificadores duplicados.");
+            }
+
+            return resultado;
         }
 
         private static List<int> ValidarIdsPermisos(

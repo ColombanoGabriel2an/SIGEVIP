@@ -49,6 +49,7 @@
     <Compile Include="Grupos\GrupoSeleccionGrupoDto.cs" />
     <Compile Include="Grupos\IGrupoGestionRepository.cs" />
     <Compile Include="Grupos\ModificarGrupoCommand.cs" />
+    <Compile Include="Grupos\PermisoEfectivoGrupoDto.cs" />
     <Compile Include="Grupos\PermisoSeleccionGrupoDto.cs" />
     <Compile Include="Grupos\RegistrarGrupoCommand.cs" />
     <Compile Include="Permisos\IPermisoGestionRepository.cs" />

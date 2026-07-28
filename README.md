@@ -95,6 +95,9 @@ Se encuentran implementados:
 - alta y modificación de Grupos;
 - generación automática e inmutabilidad del Código;
 - asignación y reemplazo transaccional de Permisos directos;
+- selección y reemplazo transaccional de Grupos hijos;
+- detección de autorreferencia y ciclos indirectos;
+- vista previa de Permisos efectivos directos y heredados;
 - activación y desactivación lógica de Grupos;
 - preservación de `GrupoPermiso`, `UsuarioGrupo` y `GrupoGrupo`;
 - protección de `ADMINISTRADOR_GENERAL`;
@@ -136,13 +139,12 @@ Se encuentran implementados:
 - aprobación y cancelación de Rendiciones;
 - cálculo de total gastado vigente y saldo pendiente;
 - validación SQL de las migraciones `003` a `006`;
-- 594 pruebas automatizadas correctas;
+- 627 pruebas automatizadas correctas;
 - compilación con 0 advertencias y 0 errores;
-- validación manual de Usuarios, Cambio de clave, Grupos, Permisos, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
+- validación manual de Usuarios, Cambio de clave, Grupos, jerarquías de Grupos, Permisos, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
 
 Permanecen pendientes:
 
-- gestión visual de jerarquías entre grupos;
 - recuperación de contraseña;
 - historial funcional completo del cliente;
 - auditoría general consultable;

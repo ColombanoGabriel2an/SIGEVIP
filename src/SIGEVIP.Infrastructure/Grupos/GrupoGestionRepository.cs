@@ -628,6 +628,251 @@ ORDER BY
             }
         }
 
+        public IReadOnlyCollection<PermisoEfectivoGrupoDto>
+            ObtenerPermisosEfectivosVistaPrevia(
+                IReadOnlyCollection<int> idsPermisosDirectos,
+                IReadOnlyCollection<int> idsGruposHijos)
+        {
+            List<int> permisosDirectos =
+                ValidarIds(
+                    idsPermisosDirectos,
+                    nameof(idsPermisosDirectos));
+
+            List<int> gruposHijos =
+                ValidarIds(
+                    idsGruposHijos,
+                    nameof(idsGruposHijos));
+
+            if (permisosDirectos.Count == 0 &&
+                gruposHijos.Count == 0)
+            {
+                return new List<PermisoEfectivoGrupoDto>()
+                    .AsReadOnly();
+            }
+
+            StringBuilder sql =
+                new StringBuilder();
+
+            List<SqlParameter> parametros =
+                new List<SqlParameter>();
+
+            sql.Append(@"
+;WITH GruposDescendientes AS
+(
+");
+
+            if (gruposHijos.Count > 0)
+            {
+                sql.Append(@"
+    SELECT
+        g.IdGrupo AS IdGrupoActual,
+        CAST(
+            N'/' +
+            CONVERT(NVARCHAR(20), g.IdGrupo) +
+            N'/'
+            AS NVARCHAR(MAX)
+        ) AS Camino
+    FROM dbo.Grupo AS g
+    WHERE
+        g.Activo = 1
+        AND g.IdGrupo IN
+(");
+
+                parametros.AddRange(
+                    CrearParametrosIds(
+                        gruposHijos,
+                        "@IdGrupoVistaPrevia",
+                        sql));
+
+                sql.Append(@"
+)
+
+    UNION ALL
+
+    SELECT
+        grupoHijo.IdGrupo,
+        CAST(
+            descendencia.Camino +
+            CONVERT(NVARCHAR(20), grupoHijo.IdGrupo) +
+            N'/'
+            AS NVARCHAR(MAX)
+        )
+    FROM GruposDescendientes AS descendencia
+    INNER JOIN dbo.GrupoGrupo AS gg
+        ON gg.IdGrupoPadre =
+            descendencia.IdGrupoActual
+    INNER JOIN dbo.Grupo AS grupoHijo
+        ON grupoHijo.IdGrupo =
+            gg.IdGrupoHijo
+        AND grupoHijo.Activo = 1
+    WHERE CHARINDEX(
+        N'/' +
+        CONVERT(NVARCHAR(20), grupoHijo.IdGrupo) +
+        N'/',
+        descendencia.Camino
+    ) = 0
+");
+            }
+            else
+            {
+                sql.Append(@"
+    SELECT
+        CAST(NULL AS INT) AS IdGrupoActual,
+        CAST(NULL AS NVARCHAR(MAX)) AS Camino
+    WHERE 1 = 0
+");
+            }
+
+            sql.Append(@"
+),
+PermisosCombinados AS
+(
+");
+
+            bool requiereUnion =
+                false;
+
+            if (permisosDirectos.Count > 0)
+            {
+                sql.Append(@"
+    SELECT
+        p.IdPermiso,
+        p.Codigo,
+        p.Nombre,
+        p.Descripcion,
+        CAST(1 AS BIT) AS EsDirecto
+    FROM dbo.Permiso AS p
+    WHERE
+        p.Activo = 1
+        AND p.IdPermiso IN
+(");
+
+                parametros.AddRange(
+                    CrearParametrosIds(
+                        permisosDirectos,
+                        "@IdPermisoVistaPrevia",
+                        sql));
+
+                sql.Append(@"
+)");
+
+                requiereUnion =
+                    true;
+            }
+
+            if (gruposHijos.Count > 0)
+            {
+                if (requiereUnion)
+                {
+                    sql.Append(@"
+
+    UNION ALL
+");
+                }
+
+                sql.Append(@"
+    SELECT
+        p.IdPermiso,
+        p.Codigo,
+        p.Nombre,
+        p.Descripcion,
+        CAST(0 AS BIT) AS EsDirecto
+    FROM GruposDescendientes AS descendencia
+    INNER JOIN dbo.GrupoPermiso AS gp
+        ON gp.IdGrupo =
+            descendencia.IdGrupoActual
+    INNER JOIN dbo.Permiso AS p
+        ON p.IdPermiso =
+            gp.IdPermiso
+        AND p.Activo = 1
+");
+            }
+
+            sql.Append(@"
+)
+SELECT
+    IdPermiso,
+    Codigo,
+    Nombre,
+    Descripcion,
+    CAST(MAX(
+        CASE
+            WHEN EsDirecto = 1 THEN 1
+            ELSE 0
+        END
+    ) AS BIT) AS EsDirecto
+FROM PermisosCombinados
+GROUP BY
+    IdPermiso,
+    Codigo,
+    Nombre,
+    Descripcion
+ORDER BY
+    Codigo,
+    IdPermiso
+OPTION (MAXRECURSION 32767);");
+
+            try
+            {
+                using (
+                    SqlConnection connection =
+                        _connectionFactory.Create())
+                using (
+                    SqlCommand command =
+                        new SqlCommand(
+                            sql.ToString(),
+                            connection))
+                {
+                    foreach (
+                        SqlParameter parametro
+                        in parametros)
+                    {
+                        command.Parameters.Add(
+                            parametro);
+                    }
+
+                    connection.Open();
+
+                    List<PermisoEfectivoGrupoDto> resultados =
+                        new List<PermisoEfectivoGrupoDto>();
+
+                    using (
+                        SqlDataReader reader =
+                            command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            resultados.Add(
+                                new PermisoEfectivoGrupoDto(
+                                    reader.GetInt32(
+                                        reader.GetOrdinal(
+                                            "IdPermiso")),
+                                    LeerTextoObligatorio(
+                                        reader,
+                                        "Codigo"),
+                                    LeerTextoObligatorio(
+                                        reader,
+                                        "Nombre"),
+                                    LeerTextoOpcional(
+                                        reader,
+                                        "Descripcion"),
+                                    reader.GetBoolean(
+                                        reader.GetOrdinal(
+                                            "EsDirecto"))));
+                        }
+                    }
+
+                    return resultados.AsReadOnly();
+                }
+            }
+            catch (SqlException exception)
+            {
+                throw CrearErrorPersistencia(
+                    "No fue posible calcular los permisos efectivos del grupo.",
+                    exception);
+            }
+        }
+
         public IReadOnlyCollection<Grupo>
             ObtenerGruposPorIds(
                 IReadOnlyCollection<int> idsGrupos)

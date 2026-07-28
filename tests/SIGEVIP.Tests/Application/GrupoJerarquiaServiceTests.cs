@@ -472,6 +472,124 @@ namespace SIGEVIP.Tests.Application
                     .ActualizacionJerarquiaInvocada);
         }
 
+        [TestMethod]
+        public void ObtenerVistaPreviaPermisosEfectivos_SinSesion_RechazaOperacion()
+        {
+            GrupoJerarquiaRepositoryFalso repository =
+                CrearRepositoryBase();
+
+            GrupoGestionService servicio =
+                CrearServicio(
+                    repository,
+                    null);
+
+            Assert.ThrowsException<AccesoDenegadoException>(
+                () =>
+                    servicio
+                        .ObtenerVistaPreviaPermisosEfectivos(
+                            new[]
+                            {
+                                1
+                            },
+                            new int[0]));
+        }
+
+        [TestMethod]
+        public void ObtenerVistaPreviaPermisosEfectivos_ConDuplicados_RechazaOperacion()
+        {
+            GrupoJerarquiaRepositoryFalso repository =
+                CrearRepositoryBase();
+
+            GrupoGestionService servicio =
+                CrearServicioAutorizado(
+                    repository);
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () =>
+                    servicio
+                        .ObtenerVistaPreviaPermisosEfectivos(
+                            new[]
+                            {
+                                1,
+                                1
+                            },
+                            new int[0]));
+        }
+
+        [TestMethod]
+        public void ObtenerVistaPreviaPermisosEfectivos_ConSeleccionValida_DelegaYDevuelveResultado()
+        {
+            GrupoJerarquiaRepositoryFalso repository =
+                CrearRepositoryBase();
+
+            repository.VistaPreviaResultado.Add(
+                new PermisoEfectivoGrupoDto(
+                    1,
+                    "CLIENTE_CONSULTAR",
+                    "Consultar clientes",
+                    "Consulta de clientes",
+                    true));
+
+            repository.VistaPreviaResultado.Add(
+                new PermisoEfectivoGrupoDto(
+                    2,
+                    "VISITA_REGISTRAR",
+                    "Registrar visitas",
+                    "Registro de visitas",
+                    false));
+
+            GrupoGestionService servicio =
+                CrearServicioAutorizado(
+                    repository);
+
+            IReadOnlyCollection<PermisoEfectivoGrupoDto>
+                resultado =
+                    servicio
+                        .ObtenerVistaPreviaPermisosEfectivos(
+                            new[]
+                            {
+                                1
+                            },
+                            new[]
+                            {
+                                20
+                            });
+
+            Assert.AreEqual(
+                2,
+                resultado.Count);
+
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    1
+                },
+                repository
+                    .UltimosIdsPermisosVistaPrevia
+                    .ToArray());
+
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    20
+                },
+                repository
+                    .UltimosIdsGruposVistaPrevia
+                    .ToArray());
+
+            Assert.IsTrue(
+                resultado.Single(
+                    permiso =>
+                        permiso.IdPermiso == 1)
+                    .Directo);
+
+            Assert.IsFalse(
+                resultado.Single(
+                    permiso =>
+                        permiso.IdPermiso == 2)
+                    .Directo);
+        }
+
         private static GrupoJerarquiaRepositoryFalso
             CrearRepositoryBase()
         {
@@ -615,6 +733,9 @@ namespace SIGEVIP.Tests.Application
                 GruposDisponibles =
                     new List<Grupo>();
 
+                VistaPreviaResultado =
+                    new List<PermisoEfectivoGrupoDto>();
+
                 IdInsertado = 25;
             }
 
@@ -625,6 +746,27 @@ namespace SIGEVIP.Tests.Application
             }
 
             public List<Grupo> GruposDisponibles
+            {
+                get;
+                private set;
+            }
+
+            public List<PermisoEfectivoGrupoDto>
+                VistaPreviaResultado
+            {
+                get;
+                private set;
+            }
+
+            public IReadOnlyCollection<int>
+                UltimosIdsPermisosVistaPrevia
+            {
+                get;
+                private set;
+            }
+
+            public IReadOnlyCollection<int>
+                UltimosIdsGruposVistaPrevia
             {
                 get;
                 private set;
@@ -813,6 +955,26 @@ namespace SIGEVIP.Tests.Application
                                 grupo.Activo,
                                 seleccionados.Contains(
                                     grupo.IdGrupo)))
+                    .ToList()
+                    .AsReadOnly();
+            }
+
+            public IReadOnlyCollection<PermisoEfectivoGrupoDto>
+                ObtenerPermisosEfectivosVistaPrevia(
+                    IReadOnlyCollection<int> idsPermisosDirectos,
+                    IReadOnlyCollection<int> idsGruposHijos)
+            {
+                UltimosIdsPermisosVistaPrevia =
+                    idsPermisosDirectos
+                        .ToList()
+                        .AsReadOnly();
+
+                UltimosIdsGruposVistaPrevia =
+                    idsGruposHijos
+                        .ToList()
+                        .AsReadOnly();
+
+                return VistaPreviaResultado
                     .ToList()
                     .AsReadOnly();
             }

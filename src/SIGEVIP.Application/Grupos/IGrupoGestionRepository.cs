@@ -23,6 +23,11 @@ namespace SIGEVIP.Application.Grupos
                 int? idGrupoPadre,
                 IReadOnlyCollection<int> idsSeleccionados);
 
+        IReadOnlyCollection<PermisoEfectivoGrupoDto>
+            ObtenerPermisosEfectivosVistaPrevia(
+                IReadOnlyCollection<int> idsPermisosDirectos,
+                IReadOnlyCollection<int> idsGruposHijos);
+
         IReadOnlyCollection<Permiso>
             ObtenerPermisosPorIds(
                 IReadOnlyCollection<int> idsPermisos);
