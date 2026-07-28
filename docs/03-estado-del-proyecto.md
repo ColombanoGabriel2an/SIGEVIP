@@ -468,7 +468,7 @@ Se utilizan:
 - Mapa y geolocalización.
 - Datos de demostración.
 - Manual técnico.
-- Preparación de la presentación académica.
+- Preparación de la presentación funcional del sistema.
 
 ## Módulo funcional de Clientes
 
@@ -1275,7 +1275,7 @@ El commit de interfaz y cierre documental se agregará después de confirmar est
 
 El catálogo de Permisos se encuentra implementado de extremo a extremo.
 
-La documentación académica no define un CUD numerado específico para este mantenimiento.
+La documentación funcional disponible no define un caso de uso numerado específico para este mantenimiento.
 
 Por ese motivo el módulo se registra como una extensión funcional del subsistema de seguridad, sin inventar numeración documental.
 

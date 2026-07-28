@@ -10,7 +10,7 @@ El sistema incorpora la gestión funcional del catálogo de Permisos de segurida
 
 
 
-La documentación académica disponible no define un CUD numerado específico para este mantenimiento.
+La documentación funcional disponible no define un caso de uso numerado específico para este mantenimiento.
 
 
 
@@ -1286,4 +1286,4 @@ Continúan pendientes:
 
 - manual técnico;
 
-- preparación de la presentación académica.
+- preparación de la presentación funcional del sistema.

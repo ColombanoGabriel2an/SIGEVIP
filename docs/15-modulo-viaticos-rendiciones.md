@@ -440,7 +440,7 @@ Las operaciones de Rendición verifican el estado esperado del Viaje y detectan 
 
 Implementación:
 
-`COMPLETA DENTRO DEL MVP ACADÉMICO`
+`COMPLETA DENTRO DEL MVP DEL PRODUCTO`
 
 Validación:
 

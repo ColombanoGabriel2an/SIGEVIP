@@ -2,7 +2,7 @@
 
 ## DT-01 — Plataforma
 
-Se utiliza .NET Framework 4.8 por compatibilidad con el entorno académico y Windows Forms.
+Se utiliza .NET Framework 4.8 por compatibilidad con el entorno Windows, la aplicación de escritorio y las herramientas disponibles.
 
 ## DT-02 — Interfaz
 

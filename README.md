@@ -2,7 +2,7 @@
 
 SIGEVIP es un sistema de escritorio para la gestión de viajes comerciales, visitas a clientes y viáticos asociados.
 
-El proyecto se desarrolla como trabajo universitario, priorizando una solución funcional, comprobable y mantenible, sin incorporar complejidad innecesaria.
+El proyecto se desarrolla como una solución funcional, comprobable y mantenible, evitando complejidad innecesaria.
 
 ## Tecnologías
 
@@ -154,4 +154,4 @@ Permanecen pendientes:
 - reportes;
 - mapa y geolocalización;
 - datos de demostración finales;
-- manual técnico y preparación de la presentación académica.
+- manual técnico y preparación de la presentación del sistema.

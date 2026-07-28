@@ -384,7 +384,7 @@ La consulta final no devolvió registros temporales.
 
 ## 11. Estado final
 
-El módulo de gestión de Usuarios se considera implementado dentro del alcance académico aprobado porque cuenta con:
+El módulo de gestión de Usuarios se considera implementado dentro del alcance definido porque cuenta con:
 
 - reglas de dominio;
 - casos de uso;

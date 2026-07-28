@@ -760,7 +760,7 @@ El registro se utilizó únicamente para comprobar el comportamiento funcional d
 
 ## 12. Estado final
 
-El módulo de Gestión de Grupos se considera implementado dentro del alcance académico aprobado porque cuenta con:
+El módulo de Gestión de Grupos se considera implementado dentro del alcance definido porque cuenta con:
 
 - reglas de dominio;
 

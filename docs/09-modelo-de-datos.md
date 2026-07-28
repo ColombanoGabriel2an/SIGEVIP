@@ -321,7 +321,7 @@ Esta decisión permite:
 - claves foráneas directas;
 - consultas más simples;
 - integridad referencial explícita;
-- mejor comprensión académica;
+- mayor claridad técnica y mantenibilidad;
 - menor complejidad en ADO.NET.
 
 ## 11. Bajas lógicas

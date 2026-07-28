@@ -2,7 +2,7 @@
 
 ## 1. Objetivo
 
-Definir una estructura técnica simple, mantenible y adecuada para una aplicación universitaria de escritorio.
+Definir una estructura técnica simple, mantenible y adecuada para una aplicación empresarial de escritorio.
 
 ## 2. Estilo arquitectónico
 

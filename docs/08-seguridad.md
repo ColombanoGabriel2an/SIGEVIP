@@ -595,7 +595,7 @@ CUD12: Recuperar clave continúa pendiente.
 - pantalla de auditoría;
 - recuperación de contraseña.
 
-## 23. Estado académico
+## 23. Estado de implementación
 
 El flujo de seguridad básico del MVP está implementado y comprobado:
 
