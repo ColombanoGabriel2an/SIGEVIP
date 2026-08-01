@@ -70,7 +70,7 @@ La presente evaluación se limita a riesgos técnicos, operativos, de calidad y 
 | R08 | Datos de demostración insuficientes o incoherentes | Demostración | 3 | 4 | 12 | Alto | Preparar un guion y datos representativos | Cargar un conjunto mínimo antes de la demostración | Responsable del proyecto | Pendiente |
 | R09 | Pérdida o corrupción de la base SIGEVIP | Datos | 2 | 5 | 10 | Alto | Backup completo semanal y antes de cambios críticos | Restaurar el último backup verificado | Administrador técnico | Mitigado |
 | R10 | Pérdida del acceso administrativo | Seguridad | 2 | 5 | 10 | Alto | Mantener al menos un administrador activo y documentar Setup | Ejecutar la inicialización técnica controlada | Administrador técnico | Mitigado |
-| R11 | Regresión producida por cambios de cierre | Calidad | 2 | 5 | 10 | Alto | Commits pequeños, compilación y 682 pruebas | Revertir el commit defectuoso y repetir validación | Responsable del proyecto | Mitigado |
+| R11 | Regresión producida por cambios de cierre | Calidad | 2 | 5 | 10 | Alto | Commits pequeños, compilación y 700 pruebas | Revertir el commit defectuoso y repetir validación | Responsable del proyecto | Mitigado |
 | R12 | Configuración de conexión dependiente del equipo `Lenovo_Gabi` | Técnico | 3 | 3 | 9 | Medio | Documentar la cadena y el servidor requerido | Modificar únicamente `App.config` en el nuevo entorno | Administrador técnico | Aceptado para MVP |
 | R13 | Exposición de datos o hashes contenidos en una copia `.bak` | Seguridad | 2 | 5 | 10 | Alto | Restringir acceso y no subir backups al repositorio público | Eliminar copias expuestas y generar nuevas credenciales | Administrador técnico | Pendiente |
 | R14 | Evidencia insuficiente de caja negra, caja blanca o métricas | Calidad | 3 | 4 | 12 | Alto | Documentos específicos, pruebas reproducibles y planilla UCP | Incorporar anexos técnicos en la presentación | Responsable del proyecto | Mitigado |
@@ -95,7 +95,7 @@ Los riesgos que deben tratarse antes de reorganizar el documento final son:
 | Antes de modificar código | Confirmar la necesidad funcional o técnica y revisar el contenido actual |
 | Antes de cada commit | Ejecutar `git diff --check` y revisar archivos afectados |
 | Después de modificar código o SQL | Compilar y ejecutar las pruebas pertinentes |
-| Antes de la entrega | Ejecutar las 682 pruebas, realizar backup y probar restauración |
+| Antes de la liberación | Ejecutar las 700 pruebas, realizar backup y probar restauración |
 | Antes de una demostración o liberación | Ejecutar el guion completo con datos representativos |
 | Después de la entrega | Conservar código, documentación, PDF, planilla y backup verificado |
 

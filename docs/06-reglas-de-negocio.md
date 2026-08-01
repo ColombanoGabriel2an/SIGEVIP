@@ -532,3 +532,62 @@ Cambio y recuperación de contraseña requieren definición e implementación ad
 ### RN-PEN-07
 
 La persistencia del Composite debe impedir ciclos también a nivel de datos.
+
+## 11. Consolidación de reglas operativas
+
+### RN-VIA-12 — Modificación según estado
+
+Solo un Viaje en estado `Abierto` puede modificarse.
+
+La regla se controla en:
+
+- Domain, mediante State;
+- Application, mediante `ViajeService`;
+- WinForms, antes de abrir `ViajeEditForm`.
+
+Los estados `EnRendicion`, `Aprobado` y `Cancelado` impiden la modificación.
+
+Clasificación: obligatoria para el funcionamiento.
+
+### RN-VIA-13 — Persona pagadora participante
+
+Cuando un Viático requiere Persona pagadora, esta debe:
+
+- existir;
+- encontrarse activa;
+- participar del Viaje al que pertenece el Viático.
+
+El selector visual solo lista participantes activos, pero `ViaticoService`
+repite la validación para impedir que otro cliente de Application eluda el
+control de interfaz.
+
+Clasificación: obligatoria para la integridad funcional.
+
+### RN-VIA-14 — Total del Comprobante
+
+Cuando un Viático posee Comprobante:
+
+`MontoGravado + MontoImpuestos = Monto del Viático`
+
+La igualdad se controla en WinForms y Application.
+
+Los datos históricos se reconstruyen sin aplicar retroactivamente esta regla,
+para no impedir la lectura de registros previos que deban corregirse.
+
+Clasificación: obligatoria para la consistencia económica.
+
+### RN-UI-01 — Representación de valores lógicos
+
+Los valores lógicos destinados al usuario deben expresarse mediante términos
+de negocio. La columna Comprobante utiliza `Sí` y `No` en lugar de `True` y
+`False`.
+
+Clasificación: recomendable.
+
+### RN-UI-02 — Ordenamiento de listados
+
+Las grillas principales de consulta deben permitir ordenamiento ascendente y
+descendente cuando su origen de datos lo soporte.
+
+La implementación actual cubre Clientes, Auditoría y Rendiciones. Su extensión
+a las demás grillas se conserva como mejora recomendable.

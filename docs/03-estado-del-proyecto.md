@@ -8,16 +8,13 @@ Bloque actual: cierre de controles de Auditoría y trazabilidad.
 
 ## Rama de trabajo
 
-`desarrollo/interfaz-funcional`
+`desarrollo/reportes-auditoria-usabilidad`
 
-## Último cierre funcional publicado
+## Último cierre funcional local
 
-- Commit: `f6360f1`
-- Mensaje: `Integro auditoria transaccional en revision de rendiciones`
-
-La rama local se encuentra sincronizada con:
-
-`origin/desarrollo/interfaz-funcional`
+- Commit: `0874d48`
+- Mensaje: `Completo consulta de auditoria y controles operativos`
+- Publicación remota: pendiente hasta completar el cierre documental.
 
 ## Arquitectura vigente
 
@@ -1431,3 +1428,63 @@ La edición de Grupos fue ajustada para:
 Documento específico:
 
 `docs/20-pruebas-gestion-permisos.md`
+
+## Cierre de consulta de Auditoría y controles operativos
+
+El commit `0874d48` completa la interfaz consultable de Auditoría y consolida
+controles operativos detectados durante la validación manual.
+
+### Auditoría consultable
+
+Se incorporaron:
+
+- `AuditoriaForm`;
+- consulta autorizada mediante `AUDITORIA_CONSULTAR`;
+- filtros por fecha desde, fecha hasta, Usuario, módulo, acción y texto general;
+- catálogos dinámicos de módulos y acciones;
+- filtrado de acciones según el módulo seleccionado;
+- opción `Todos` en los catálogos;
+- detalle de cambios de Cliente mediante `AuditoriaCambioDto`;
+- ordenamiento ascendente y descendente de eventos y cambios;
+- prueba de integración real para recuperar el detalle persistido.
+
+### Controles de Viáticos y Viajes
+
+Se consolidaron las siguientes reglas obligatorias:
+
+- el total del Comprobante debe coincidir con el monto del Viático;
+- la Persona pagadora debe ser participante activo del Viaje;
+- únicamente un Viaje en estado `Abierto` puede abrirse para modificación;
+- los Viajes `EnRendicion`, `Aprobado` y `Cancelado` son rechazados antes de
+  abrir el formulario de edición;
+- la columna Comprobante presenta `Sí` o `No`, sin exponer valores booleanos
+  técnicos.
+
+### Usabilidad de grillas
+
+Se incorporó `SortableBindingList<T>` como componente reutilizable.
+
+Actualmente se aplica a:
+
+- Clientes;
+- eventos de Auditoría;
+- detalle de cambios de Auditoría;
+- Rendiciones pendientes;
+- Viáticos de la Rendición;
+- Visitas de la Rendición;
+- Participantes de la Rendición.
+
+También se incorporó el identificador del Cliente como primera columna.
+
+### Evidencia de cierre
+
+- Compilación completa: 0 advertencias y 0 errores.
+- Pruebas específicas del cierre: 99 correctas.
+- Regresión completa: 700 correctas, 0 fallidas.
+- Validación manual: correcta para Auditoría, Clientes, Viáticos, Viajes y
+  Rendiciones.
+
+### Mejora recomendable pendiente
+
+Extender progresivamente `SortableBindingList<T>` a las grillas restantes.
+Esta mejora no bloquea el funcionamiento ni el cierre del alcance actual.

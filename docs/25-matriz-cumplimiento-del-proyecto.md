@@ -42,10 +42,10 @@ Comparar los requisitos, los criterios de aceptación, la documentación de refe
 | Métrica de software | Cumplido | UCP, proceso de conteo y planilla verificable | Sin faltantes para el alcance medido | Alta |
 | Estimación de tiempos | Cumplido | Escenarios y distribución por hitos | Incorporar el resumen al documento maestro | Alta |
 | Gestión de riesgos | Cumplido | Matriz, exposición, tratamiento y seguimiento | Mantener actualizado el estado residual | Alta |
-| Bitácora consultable | Cumplido | Auditoría general y filtros | Documentar búsqueda combinada | Alta |
+| Bitácora consultable | Cumplido | `AuditoriaForm`, filtros combinados, catálogos dinámicos y ordenamiento | Sin faltantes para el alcance actual | Alta |
 | Auditoría de operaciones | Cumplido ampliamente | Escritura transaccional por entidad | Incorporar alcance y limitaciones | Alta |
 | Auditoría de login/logout | Cumplido | Eventos `InicioSesion` y `CierreSesion`, 6 pruebas específicas, regresión 688/688 y evidencia SQL | Sin faltantes para el alcance definido | Alta |
-| Control de cambios de una entidad | Cumplido | `AuditoriaCambio` conserva campo, valor anterior y valor nuevo para Cliente; pruebas 6/6 y regresión 690/690 | La visualización pertenece al reporte de Auditoría | Alta |
+| Control de cambios de una entidad | Cumplido | `AuditoriaCambio` conserva campo, valor anterior y valor nuevo para Cliente; visualización en Auditoría y regresión 700/700 | Sin faltantes para el alcance actual | Alta |
 | Tabla paralela por entidad | Cumplido mediante diseño genérico | `AuditoriaCambio` complementa `Auditoria` para Cliente y es reutilizable | Sin faltantes para el control exigido | Media |
 | Reporte por iteración | Parcial | Listados y filtros existentes | Definir valor y usuario beneficiado | Alta |
 | Instructivo por iteración | Parcial | Documentos de validación | Consolidar manual breve | Alta |

@@ -129,8 +129,8 @@ Se encuentran implementados:
 - módulo funcional de Viáticos y Rendiciones;
 - persistencia SQL de Viáticos y Comprobantes;
 - alta, modificación, consulta y filtrado de Viáticos;
-- carga opcional de Comprobantes;
-- selección de Personas pagadoras;
+- carga opcional de Comprobantes con igualdad obligatoria entre el total fiscal y el monto del Viático;
+- selección de Personas pagadoras limitada a participantes activos del Viaje;
 - reconstrucción completa de Viajes con Viáticos y Comprobantes;
 - envío de Viajes a rendición;
 - consulta de Rendiciones pendientes;
@@ -138,11 +138,15 @@ Se encuentran implementados:
 - ajuste de anticipos;
 - aprobación y cancelación de Rendiciones;
 - auditoría general consultable de cambios de seguridad, Clientes, Viajes, Visitas, Viáticos y Rendiciones;
+- filtros de Auditoría por fecha, Usuario, módulo, acción y texto general;
+- catálogos dinámicos de módulos y acciones;
+- visualización del detalle de cambios de Cliente;
+- ordenamiento ascendente y descendente en Clientes y Rendiciones;
 - persistencia atómica de cada operación y su evento mediante la misma `SqlConnection` y `SqlTransaction`;
 - rollback comprobado cuando no puede persistirse el evento de Auditoría;
 - cálculo de total gastado vigente y saldo pendiente;
 - validación SQL de las migraciones `003` a `006`;
-- 682 pruebas automatizadas correctas;
+- 700 pruebas automatizadas correctas;
 - compilación con 0 advertencias y 0 errores;
 - validación manual de Usuarios, Cambio de clave, Grupos, jerarquías de Grupos, Permisos, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
 
@@ -150,8 +154,8 @@ Permanecen pendientes:
 
 - recuperación de contraseña;
 - historial funcional completo del cliente;
-- auditoría general consultable;
-- reportes;
+- reportes adicionales;
+- extensión progresiva del ordenamiento reutilizable a las grillas restantes;
 - mapa y geolocalización;
 - datos de demostración finales;
 - manual técnico y preparación de la presentación del sistema.

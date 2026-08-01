@@ -129,3 +129,17 @@ En el documento principal se mostrará el resumen por iteración. La tabla compl
 - separación de responsabilidades;
 - incorporación progresiva de pruebas;
 - correspondencia entre implementación y documentación.
+
+## Actualización 2026-08-01
+
+| Fecha | Commit | Mensaje | Iteración | Trazabilidad | Resultado |
+|---|---|---|---|---|---|
+| 2026-08-01 | `0874d48` | Completo consulta de auditoria y controles operativos | Iteraciones 4 y 5 / usabilidad | RF11, RF22, RF23, RF28, RF42 y controles de interfaz | Auditoría consultable, detalle de cambios, validaciones de Viáticos y 700 pruebas |
+
+Evidencia del cierre:
+
+- compilación sin advertencias ni errores;
+- 99 pruebas específicas correctas;
+- 700 pruebas de regresión correctas;
+- validación manual completa;
+- documentación posterior registrada en un commit separado.

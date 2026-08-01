@@ -480,3 +480,34 @@ Las descripciones centrales son deliberadamente acotadas. No duplican:
 La trazabilidad operativa específica continúa disponible en las columnas de
 `Viaje` y `Viatico`, mientras que `dbo.Auditoria` proporciona la consulta
 transversal del sistema.
+
+## Controles operativos consolidados
+
+El cierre `0874d48` agrega controles complementarios al flujo existente.
+
+### Persona pagadora
+
+La Persona pagadora debe pertenecer al Viaje.
+
+`ViaticoEditForm` presenta únicamente participantes activos y
+`ViaticoService` valida nuevamente la pertenencia en alta y modificación.
+
+### Consistencia del Comprobante
+
+Cuando se informa Comprobante, la suma de monto gravado e impuestos debe
+coincidir exactamente con el monto del Viático.
+
+La interfaz informa el error antes de guardar y Application impide persistir
+una operación inválida.
+
+### Estado del Viaje
+
+La edición visual de un Viaje solo se abre cuando su estado es `Abierto`.
+Domain y Application continúan actuando como barreras adicionales.
+
+### Presentación y ordenamiento
+
+- Comprobante se muestra como `Sí` o `No`.
+- Las grillas de Rendiciones, Viáticos, Visitas y Participantes permiten
+  ordenamiento ascendente y descendente.
+- La selección permanece vinculada al objeto correcto después de ordenar.

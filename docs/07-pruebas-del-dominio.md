@@ -63,6 +63,7 @@
 - `Integration/RendicionRepositoryIntegrationTests.cs`
 - `Integration/RendicionRevisionRepositoryIntegrationTests.cs`
 - `Integration/RendicionRevisionAuditoriaRepositoryIntegrationTests.cs`
+- `Integration/AuditoriaDetalleRepositoryIntegrationTests.cs`
 
 ## 4. Distribución acumulada
 
@@ -70,8 +71,8 @@ El total definitivo se toma del ejecutor VSTest.
 
 Último resultado consolidado:
 
-- 682 pruebas totales;
-- 682 correctas;
+- 700 pruebas totales;
+- 700 correctas;
 - 0 fallidas.
 
 El conjunto incluye pruebas:
@@ -224,8 +225,8 @@ Compilación:
 
 Pruebas:
 
-- Totales: 682.
-- Correctas: 682.
+- Totales: 700.
+- Correctas: 700.
 - Fallidas: 0.
 - Omitidas: 0.
 
@@ -723,3 +724,55 @@ Regresión consolidada:
 - compilación con 0 errores;
 - validación manual aprobada;
 - datos temporales eliminados.
+
+## 17. Cierre de consulta de Auditoría y controles operativos
+
+### Pruebas específicas
+
+Se ejecutaron 99 pruebas filtradas de:
+
+- `ViaticoServiceTests`;
+- `ViaticoApplicationModelTests`;
+- `ViajeServiceTests`;
+- `ViajeTests`;
+- `RendicionServiceTests`.
+
+Resultado:
+
+- 99 ejecutadas;
+- 99 correctas;
+- 0 fallidas.
+
+### Cobertura incorporada
+
+- rechazo de Persona pagadora ajena al Viaje durante el alta;
+- rechazo de Persona pagadora ajena al Viaje durante la modificación;
+- selector de pagadores limitado a participantes activos;
+- rechazo de Comprobante cuyo total no coincide con el Viático;
+- presentación `Sí`/`No` del Comprobante;
+- bloqueo de modificación de Viajes no abiertos;
+- consulta de eventos de Auditoría;
+- recuperación del detalle de cambios de Cliente;
+- catálogos de módulos y acciones;
+- filtros combinados;
+- ordenamiento de Clientes, Auditoría y Rendiciones.
+
+### Regresión completa
+
+- 700 pruebas ejecutadas;
+- 700 correctas;
+- 0 fallidas;
+- tiempo registrado: 23,2707 segundos.
+
+### Validación manual
+
+Se verificó:
+
+- pagadores limitados a participantes;
+- registro con pagador válido;
+- rechazo visual de modificación de Viajes no abiertos;
+- representación `Sí`/`No`;
+- ordenamiento de las cuatro grillas de Rendiciones;
+- conservación de la selección correcta después de ordenar;
+- filtros y detalle de Auditoría;
+- ID visible y ordenamiento de Clientes.

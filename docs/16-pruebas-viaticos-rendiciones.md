@@ -351,3 +351,37 @@ Resultado consolidado:
 Archivo principal:
 
 `tests/SIGEVIP.Tests/Integration/RendicionRevisionAuditoriaRepositoryIntegrationTests.cs`
+
+## Validación final de controles operativos
+
+### Automatización
+
+Pruebas específicas:
+
+- 99 ejecutadas;
+- 99 correctas;
+- 0 fallidas.
+
+Regresión completa:
+
+- 700 ejecutadas;
+- 700 correctas;
+- 0 fallidas.
+
+Compilación:
+
+- 0 advertencias;
+- 0 errores.
+
+### Validación manual
+
+Se comprobó:
+
+1. El selector de Persona pagadora solo presenta participantes activos.
+2. Una Persona ajena al Viaje no puede utilizarse como pagadora.
+3. Un participante válido permite registrar y modificar el Viático.
+4. El total del Comprobante debe coincidir con el monto del Viático.
+5. La columna Comprobante presenta `Sí` o `No`.
+6. Un Viaje no abierto no abre el formulario de modificación.
+7. Las cuatro grillas de Rendiciones permiten ordenar en ambos sentidos.
+8. La selección y las acciones siguen operando sobre el registro correcto.
