@@ -57,6 +57,8 @@
     <Compile Include="Application\UsuarioGestionServiceTests.cs" />
     <Compile Include="Application\InicializacionSeguridadServiceTests.cs" />
     <Compile Include="Application\PerfilSesionServiceTests.cs" />
+    <Compile Include="Application\ReporteApplicationModelTests.cs" />
+    <Compile Include="Application\ReporteServiceTests.cs" />
     <Compile Include="Application\RendicionApplicationModelTests.cs" />
     <Compile Include="Application\RendicionServiceTests.cs" />
     <Compile Include="Application\ViaticoApplicationModelTests.cs" />
@@ -101,6 +103,7 @@
     <Compile Include="Integration\VisitaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\PersonaConsultaViaticoRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\RendicionRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\ReporteRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\RendicionRevisionRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\RendicionRevisionAuditoriaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ViaticoAuditoriaRepositoryIntegrationTests.cs" />

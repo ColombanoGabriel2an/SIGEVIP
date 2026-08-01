@@ -6,6 +6,7 @@ using SIGEVIP.Application.Clientes;
 using SIGEVIP.Application.Grupos;
 using SIGEVIP.Application.Permisos;
 using SIGEVIP.Application.Rendiciones;
+using SIGEVIP.Application.Reportes;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Application.Usuarios;
 using SIGEVIP.Application.Viajes;
@@ -17,6 +18,7 @@ using SIGEVIP.Infrastructure.Data;
 using SIGEVIP.Infrastructure.Grupos;
 using SIGEVIP.Infrastructure.Permisos;
 using SIGEVIP.Infrastructure.Rendiciones;
+using SIGEVIP.Infrastructure.Reportes;
 using SIGEVIP.Infrastructure.Security;
 using SIGEVIP.Infrastructure.Usuarios;
 using SIGEVIP.Infrastructure.Viajes;
@@ -118,6 +120,10 @@ namespace SIGEVIP.WinForms
                     new RendicionRepository(
                         connectionFactory);
 
+                var reporteRepository =
+                    new ReporteRepository(
+                        connectionFactory);
+
                 var auditoriaRepository =
                     new AuditoriaRepository(
                         connectionFactory);
@@ -208,11 +214,18 @@ namespace SIGEVIP.WinForms
                         sesionActual,
                         autorizacionService);
 
+                var reporteService =
+                    new ReporteService(
+                        reporteRepository,
+                        sesionActual,
+                        autorizacionService);
+
                 var applicationContext =
                     new SigevipApplicationContext(
                         autenticacionService,
                         autorizacionService,
                         auditoriaService,
+                        reporteService,
                         perfilSesionService,
                         clienteService,
                         viajeService,

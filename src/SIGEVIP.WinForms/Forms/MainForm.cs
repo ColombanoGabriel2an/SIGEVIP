@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using SIGEVIP.Application.Rendiciones;
+using SIGEVIP.Application.Reportes;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Application.Viaticos;
 using SIGEVIP.Domain.Entities;
@@ -57,6 +58,7 @@ namespace SIGEVIP.WinForms.Forms
         private Button _btnGrupos;
         private Button _btnPermisos;
         private Button _btnAuditoria;
+        private Button _btnReportes;
         private Button _btnCambiarClave;
         private Button _btnCerrarSesion;
         private Button _btnSalir;
@@ -117,6 +119,9 @@ namespace SIGEVIP.WinForms.Forms
 
         public event EventHandler
             AuditoriaSolicitada;
+
+        public event EventHandler
+            ReportesSolicitados;
 
         public event EventHandler
             CambiarClaveSolicitada;
@@ -219,6 +224,9 @@ namespace SIGEVIP.WinForms.Forms
 
             panelModulos.Controls.Add(
                 _btnAuditoria);
+
+            panelModulos.Controls.Add(
+                _btnReportes);
 
             _lblEstado =
                 new Label
@@ -461,6 +469,11 @@ namespace SIGEVIP.WinForms.Forms
                     "Auditoria",
                     "Consulta de registros de auditoria.");
 
+            _btnReportes =
+                CrearBotonModulo(
+                    "Reportes",
+                    "Resumen de viajes, viáticos y actividad comercial.");
+
             _btnClientes.Click +=
                 BtnClientes_Click;
 
@@ -484,6 +497,9 @@ namespace SIGEVIP.WinForms.Forms
 
             _btnAuditoria.Click +=
                 BtnAuditoria_Click;
+
+            _btnReportes.Click +=
+                BtnReportes_Click;
         }
 
         private static Button CrearBotonModulo(
@@ -569,6 +585,12 @@ namespace SIGEVIP.WinForms.Forms
                 TieneAlgunPermiso(
                     AuditoriaConsultar);
 
+            bool puedeReportes =
+                TieneAlgunPermiso(
+                    ReporteService.PermisoResumenViaje,
+                    ReporteService.PermisoReporteViaticos,
+                    ReporteService.PermisoReporteRendiciones);
+
             ConfigurarVisibilidad(
                 _btnClientes,
                 puedeClientes);
@@ -601,6 +623,10 @@ namespace SIGEVIP.WinForms.Forms
                 _btnAuditoria,
                 puedeAuditoria);
 
+            ConfigurarVisibilidad(
+                _btnReportes,
+                puedeReportes);
+
             int cantidadDisponibles =
                 ContarOpcionesDisponibles(
                     puedeClientes,
@@ -610,7 +636,8 @@ namespace SIGEVIP.WinForms.Forms
                     puedeUsuarios,
                     puedeGrupos,
                     puedePermisos,
-                    puedeAuditoria);
+                    puedeAuditoria,
+                    puedeReportes);
 
             _lblEstado.Text =
                 "Sesion iniciada correctamente. " +
@@ -752,6 +779,18 @@ namespace SIGEVIP.WinForms.Forms
         {
             EventHandler handler =
                 AuditoriaSolicitada;
+
+            handler?.Invoke(
+                this,
+                EventArgs.Empty);
+        }
+
+        private void BtnReportes_Click(
+            object sender,
+            EventArgs e)
+        {
+            EventHandler handler =
+                ReportesSolicitados;
 
             handler?.Invoke(
                 this,
