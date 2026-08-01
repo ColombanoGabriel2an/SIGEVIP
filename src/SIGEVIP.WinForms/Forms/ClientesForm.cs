@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using SIGEVIP.WinForms.Controls;
 using SIGEVIP.Application.Clientes;
 using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
@@ -341,6 +342,12 @@ namespace SIGEVIP.WinForms.Forms
 
             AgregarColumna(
                 grilla,
+                "IdCliente",
+                "ID",
+                70);
+
+            AgregarColumna(
+                grilla,
                 "RazonSocial",
                 "Razón social",
                 200);
@@ -399,6 +406,8 @@ namespace SIGEVIP.WinForms.Forms
                         titulo,
                     Name =
                         propiedad,
+                    SortMode =
+                        DataGridViewColumnSortMode.Automatic,
                     Width =
                         ancho
                 });
@@ -708,7 +717,9 @@ namespace SIGEVIP.WinForms.Forms
                     null;
 
                 _grilla.DataSource =
-                    lista;
+                    new SortableBindingList
+                        <ClienteListadoDto>(
+                            lista);
 
                 _lblCantidad.Text =
                     "Resultados: " +

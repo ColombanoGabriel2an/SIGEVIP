@@ -116,6 +116,9 @@ namespace SIGEVIP.WinForms.Forms
             PermisosSolicitados;
 
         public event EventHandler
+            AuditoriaSolicitada;
+
+        public event EventHandler
             CambiarClaveSolicitada;
 
         public event EventHandler
@@ -747,22 +750,12 @@ namespace SIGEVIP.WinForms.Forms
             object sender,
             EventArgs e)
         {
-            MostrarModuloPendiente(
-                "Auditoria");
-        }
+            EventHandler handler =
+                AuditoriaSolicitada;
 
-        private static void MostrarModuloPendiente(
-            string nombreModulo)
-        {
-            MessageBox.Show(
-                "El modulo " +
-                nombreModulo +
-                " esta autorizado para el usuario actual, " +
-                "pero su pantalla funcional se implementara " +
-                "en un incremento posterior.",
-                "Modulo pendiente",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            handler?.Invoke(
+                this,
+                EventArgs.Empty);
         }
 
         private void BtnCambiarClave_Click(

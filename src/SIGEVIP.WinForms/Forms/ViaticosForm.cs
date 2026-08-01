@@ -521,7 +521,7 @@ namespace SIGEVIP.WinForms.Forms
 
             AgregarColumna(
                 grilla,
-                "TieneComprobante",
+                "Comprobante",
                 "Comprobante",
                 100);
 

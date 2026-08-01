@@ -109,5 +109,15 @@ namespace SIGEVIP.Application.Viaticos
             get;
             private set;
         }
+
+        public string Comprobante
+        {
+            get
+            {
+                return TieneComprobante
+                    ? "Sí"
+                    : "No";
+            }
+        }
     }
 }

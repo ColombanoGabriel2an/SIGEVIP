@@ -149,6 +149,94 @@ namespace SIGEVIP.Tests.Application
                 repository.UltimoFiltro);
         }
 
+        [TestMethod]
+        public void ObtenerCambios_IdInvalido_RechazaOperacion()
+        {
+            AuditoriaService servicio =
+                CrearServicio(
+                    new AuditoriaRepositoryFalso(),
+                    CrearUsuarioAutorizado());
+
+            Assert.ThrowsException
+                <ReglaNegocioException>(
+                    () => servicio.ObtenerCambios(0));
+        }
+
+        [TestMethod]
+        public void ObtenerCambios_ConPermiso_DevuelveDetalle()
+        {
+            AuditoriaRepositoryFalso repository =
+                new AuditoriaRepositoryFalso();
+
+            repository.Cambios.Add(
+                new AuditoriaCambioDto(
+                    1L,
+                    10L,
+                    "RazonSocial",
+                    "Original",
+                    "Modificada"));
+
+            AuditoriaService servicio =
+                CrearServicio(
+                    repository,
+                    CrearUsuarioAutorizado());
+
+            IReadOnlyCollection<AuditoriaCambioDto> cambios =
+                servicio.ObtenerCambios(10L);
+
+            Assert.AreEqual(1, cambios.Count);
+            Assert.AreEqual(10L, repository.UltimoIdAuditoria);
+        }
+
+        [TestMethod]
+        public void ListarModulos_ConPermiso_DevuelveCatalogo()
+        {
+            AuditoriaRepositoryFalso repository =
+                new AuditoriaRepositoryFalso();
+
+            repository.Modulos.Add(
+                "Clientes");
+
+            AuditoriaService servicio =
+                CrearServicio(
+                    repository,
+                    CrearUsuarioAutorizado());
+
+            IReadOnlyCollection<string> modulos =
+                servicio.ListarModulos();
+
+            Assert.AreEqual(
+                1,
+                modulos.Count);
+        }
+
+        [TestMethod]
+        public void ListarAcciones_NormalizaModuloYTransfiereConsulta()
+        {
+            AuditoriaRepositoryFalso repository =
+                new AuditoriaRepositoryFalso();
+
+            repository.Acciones.Add(
+                "Modificacion");
+
+            AuditoriaService servicio =
+                CrearServicio(
+                    repository,
+                    CrearUsuarioAutorizado());
+
+            IReadOnlyCollection<string> acciones =
+                servicio.ListarAcciones(
+                    "  Clientes  ");
+
+            Assert.AreEqual(
+                1,
+                acciones.Count);
+
+            Assert.AreEqual(
+                "Clientes",
+                repository.UltimoModuloCatalogo);
+        }
+
         private static AuditoriaService CrearServicio(
             AuditoriaRepositoryFalso repository,
             Usuario usuario)
@@ -233,6 +321,16 @@ namespace SIGEVIP.Tests.Application
                 Resultados =
                     new List
                         <AuditoriaListadoDto>();
+
+                Cambios =
+                    new List
+                        <AuditoriaCambioDto>();
+
+                Modulos =
+                    new List<string>();
+
+                Acciones =
+                    new List<string>();
             }
 
             public List<AuditoriaListadoDto>
@@ -242,7 +340,38 @@ namespace SIGEVIP.Tests.Application
                 private set;
             }
 
+            public List<AuditoriaCambioDto>
+                Cambios
+            {
+                get;
+                private set;
+            }
+
+            public List<string> Modulos
+            {
+                get;
+                private set;
+            }
+
+            public List<string> Acciones
+            {
+                get;
+                private set;
+            }
+
+            public string UltimoModuloCatalogo
+            {
+                get;
+                private set;
+            }
+
             public AuditoriaFiltro UltimoFiltro
+            {
+                get;
+                private set;
+            }
+
+            public long UltimoIdAuditoria
             {
                 get;
                 private set;
@@ -257,6 +386,30 @@ namespace SIGEVIP.Tests.Application
 
                 return Resultados
                     .AsReadOnly();
+            }
+
+            public IReadOnlyCollection<AuditoriaCambioDto>
+                ObtenerCambios(
+                    long idAuditoria)
+            {
+                UltimoIdAuditoria = idAuditoria;
+                return Cambios.AsReadOnly();
+            }
+
+            public IReadOnlyCollection<string>
+                ListarModulos()
+            {
+                return Modulos.AsReadOnly();
+            }
+
+            public IReadOnlyCollection<string>
+                ListarAcciones(
+                    string modulo)
+            {
+                UltimoModuloCatalogo =
+                    modulo;
+
+                return Acciones.AsReadOnly();
             }
         }
     }

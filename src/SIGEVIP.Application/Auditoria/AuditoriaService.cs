@@ -60,6 +60,46 @@ namespace SIGEVIP.Application.Auditoria
                     filtroEfectivo);
         }
 
+        public IReadOnlyCollection<AuditoriaCambioDto>
+            ObtenerCambios(
+                long idAuditoria)
+        {
+            ExigirPermisoConsultar();
+
+            if (idAuditoria <= 0)
+            {
+                throw new ReglaNegocioException(
+                    "El identificador del evento de auditoría debe ser válido.");
+            }
+
+            return _auditoriaRepository
+                .ObtenerCambios(
+                    idAuditoria);
+        }
+
+        public IReadOnlyCollection<string>
+            ListarModulos()
+        {
+            ExigirPermisoConsultar();
+
+            return _auditoriaRepository
+                .ListarModulos();
+        }
+
+        public IReadOnlyCollection<string>
+            ListarAcciones(
+                string modulo)
+        {
+            ExigirPermisoConsultar();
+
+            return _auditoriaRepository
+                .ListarAcciones(
+                    string.IsNullOrWhiteSpace(
+                        modulo)
+                        ? string.Empty
+                        : modulo.Trim());
+        }
+
         private void ExigirPermisoConsultar()
         {
             if (!_sesionActual

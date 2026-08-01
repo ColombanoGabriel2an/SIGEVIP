@@ -86,6 +86,7 @@
     <Compile Include="Integration\ClienteAuditoriaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\ClienteControlCambiosIntegrationTests.cs" />
     <Compile Include="Integration\AuditoriaRepositoryIntegrationTests.cs" />
+    <Compile Include="Integration\AuditoriaDetalleRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\GrupoAuditoriaRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\GrupoGestionRepositoryIntegrationTests.cs" />
     <Compile Include="Integration\GrupoJerarquiaGestionRepositoryIntegrationTests.cs" />

@@ -648,6 +648,18 @@ namespace SIGEVIP.WinForms.Forms
                 return;
             }
 
+            if (seleccionado.Estado !=
+                EstadoViaje.Abierto)
+            {
+                MessageBox.Show(
+                    "Solo pueden modificarse viajes en estado Abierto.",
+                    "Viajes",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+
+                return;
+            }
+
             try
             {
                 Viaje viaje =

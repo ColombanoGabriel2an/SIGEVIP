@@ -168,6 +168,44 @@ namespace SIGEVIP.Tests.Application
                 dto.Descripcion);
         }
 
+        [TestMethod]
+        public void ViaticoListadoDto_Comprobante_ExponeSiONo()
+        {
+            ViaticoListadoDto sinComprobante =
+                new ViaticoListadoDto(
+                    1,
+                    10,
+                    DateTime.Today,
+                    CategoriaGasto.Otros,
+                    MetodoPago.EfectivoEmpresa,
+                    string.Empty,
+                    100m,
+                    "Sin comprobante",
+                    EstadoViatico.Vigente,
+                    false);
+
+            ViaticoListadoDto conComprobante =
+                new ViaticoListadoDto(
+                    2,
+                    10,
+                    DateTime.Today,
+                    CategoriaGasto.Otros,
+                    MetodoPago.EfectivoEmpresa,
+                    string.Empty,
+                    100m,
+                    "Con comprobante",
+                    EstadoViatico.Vigente,
+                    true);
+
+            Assert.AreEqual(
+                "No",
+                sinComprobante.Comprobante);
+
+            Assert.AreEqual(
+                "Sí",
+                conComprobante.Comprobante);
+        }
+
         private static ComprobanteInput
             CrearComprobanteInput()
         {

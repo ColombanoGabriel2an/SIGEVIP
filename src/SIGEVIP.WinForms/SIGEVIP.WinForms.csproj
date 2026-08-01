@@ -66,6 +66,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+                <Compile Include="Controls\SortableBindingList.cs" />
+
+                <Compile Include="Forms\AuditoriaForm.cs">
+                        <SubType>Form</SubType>
+                </Compile>
+
                 <Compile Include="Forms\CambiarClaveForm.cs">
                         <SubType>Form</SubType>
                 </Compile>

@@ -153,6 +153,213 @@ ORDER BY
             }
         }
 
+        public IReadOnlyCollection<AuditoriaCambioDto>
+            ObtenerCambios(
+                long idAuditoria)
+        {
+            if (idAuditoria <= 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(idAuditoria));
+            }
+
+            const string sql = @"
+SELECT
+    cambio.IdAuditoriaCambio,
+    cambio.IdAuditoria,
+    cambio.Campo,
+    cambio.ValorAnterior,
+    cambio.ValorNuevo
+FROM dbo.AuditoriaCambio AS cambio
+WHERE cambio.IdAuditoria = @IdAuditoria
+ORDER BY cambio.IdAuditoriaCambio ASC;";
+
+            try
+            {
+                using (
+                    SqlConnection connection =
+                        _connectionFactory.Create())
+                using (
+                    SqlCommand command =
+                        new SqlCommand(sql, connection))
+                {
+                    command.Parameters.Add(
+                        "@IdAuditoria",
+                        SqlDbType.BigInt).Value =
+                            idAuditoria;
+
+                    connection.Open();
+
+                    List<AuditoriaCambioDto> resultados =
+                        new List<AuditoriaCambioDto>();
+
+                    using (
+                        SqlDataReader reader =
+                            command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            resultados.Add(
+                                new AuditoriaCambioDto(
+                                    reader.GetInt64(
+                                        reader.GetOrdinal(
+                                            "IdAuditoriaCambio")),
+                                    reader.GetInt64(
+                                        reader.GetOrdinal(
+                                            "IdAuditoria")),
+                                    LeerTextoObligatorio(
+                                        reader,
+                                        "Campo"),
+                                    LeerTextoOpcional(
+                                        reader,
+                                        "ValorAnterior"),
+                                    LeerTextoOpcional(
+                                        reader,
+                                        "ValorNuevo")));
+                        }
+                    }
+
+                    return resultados.AsReadOnly();
+                }
+            }
+            catch (PersistenciaException)
+            {
+                throw;
+            }
+            catch (SqlException exception)
+            {
+                throw new PersistenciaException(
+                    "No fue posible consultar el detalle de auditoría.",
+                    exception);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "No fue posible ejecutar la consulta del detalle de auditoría.",
+                    exception);
+            }
+        }
+
+        public IReadOnlyCollection<string>
+            ListarModulos()
+        {
+            const string sql = @"
+SELECT DISTINCT
+    auditoria.Modulo
+FROM dbo.Auditoria AS auditoria
+WHERE
+    auditoria.Modulo IS NOT NULL
+    AND LTRIM(RTRIM(auditoria.Modulo)) <> N''
+ORDER BY
+    auditoria.Modulo ASC;";
+
+            return EjecutarCatalogo(
+                sql,
+                null,
+                "Modulo");
+        }
+
+        public IReadOnlyCollection<string>
+            ListarAcciones(
+                string modulo)
+        {
+            const string sql = @"
+SELECT DISTINCT
+    auditoria.Accion
+FROM dbo.Auditoria AS auditoria
+WHERE
+    auditoria.Accion IS NOT NULL
+    AND LTRIM(RTRIM(auditoria.Accion)) <> N''
+    AND
+    (
+        @Modulo = N''
+        OR auditoria.Modulo = @Modulo
+    )
+ORDER BY
+    auditoria.Accion ASC;";
+
+            SqlParameter parametro =
+                new SqlParameter(
+                    "@Modulo",
+                    SqlDbType.NVarChar,
+                    50)
+                {
+                    Value =
+                        string.IsNullOrWhiteSpace(
+                            modulo)
+                            ? string.Empty
+                            : modulo.Trim()
+                };
+
+            return EjecutarCatalogo(
+                sql,
+                parametro,
+                "Accion");
+        }
+
+        private IReadOnlyCollection<string>
+            EjecutarCatalogo(
+                string sql,
+                SqlParameter parametro,
+                string columna)
+        {
+            try
+            {
+                using (
+                    SqlConnection connection =
+                        _connectionFactory.Create())
+                using (
+                    SqlCommand command =
+                        new SqlCommand(
+                            sql,
+                            connection))
+                {
+                    if (parametro != null)
+                    {
+                        command.Parameters.Add(
+                            parametro);
+                    }
+
+                    connection.Open();
+
+                    List<string> resultados =
+                        new List<string>();
+
+                    using (
+                        SqlDataReader reader =
+                            command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            resultados.Add(
+                                LeerTextoObligatorio(
+                                    reader,
+                                    columna));
+                        }
+                    }
+
+                    return resultados
+                        .AsReadOnly();
+                }
+            }
+            catch (PersistenciaException)
+            {
+                throw;
+            }
+            catch (SqlException exception)
+            {
+                throw new PersistenciaException(
+                    "No fue posible consultar los filtros disponibles de auditoría.",
+                    exception);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "No fue posible ejecutar la consulta de filtros de auditoría.",
+                    exception);
+            }
+        }
+
         private static void AgregarFiltroFechaDesde(
             StringBuilder sql,
             ICollection<SqlParameter> parametros,
@@ -347,6 +554,16 @@ ORDER BY
                 LeerTextoObligatorio(
                     reader,
                     "Descripcion"));
+        }
+
+        private static string LeerTextoOpcional(
+            SqlDataReader reader,
+            string columna)
+        {
+            int ordinal = reader.GetOrdinal(columna);
+            return reader.IsDBNull(ordinal)
+                ? null
+                : reader.GetString(ordinal);
         }
 
         private static string LeerTextoObligatorio(

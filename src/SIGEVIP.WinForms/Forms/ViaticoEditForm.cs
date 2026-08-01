@@ -672,7 +672,7 @@ namespace SIGEVIP.WinForms.Forms
                             38),
                     Text =
                         "El total se calcula automáticamente como monto gravado más impuestos. " +
-                        "No es obligatorio que coincida con el monto del viático."
+                        "Debe coincidir con el monto del viático."
                 });
 
             Controls.Add(
@@ -800,7 +800,8 @@ namespace SIGEVIP.WinForms.Forms
             {
                 List<PagadorSeleccionDto> pagadores =
                     _viaticoService
-                        .ListarPagadoresDisponibles()
+                        .ListarPagadoresDisponibles(
+                            _idViaje)
                         .Where(
                             item =>
                                 item.Activo)
@@ -1292,6 +1293,31 @@ namespace SIGEVIP.WinForms.Forms
                 _errorProvider.SetError(
                     _txtNumero,
                     "El número debe contener exactamente ocho dígitos.");
+
+                valido = false;
+            }
+
+            decimal totalComprobante =
+                _nudMontoGravado.Value +
+                _nudMontoImpuestos.Value;
+
+            if (totalComprobante !=
+                _nudMonto.Value)
+            {
+                string mensaje =
+                    "El total del comprobante debe coincidir con el monto del viático.";
+
+                _errorProvider.SetError(
+                    _nudMonto,
+                    mensaje);
+
+                _errorProvider.SetError(
+                    _nudMontoGravado,
+                    mensaje);
+
+                _errorProvider.SetError(
+                    _nudMontoImpuestos,
+                    mensaje);
 
                 valido = false;
             }

@@ -141,7 +141,7 @@ namespace SIGEVIP.Tests.Application
         }
 
         [TestMethod]
-        public void Registrar_PagadorInexistente_RechazaOperacion()
+        public void Registrar_PagadorNoParticipante_RechazaOperacion()
         {
             ViaticoService servicio =
                 CrearServicio(
@@ -212,10 +212,39 @@ namespace SIGEVIP.Tests.Application
                     .Tipo);
 
             Assert.AreEqual(
-                1210m,
+                1500m,
                 viaticos.Insertado
                     .Comprobante
                     .Total);
+        }
+
+        [TestMethod]
+        public void Registrar_ComprobanteConTotalDiferente_RechazaOperacion()
+        {
+            ViaticoService servicio =
+                CrearServicio(
+                    CrearUsuario(
+                        ViaticoService.PermisoRegistrar),
+                    CrearViajesConViaje(),
+                    new ViaticoRepositoryFalso(),
+                    CrearPersonas());
+
+            Assert.ThrowsException
+                <ReglaNegocioException>(
+                    () => servicio.Registrar(
+                        CrearComandoRegistro(
+                            MetodoPago.EfectivoEmpresa,
+                            null,
+                            new ComprobanteInput(
+                                0,
+                                TipoComprobante.FacturaB,
+                                "30-12345678-9",
+                                "Proveedor de prueba",
+                                SituacionFiscal.ResponsableInscripto,
+                                "0001",
+                                "00001234",
+                                1000m,
+                                210m))));
         }
 
         [TestMethod]
@@ -305,6 +334,35 @@ namespace SIGEVIP.Tests.Application
         }
 
         [TestMethod]
+        public void Modificar_ComprobanteConTotalDiferente_RechazaOperacion()
+        {
+            ViaticoService servicio =
+                CrearServicio(
+                    CrearUsuario(
+                        ViaticoService.PermisoModificar),
+                    CrearViajesConViatico(),
+                    new ViaticoRepositoryFalso(),
+                    CrearPersonas());
+
+            Assert.ThrowsException
+                <ReglaNegocioException>(
+                    () => servicio.Modificar(
+                        new ModificarViaticoCommand(
+                            1,
+                            10,
+                            new DateTime(
+                                2026,
+                                7,
+                                11),
+                            CategoriaGasto.Otros,
+                            MetodoPago.EfectivoEmpresa,
+                            null,
+                            2000m,
+                            "Gasto modificado",
+                            CrearComprobanteInput())));
+        }
+
+        [TestMethod]
         public void Modificar_ViaticoAjenoAlViaje_RechazaOperacion()
         {
             ViaticoService servicio =
@@ -318,6 +376,35 @@ namespace SIGEVIP.Tests.Application
             Assert.ThrowsException<ReglaNegocioException>(
                 () => servicio.Modificar(
                     CrearComandoModificacion()));
+        }
+
+        [TestMethod]
+        public void Modificar_PagadorNoParticipante_RechazaOperacion()
+        {
+            ViaticoService servicio =
+                CrearServicio(
+                    CrearUsuario(
+                        ViaticoService.PermisoModificar),
+                    CrearViajesConViatico(),
+                    new ViaticoRepositoryFalso(),
+                    CrearPersonas());
+
+            Assert.ThrowsException
+                <ReglaNegocioException>(
+                    () => servicio.Modificar(
+                        new ModificarViaticoCommand(
+                            1,
+                            10,
+                            new DateTime(
+                                2026,
+                                7,
+                                11),
+                            CategoriaGasto.Otros,
+                            MetodoPago.PagoPersonal,
+                            99,
+                            1800m,
+                            "Traslado",
+                            null)));
         }
 
         [TestMethod]
@@ -418,27 +505,41 @@ namespace SIGEVIP.Tests.Application
         }
 
         [TestMethod]
-        public void ListarPagadoresDisponibles_ConPermisoModificar_DevuelveActivos()
+        public void ListarPagadoresDisponibles_DevuelveSoloParticipantesActivos()
         {
             PersonaRepositoryFalso personas =
                 CrearPersonas();
+
+            personas.Personas.Add(
+                new Persona(
+                    2,
+                    "Lucía",
+                    "No participante",
+                    "lucia@sigevip.local"));
 
             ViaticoService servicio =
                 CrearServicio(
                     CrearUsuario(
                         ViaticoService.PermisoModificar),
-                    new ViajeRepositoryFalso(),
+                    CrearViajesConViaje(),
                     new ViaticoRepositoryFalso(),
                     personas);
 
             IReadOnlyCollection<PagadorSeleccionDto>
                 resultado =
                     servicio
-                        .ListarPagadoresDisponibles();
+                        .ListarPagadoresDisponibles(
+                            1);
 
             Assert.AreEqual(
                 1,
                 resultado.Count);
+
+            Assert.AreEqual(
+                1,
+                resultado
+                    .Single()
+                    .IdPersona);
         }
 
         private static readonly DateTime FechaInicio =
@@ -497,7 +598,7 @@ namespace SIGEVIP.Tests.Application
                 SituacionFiscal.ResponsableInscripto,
                 "0001",
                 "00001234",
-                1000m,
+                1290m,
                 210m);
         }
 
@@ -548,13 +649,23 @@ namespace SIGEVIP.Tests.Application
 
         private static Viaje CrearViaje()
         {
-            return new Viaje(
-                1,
-                FechaInicio,
-                FechaFin,
-                "Viaje comercial",
-                TipoViaje.Desplazamiento,
-                0m);
+            var viaje =
+                new Viaje(
+                    1,
+                    FechaInicio,
+                    FechaFin,
+                    "Viaje comercial",
+                    TipoViaje.Desplazamiento,
+                    0m);
+
+            viaje.AgregarParticipante(
+                new Persona(
+                    1,
+                    "Ana",
+                    "Administrativa",
+                    "ana@sigevip.local"));
+
+            return viaje;
         }
 
         private static Viatico CrearViatico(

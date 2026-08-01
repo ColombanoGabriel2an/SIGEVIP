@@ -10,6 +10,7 @@ using SIGEVIP.Application.Security;
 using SIGEVIP.Domain.Enums;
 using SIGEVIP.Domain.Exceptions;
 using SIGEVIP.Infrastructure.Exceptions;
+using SIGEVIP.WinForms.Controls;
 
 namespace SIGEVIP.WinForms.Forms
 {
@@ -745,6 +746,8 @@ namespace SIGEVIP.WinForms.Forms
                         titulo,
                     Name =
                         propiedad,
+                    SortMode =
+                        DataGridViewColumnSortMode.Automatic,
                     Width =
                         ancho
                 };
@@ -775,9 +778,21 @@ namespace SIGEVIP.WinForms.Forms
                         titulo,
                     Name =
                         propiedad,
+                    SortMode =
+                        DataGridViewColumnSortMode.Automatic,
                     Width =
                         ancho
                 });
+        }
+
+        private static object CrearOrigenOrdenable<T>(
+            IEnumerable<T> elementos)
+        {
+            return new SortableBindingList<T>(
+                (
+                    elementos
+                    ?? Enumerable.Empty<T>()
+                ).ToList());
         }
 
         private static Label CrearResumen(
@@ -955,7 +970,8 @@ namespace SIGEVIP.WinForms.Forms
                     null;
 
                 _grillaRendiciones.DataSource =
-                    pendientes;
+                    CrearOrigenOrdenable(
+                        pendientes);
 
                 if (pendientes.Count == 0)
                 {
@@ -1121,44 +1137,47 @@ namespace SIGEVIP.WinForms.Forms
                 null;
 
             _grillaViaticos.DataSource =
-                detalle.Viaticos
-                    .OrderBy(
-                        item =>
-                            item.Fecha)
-                    .ThenBy(
-                        item =>
-                            item.IdViatico)
-                    .ToList();
+                CrearOrigenOrdenable(
+                    detalle.Viaticos
+                        .OrderBy(
+                            item =>
+                                item.Fecha)
+                        .ThenBy(
+                            item =>
+                                item.IdViatico)
+                        .ToList());
 
             _grillaVisitas.DataSource =
                 null;
 
             _grillaVisitas.DataSource =
-                detalle.Visitas
-                    .OrderBy(
-                        item =>
-                            item.Fecha)
-                    .ThenBy(
-                        item =>
-                            item.IdVisita)
-                    .Select(
-                        item =>
-                            new VisitaFila(
-                                item))
-                    .ToList();
+                CrearOrigenOrdenable(
+                    detalle.Visitas
+                        .OrderBy(
+                            item =>
+                                item.Fecha)
+                        .ThenBy(
+                            item =>
+                                item.IdVisita)
+                        .Select(
+                            item =>
+                                new VisitaFila(
+                                    item))
+                        .ToList());
 
             _grillaParticipantes.DataSource =
                 null;
 
             _grillaParticipantes.DataSource =
-                detalle.Participantes
-                    .OrderBy(
-                        item =>
-                            item.NombreCompleto)
-                    .ThenBy(
-                        item =>
-                            item.IdPersona)
-                    .ToList();
+                CrearOrigenOrdenable(
+                    detalle.Participantes
+                        .OrderBy(
+                            item =>
+                                item.NombreCompleto)
+                        .ThenBy(
+                            item =>
+                                item.IdPersona)
+                        .ToList());
 
             _lblEstado.Text =
                 "Viáticos: " +

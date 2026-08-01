@@ -127,20 +127,44 @@ namespace SIGEVIP.Application.Viaticos
         }
 
         public IReadOnlyCollection<PagadorSeleccionDto>
-            ListarPagadoresDisponibles()
+            ListarPagadoresDisponibles(
+                int idViaje)
         {
             ExigirAlMenosUnPermiso(
                 PermisoRegistrar,
                 PermisoModificar);
 
-            IReadOnlyCollection<PagadorSeleccionDto>
-                resultados =
-                    _personaRepository
-                        .ListarActivas();
+            Viaje viaje =
+                ObtenerViaje(
+                    idViaje);
+
+            List<PagadorSeleccionDto> resultados =
+                viaje.Participantes
+                    .Where(
+                        participante =>
+                            participante != null &&
+                            participante.Activo)
+                    .OrderBy(
+                        participante =>
+                            participante.Apellido)
+                    .ThenBy(
+                        participante =>
+                            participante.Nombre)
+                    .ThenBy(
+                        participante =>
+                            participante.IdPersona)
+                    .Select(
+                        participante =>
+                            new PagadorSeleccionDto(
+                                participante.IdPersona,
+                                participante.Apellido +
+                                ", " +
+                                participante.Nombre,
+                                participante.Activo))
+                    .ToList();
 
             return resultados
-                   ?? new List<PagadorSeleccionDto>()
-                       .AsReadOnly();
+                .AsReadOnly();
         }
 
         public int Registrar(
@@ -160,12 +184,17 @@ namespace SIGEVIP.Application.Viaticos
                     command.IdViaje);
 
             Persona pagador =
-                ResolverPagadorActivo(
+                ResolverPagadorParticipante(
+                    viaje,
                     command.IdPersonaPagadora);
 
             Comprobante comprobante =
                 CrearComprobante(
                     command.Comprobante);
+
+            ValidarCoincidenciaMontoComprobante(
+                command.Monto,
+                comprobante);
 
             var viatico =
                 new Viatico(
@@ -223,12 +252,17 @@ namespace SIGEVIP.Application.Viaticos
             }
 
             Persona pagador =
-                ResolverPagadorActivo(
+                ResolverPagadorParticipante(
+                    viaje,
                     command.IdPersonaPagadora);
 
             Comprobante comprobante =
                 CrearComprobante(
                     command.Comprobante);
+
+            ValidarCoincidenciaMontoComprobante(
+                command.Monto,
+                comprobante);
 
             viaje.ModificarViatico(
                 viatico,
@@ -291,12 +325,32 @@ namespace SIGEVIP.Application.Viaticos
             return viaje;
         }
 
-        private Persona ResolverPagadorActivo(
+        private Persona ResolverPagadorParticipante(
+            Viaje viaje,
             int? idPersonaPagadora)
         {
             if (!idPersonaPagadora.HasValue)
             {
                 return null;
+            }
+
+            if (viaje == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(viaje));
+            }
+
+            bool participaDelViaje =
+                viaje.Participantes.Any(
+                    participante =>
+                        participante != null &&
+                        participante.IdPersona ==
+                            idPersonaPagadora.Value);
+
+            if (!participaDelViaje)
+            {
+                throw new ReglaNegocioException(
+                    "La persona pagadora debe ser participante del viaje.");
             }
 
             Persona persona =
@@ -317,6 +371,24 @@ namespace SIGEVIP.Application.Viaticos
             }
 
             return persona;
+        }
+
+        private static void
+            ValidarCoincidenciaMontoComprobante(
+                decimal montoViatico,
+                Comprobante comprobante)
+        {
+            if (comprobante == null)
+            {
+                return;
+            }
+
+            if (comprobante.Total !=
+                montoViatico)
+            {
+                throw new ReglaNegocioException(
+                    "El total del comprobante debe coincidir con el monto del viático.");
+            }
         }
 
         private static Comprobante CrearComprobante(

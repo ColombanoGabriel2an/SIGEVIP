@@ -1,5 +1,6 @@
 using System;
 using System.Windows.Forms;
+using SIGEVIP.Application.Auditoria;
 using SIGEVIP.Application.Clientes;
 using SIGEVIP.Application.Grupos;
 using SIGEVIP.Application.Permisos;
@@ -21,6 +22,9 @@ namespace SIGEVIP.WinForms.Navigation
 
         private readonly AutorizacionService
             _autorizacionService;
+
+        private readonly AuditoriaService
+            _auditoriaService;
 
         private readonly PerfilSesionService
             _perfilSesionService;
@@ -65,6 +69,7 @@ namespace SIGEVIP.WinForms.Navigation
         public SigevipApplicationContext(
             AutenticacionService autenticacionService,
             AutorizacionService autorizacionService,
+            AuditoriaService auditoriaService,
             PerfilSesionService perfilSesionService,
             ClienteService clienteService,
             ViajeService viajeService,
@@ -87,6 +92,11 @@ namespace SIGEVIP.WinForms.Navigation
                 autorizacionService
                 ?? throw new ArgumentNullException(
                     nameof(autorizacionService));
+
+            _auditoriaService =
+                auditoriaService
+                ?? throw new ArgumentNullException(
+                    nameof(auditoriaService));
 
             _perfilSesionService =
                 perfilSesionService
@@ -283,6 +293,9 @@ namespace SIGEVIP.WinForms.Navigation
             _mainForm.PermisosSolicitados +=
                 MainForm_PermisosSolicitados;
 
+            _mainForm.AuditoriaSolicitada +=
+                MainForm_AuditoriaSolicitada;
+
             _mainForm.CambiarClaveSolicitada +=
                 MainForm_CambiarClaveSolicitada;
 
@@ -448,6 +461,25 @@ namespace SIGEVIP.WinForms.Navigation
             }
         }
 
+        private void MainForm_AuditoriaSolicitada(
+            object sender,
+            EventArgs e)
+        {
+            if (_mainForm == null)
+            {
+                return;
+            }
+
+            using (
+                var formulario =
+                    new AuditoriaForm(
+                        _auditoriaService))
+            {
+                formulario.ShowDialog(
+                    _mainForm);
+            }
+        }
+
         private void MainForm_CambiarClaveSolicitada(
             object sender,
             EventArgs e)
@@ -555,6 +587,9 @@ namespace SIGEVIP.WinForms.Navigation
 
             _mainForm.PermisosSolicitados -=
                 MainForm_PermisosSolicitados;
+
+            _mainForm.AuditoriaSolicitada -=
+                MainForm_AuditoriaSolicitada;
 
             _mainForm.CambiarClaveSolicitada -=
                 MainForm_CambiarClaveSolicitada;

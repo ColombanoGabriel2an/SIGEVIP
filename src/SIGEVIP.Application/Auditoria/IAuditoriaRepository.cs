@@ -7,5 +7,16 @@ namespace SIGEVIP.Application.Auditoria
         IReadOnlyCollection<AuditoriaListadoDto>
             Listar(
                 AuditoriaFiltro filtro);
+
+        IReadOnlyCollection<AuditoriaCambioDto>
+            ObtenerCambios(
+                long idAuditoria);
+
+        IReadOnlyCollection<string>
+            ListarModulos();
+
+        IReadOnlyCollection<string>
+            ListarAcciones(
+                string modulo);
     }
 }
