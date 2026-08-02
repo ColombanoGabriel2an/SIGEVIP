@@ -585,6 +585,8 @@ Se implementaron:
 - coordinación desde `SigevipApplicationContext`;
 - composición de dependencias en `Program`.
 
+La interfaz permite registrar y modificar Visitas de Viajes Abiertos, consultar por selección explícita o doble clic y conservar las opciones existentes. Los Clientes históricos inactivos ya asociados pueden conservarse o quitarse durante la modificación, pero no agregarse como nuevas asociaciones.
+
 La interfaz permite:
 
 - listar;
@@ -709,8 +711,10 @@ La interfaz permite:
 - modificar;
 - consultar detalle;
 - cancelar;
-- seleccionar varios participantes;
-- visualizar participantes inactivos históricos;
+- seleccionar varios participantes mediante una grilla ordenable;
+- buscar participantes por nombre, apellido o correo;
+- conservar selecciones al filtrar u ordenar;
+- visualizar participantes inactivos históricos y permitir conservarlos en modificaciones;
 - aplicar permisos visuales;
 - mostrar mensajes de validación y errores controlados.
 
@@ -762,6 +766,8 @@ Casos de uso disponibles:
 
 - listar Clientes activos disponibles;
 - registrar una Visita;
+- obtener una Visita del Viaje seleccionado;
+- modificar una Visita mientras el Viaje permanece Abierto;
 - listar Visitas por Viaje;
 - listar Visitas por Cliente.
 
@@ -787,6 +793,8 @@ Se implementaron:
 Responsabilidades:
 
 - insertar Visitas y asociaciones dentro de una transacción;
+- actualizar datos y reemplazar asociaciones de Clientes dentro de una transacción;
+- registrar auditoría de alta y modificación;
 - consultar Visitas por Viaje;
 - consultar Visitas por Cliente;
 - consultar Clientes activos;
@@ -817,8 +825,9 @@ Validación ejecutada:
 
 Se implementaron:
 
-- `VisitasForm`;
-- `VisitaEditForm`;
+- `VisitasForm` con selector filtrable y grilla de Viajes;
+- `VisitaEditForm` para alta y modificación;
+- selector de Clientes mediante grilla con búsqueda, ordenamiento y selección persistente;
 - navegación desde `MainForm`;
 - coordinación desde `SigevipApplicationContext`;
 - composición de dependencias en `Program`.

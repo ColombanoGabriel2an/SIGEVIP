@@ -7,14 +7,55 @@ using SIGEVIP.Application.Exceptions;
 using SIGEVIP.Application.Security;
 using SIGEVIP.Application.Viajes;
 using SIGEVIP.Application.Visitas;
+using SIGEVIP.Domain.Entities;
 using SIGEVIP.Domain.Enums;
 using SIGEVIP.Domain.Exceptions;
 using SIGEVIP.Infrastructure.Exceptions;
+using SIGEVIP.WinForms.Controls;
 
 namespace SIGEVIP.WinForms.Forms
 {
     public sealed class VisitasForm : Form
     {
+        private static readonly Color
+            ColorPrimario =
+                Color.FromArgb(
+                    37,
+                    99,
+                    235);
+
+        private static readonly Color
+            ColorFondo =
+                Color.FromArgb(
+                    245,
+                    247,
+                    250);
+
+        private static readonly Color
+            ColorTarjeta =
+                Color.White;
+
+        private static readonly Color
+            ColorBorde =
+                Color.FromArgb(
+                    218,
+                    223,
+                    230);
+
+        private static readonly Color
+            ColorTexto =
+                Color.FromArgb(
+                    30,
+                    41,
+                    59);
+
+        private static readonly Color
+            ColorTextoSecundario =
+                Color.FromArgb(
+                    85,
+                    94,
+                    108);
+
         private readonly VisitaService
             _visitaService;
 
@@ -27,14 +68,53 @@ namespace SIGEVIP.WinForms.Forms
         private readonly AutorizacionService
             _autorizacionService;
 
-        private ComboBox _cmbViaje;
-        private Button _btnBuscar;
-        private Button _btnActualizar;
-        private Button _btnNuevaVisita;
-        private Button _btnCerrar;
-        private DataGridView _grilla;
-        private Label _lblCantidad;
-        private Label _lblViajeSeleccionado;
+        private bool
+            _puedeRegistrar;
+
+        private TextBox
+            _txtBuscarViaje;
+
+        private DateTimePicker
+            _dtpViajeDesde;
+
+        private DateTimePicker
+            _dtpViajeHasta;
+
+        private ComboBox
+            _cmbEstadoViaje;
+
+        private Button
+            _btnBuscarViajes;
+
+        private Button
+            _btnLimpiarViajes;
+
+        private Button
+            _btnConsultarSeleccion;
+
+        private DataGridView
+            _grillaViajes;
+
+        private Label
+            _lblViajeSeleccionado;
+
+        private DataGridView
+            _grillaVisitas;
+
+        private Button
+            _btnNuevaVisita;
+
+        private Button
+            _btnModificarVisita;
+
+        private Button
+            _btnCerrar;
+
+        private Label
+            _lblCantidad;
+
+        private ViajeListadoDto
+            _viajeSeleccionado;
 
         public VisitasForm(
             VisitaService visitaService,
@@ -78,10 +158,17 @@ namespace SIGEVIP.WinForms.Forms
                 FormStartPosition.CenterParent;
 
             MinimumSize =
-                new Size(1050, 650);
+                new Size(
+                    1100,
+                    700);
 
             Size =
-                new Size(1220, 740);
+                new Size(
+                    1320,
+                    820);
+
+            AutoScaleMode =
+                AutoScaleMode.Dpi;
 
             Font =
                 new Font(
@@ -89,199 +176,723 @@ namespace SIGEVIP.WinForms.Forms
                     9F);
 
             BackColor =
-                Color.WhiteSmoke;
+                ColorFondo;
 
-            Controls.Add(
-                new Label
+            var raiz =
+                new TableLayoutPanel
                 {
-                    AutoSize = true,
-                    Font = new Font(
-                        "Segoe UI",
-                        18F,
-                        FontStyle.Bold),
-                    Location =
-                        new Point(24, 20),
-                    Text =
-                        "Visitas comerciales"
-                });
+                    Dock = DockStyle.Fill,
+                    ColumnCount = 1,
+                    RowCount = 6,
+                    Padding =
+                        new Padding(14),
+                    BackColor =
+                        ColorFondo
+                };
 
-            Controls.Add(
-                CrearPanelFiltros());
+            raiz.ColumnStyles.Add(
+                new ColumnStyle(
+                    SizeType.Percent,
+                    100F));
+
+            raiz.RowStyles.Add(
+                new RowStyle(
+                    SizeType.Absolute,
+                    52F));
+
+            raiz.RowStyles.Add(
+                new RowStyle(
+                    SizeType.Absolute,
+                    252F));
+
+            raiz.RowStyles.Add(
+                new RowStyle(
+                    SizeType.Absolute,
+                    46F));
+
+            raiz.RowStyles.Add(
+                new RowStyle(
+                    SizeType.Percent,
+                    100F));
+
+            raiz.RowStyles.Add(
+                new RowStyle(
+                    SizeType.Absolute,
+                    50F));
+
+            raiz.RowStyles.Add(
+                new RowStyle(
+                    SizeType.Absolute,
+                    25F));
+
+            raiz.Controls.Add(
+                CrearEncabezado(),
+                0,
+                0);
+
+            raiz.Controls.Add(
+                CrearSelectorViajes(),
+                0,
+                1);
 
             _lblViajeSeleccionado =
                 new Label
                 {
-                    Anchor =
-                        AnchorStyles.Top |
-                        AnchorStyles.Left |
-                        AnchorStyles.Right,
-                    AutoEllipsis = true,
+                    Dock = DockStyle.Fill,
+                    Margin =
+                        new Padding(
+                            0,
+                            5,
+                            0,
+                            4),
+                    Padding =
+                        new Padding(
+                            12,
+                            0,
+                            12,
+                            0),
                     BackColor =
-                        Color.White,
+                        ColorTarjeta,
                     BorderStyle =
                         BorderStyle.FixedSingle,
-                    Font = new Font(
-                        "Segoe UI",
-                        9F,
-                        FontStyle.Bold),
-                    Location =
-                        new Point(24, 165),
-                    Padding =
-                        new Padding(10),
-                    Size =
-                        new Size(1155, 43),
+                    Font =
+                        new Font(
+                            "Segoe UI",
+                            9F,
+                            FontStyle.Bold),
+                    ForeColor =
+                        ColorTexto,
                     Text =
                         "Seleccione un viaje para consultar sus visitas.",
                     TextAlign =
-                        ContentAlignment.MiddleLeft
+                        ContentAlignment.MiddleLeft,
+                    AutoEllipsis = true
                 };
 
-            Controls.Add(
-                _lblViajeSeleccionado);
+            raiz.Controls.Add(
+                _lblViajeSeleccionado,
+                0,
+                2);
 
-            _grilla =
-                CrearGrilla();
+            _grillaVisitas =
+                CrearGrillaBase();
 
-            Controls.Add(
-                _grilla);
+            AgregarColumna(
+                _grillaVisitas,
+                "IdVisita",
+                "ID",
+                60);
 
-            Controls.Add(
-                CrearPanelAcciones());
+            AgregarColumna(
+                _grillaVisitas,
+                "Fecha",
+                "Fecha",
+                100,
+                "dd/MM/yyyy");
+
+            AgregarColumna(
+                _grillaVisitas,
+                "LocalidadEncuentro",
+                "Localidad",
+                170);
+
+            AgregarColumna(
+                _grillaVisitas,
+                "Observacion",
+                "Observación",
+                380);
+
+            AgregarColumna(
+                _grillaVisitas,
+                "ClientesResumen",
+                "Clientes",
+                420);
+
+            _grillaVisitas.SelectionChanged +=
+                GrillaVisitas_SelectionChanged;
+
+            _grillaVisitas.CellDoubleClick +=
+                GrillaVisitas_CellDoubleClick;
+
+            _grillaVisitas.DataBindingComplete +=
+                GrillaVisitas_DataBindingComplete;
+
+            raiz.Controls.Add(
+                _grillaVisitas,
+                0,
+                3);
+
+            raiz.Controls.Add(
+                CrearPanelAcciones(),
+                0,
+                4);
 
             _lblCantidad =
                 new Label
                 {
-                    Anchor =
-                        AnchorStyles.Left |
-                        AnchorStyles.Bottom,
-                    AutoSize = true,
-                    Font = new Font(
-                        "Segoe UI",
-                        9F,
-                        FontStyle.Bold),
-                    Location =
-                        new Point(25, 660),
+                    Dock = DockStyle.Fill,
+                    Font =
+                        new Font(
+                            "Segoe UI",
+                            9F,
+                            FontStyle.Bold),
+                    ForeColor =
+                        ColorTexto,
                     Text =
-                        "Resultados: 0"
+                        "Resultados: 0",
+                    TextAlign =
+                        ContentAlignment.MiddleLeft
                 };
 
+            raiz.Controls.Add(
+                _lblCantidad,
+                0,
+                5);
+
             Controls.Add(
-                _lblCantidad);
+                raiz);
+
+            AcceptButton =
+                _btnConsultarSeleccion;
+
+            CancelButton =
+                _btnCerrar;
         }
 
-        private Panel CrearPanelFiltros()
+        private static Control CrearEncabezado()
         {
             var panel =
                 new Panel
                 {
-                    Anchor =
-                        AnchorStyles.Top |
-                        AnchorStyles.Left |
-                        AnchorStyles.Right,
+                    Dock = DockStyle.Fill,
                     BackColor =
-                        Color.White,
-                    BorderStyle =
-                        BorderStyle.FixedSingle,
-                    Location =
-                        new Point(24, 67),
-                    Size =
-                        new Size(1155, 82)
+                        ColorTarjeta,
+                    Padding =
+                        new Padding(
+                            16,
+                            5,
+                            16,
+                            5)
                 };
 
             panel.Controls.Add(
                 new Label
                 {
-                    AutoSize = true,
-                    Font = new Font(
-                        "Segoe UI",
-                        9F,
-                        FontStyle.Bold),
-                    Location =
-                        new Point(16, 15),
+                    Dock = DockStyle.Fill,
+                    Font =
+                        new Font(
+                            "Segoe UI",
+                            18F,
+                            FontStyle.Bold),
+                    ForeColor =
+                        ColorTexto,
                     Text =
-                        "Viaje"
+                        "Visitas comerciales",
+                    TextAlign =
+                        ContentAlignment.MiddleLeft
                 });
-
-            _cmbViaje =
-                new ComboBox
-                {
-                    DropDownStyle =
-                        ComboBoxStyle.DropDownList,
-                    DisplayMember =
-                        "DescripcionCompleta",
-                    Location =
-                        new Point(19, 40),
-                    Size =
-                        new Size(760, 24)
-                };
-
-            _btnBuscar =
-                CrearBotonFiltro(
-                    "Consultar",
-                    800);
-
-            _btnActualizar =
-                CrearBotonFiltro(
-                    "Actualizar viajes",
-                    930);
-
-            _btnBuscar.Click +=
-                BtnBuscar_Click;
-
-            _btnActualizar.Click +=
-                BtnActualizar_Click;
-
-            panel.Controls.Add(
-                _cmbViaje);
-
-            panel.Controls.Add(
-                _btnBuscar);
-
-            panel.Controls.Add(
-                _btnActualizar);
 
             return panel;
         }
 
-        private static Button CrearBotonFiltro(
-            string texto,
-            int posicionX)
+        private Control CrearSelectorViajes()
         {
-            return new Button
+            var grupo =
+                new GroupBox
+                {
+                    Dock = DockStyle.Fill,
+                    Text =
+                        "Seleccionar viaje",
+                    BackColor =
+                        ColorTarjeta,
+                    ForeColor =
+                        ColorTexto,
+                    Padding =
+                        new Padding(8)
+                };
+
+            var tabla =
+                new TableLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    ColumnCount = 5,
+                    RowCount = 3,
+                    Padding =
+                        new Padding(
+                            5,
+                            3,
+                            5,
+                            5),
+                    BackColor =
+                        ColorTarjeta
+                };
+
+            tabla.ColumnStyles.Add(
+                new ColumnStyle(
+                    SizeType.Percent,
+                    31F));
+
+            tabla.ColumnStyles.Add(
+                new ColumnStyle(
+                    SizeType.Percent,
+                    14F));
+
+            tabla.ColumnStyles.Add(
+                new ColumnStyle(
+                    SizeType.Percent,
+                    14F));
+
+            tabla.ColumnStyles.Add(
+                new ColumnStyle(
+                    SizeType.Percent,
+                    15F));
+
+            tabla.ColumnStyles.Add(
+                new ColumnStyle(
+                    SizeType.Percent,
+                    26F));
+
+            tabla.RowStyles.Add(
+                new RowStyle(
+                    SizeType.Absolute,
+                    22F));
+
+            tabla.RowStyles.Add(
+                new RowStyle(
+                    SizeType.Absolute,
+                    38F));
+
+            tabla.RowStyles.Add(
+                new RowStyle(
+                    SizeType.Percent,
+                    100F));
+
+            tabla.Controls.Add(
+                CrearEtiquetaFiltro(
+                    "Buscar por ID, descripción o participante"),
+                0,
+                0);
+
+            tabla.Controls.Add(
+                CrearEtiquetaFiltro(
+                    "Fecha desde"),
+                1,
+                0);
+
+            tabla.Controls.Add(
+                CrearEtiquetaFiltro(
+                    "Fecha hasta"),
+                2,
+                0);
+
+            tabla.Controls.Add(
+                CrearEtiquetaFiltro(
+                    "Estado"),
+                3,
+                0);
+
+            tabla.Controls.Add(
+                CrearEtiquetaFiltro(
+                    "Acciones"),
+                4,
+                0);
+
+            _txtBuscarViaje =
+                new TextBox
+                {
+                    Dock = DockStyle.Fill,
+                    Margin =
+                        new Padding(
+                            3,
+                            3,
+                            6,
+                            3)
+                };
+
+            _dtpViajeDesde =
+                CrearFechaFiltro();
+
+            _dtpViajeHasta =
+                CrearFechaFiltro();
+
+            _cmbEstadoViaje =
+                new ComboBox
+                {
+                    Dock = DockStyle.Fill,
+                    DropDownStyle =
+                        ComboBoxStyle.DropDownList,
+                    Margin =
+                        new Padding(
+                            3,
+                            3,
+                            6,
+                            3)
+                };
+
+            tabla.Controls.Add(
+                _txtBuscarViaje,
+                0,
+                1);
+
+            tabla.Controls.Add(
+                _dtpViajeDesde,
+                1,
+                1);
+
+            tabla.Controls.Add(
+                _dtpViajeHasta,
+                2,
+                1);
+
+            tabla.Controls.Add(
+                _cmbEstadoViaje,
+                3,
+                1);
+
+            var acciones =
+                new TableLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    ColumnCount = 3,
+                    RowCount = 1,
+                    Margin =
+                        new Padding(
+                            2,
+                            1,
+                            2,
+                            1),
+                    BackColor =
+                        ColorTarjeta
+                };
+
+            acciones.ColumnStyles.Add(
+                new ColumnStyle(
+                    SizeType.Percent,
+                    27F));
+
+            acciones.ColumnStyles.Add(
+                new ColumnStyle(
+                    SizeType.Percent,
+                    27F));
+
+            acciones.ColumnStyles.Add(
+                new ColumnStyle(
+                    SizeType.Percent,
+                    46F));
+
+            acciones.RowStyles.Add(
+                new RowStyle(
+                    SizeType.Percent,
+                    100F));
+
+            _btnBuscarViajes =
+                CrearBotonPrimario(
+                    "Buscar");
+
+            _btnLimpiarViajes =
+                CrearBotonSecundario(
+                    "Limpiar");
+
+            _btnLimpiarViajes.Dock =
+                DockStyle.Fill;
+
+            _btnLimpiarViajes.Margin =
+                new Padding(2);
+
+            _btnConsultarSeleccion =
+                CrearBotonPrimario(
+                    "Consultar selección");
+
+            _btnBuscarViajes.Click +=
+                BtnBuscarViajes_Click;
+
+            _btnLimpiarViajes.Click +=
+                BtnLimpiarViajes_Click;
+
+            _btnConsultarSeleccion.Click +=
+                BtnConsultarSeleccion_Click;
+
+            acciones.Controls.Add(
+                _btnBuscarViajes,
+                0,
+                0);
+
+            acciones.Controls.Add(
+                _btnLimpiarViajes,
+                1,
+                0);
+
+            acciones.Controls.Add(
+                _btnConsultarSeleccion,
+                2,
+                0);
+
+            tabla.Controls.Add(
+                acciones,
+                4,
+                1);
+
+            _grillaViajes =
+                CrearGrillaBase();
+
+            AgregarColumna(
+                _grillaViajes,
+                "IdViaje",
+                "ID",
+                65);
+
+            AgregarColumna(
+                _grillaViajes,
+                "FechaInicio",
+                "Inicio",
+                95,
+                "dd/MM/yyyy");
+
+            AgregarColumna(
+                _grillaViajes,
+                "FechaFin",
+                "Fin",
+                95,
+                "dd/MM/yyyy");
+
+            AgregarColumna(
+                _grillaViajes,
+                "Descripcion",
+                "Descripción",
+                270);
+
+            AgregarColumna(
+                _grillaViajes,
+                "TipoViaje",
+                "Tipo",
+                125);
+
+            AgregarColumna(
+                _grillaViajes,
+                "ParticipantesResumen",
+                "Participantes",
+                330);
+
+            AgregarColumna(
+                _grillaViajes,
+                "Estado",
+                "Estado",
+                115);
+
+            _grillaViajes.SelectionChanged +=
+                GrillaViajes_SelectionChanged;
+
+            _grillaViajes.CellDoubleClick +=
+                GrillaViajes_CellDoubleClick;
+
+            tabla.Controls.Add(
+                _grillaViajes,
+                0,
+                2);
+
+            tabla.SetColumnSpan(
+                _grillaViajes,
+                5);
+
+            grupo.Controls.Add(
+                tabla);
+
+            return grupo;
+        }
+
+        private Control CrearPanelAcciones()
+        {
+            var panel =
+                new FlowLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    FlowDirection =
+                        FlowDirection.LeftToRight,
+                    WrapContents =
+                        false,
+                    Padding =
+                        new Padding(
+                            0,
+                            8,
+                            0,
+                            5),
+                    BackColor =
+                        ColorFondo
+                };
+
+            _btnNuevaVisita =
+                CrearBotonSecundario(
+                    "Nueva visita");
+
+            _btnNuevaVisita.Width =
+                145;
+
+            _btnModificarVisita =
+                CrearBotonSecundario(
+                    "Modificar visita");
+
+            _btnModificarVisita.Width =
+                145;
+
+            _btnCerrar =
+                CrearBotonSecundario(
+                    "Cerrar");
+
+            _btnCerrar.Width =
+                110;
+
+            _btnCerrar.DialogResult =
+                DialogResult.Cancel;
+
+            _btnNuevaVisita.Click +=
+                BtnNuevaVisita_Click;
+
+            _btnModificarVisita.Click +=
+                BtnModificarVisita_Click;
+
+            _btnCerrar.Click +=
+                delegate
+                {
+                    Close();
+                };
+
+            panel.Controls.Add(
+                _btnNuevaVisita);
+
+            panel.Controls.Add(
+                _btnModificarVisita);
+
+            panel.Controls.Add(
+                _btnCerrar);
+
+            return panel;
+        }
+
+        private static Label CrearEtiquetaFiltro(
+            string texto)
+        {
+            return new Label
             {
-                Location =
-                    new Point(posicionX, 34),
-                Size =
-                    new Size(145, 32),
+                Dock = DockStyle.Fill,
+                Font =
+                    new Font(
+                        "Segoe UI",
+                        8.5F,
+                        FontStyle.Bold),
+                ForeColor =
+                    ColorTexto,
                 Text =
                     texto,
-                UseVisualStyleBackColor =
-                    true
+                TextAlign =
+                    ContentAlignment.BottomLeft,
+                AutoEllipsis = true
             };
         }
 
-        private DataGridView CrearGrilla()
+        private static DateTimePicker
+            CrearFechaFiltro()
+        {
+            return new DateTimePicker
+            {
+                Dock = DockStyle.Fill,
+                Format =
+                    DateTimePickerFormat.Short,
+                ShowCheckBox = true,
+                Margin =
+                    new Padding(
+                        3,
+                        3,
+                        6,
+                        3)
+            };
+        }
+
+        private static Button CrearBotonPrimario(
+            string texto)
+        {
+            var boton =
+                new Button
+                {
+                    Dock = DockStyle.Fill,
+                    Margin =
+                        new Padding(2),
+                    FlatStyle =
+                        FlatStyle.Flat,
+                    BackColor =
+                        ColorPrimario,
+                    ForeColor =
+                        Color.White,
+                    Font =
+                        new Font(
+                            "Segoe UI",
+                            8.5F,
+                            FontStyle.Bold),
+                    Text =
+                        texto,
+                    UseVisualStyleBackColor =
+                        false
+                };
+
+            boton.FlatAppearance.BorderSize =
+                0;
+
+            return boton;
+        }
+
+        private static Button CrearBotonSecundario(
+            string texto)
+        {
+            var boton =
+                new Button
+                {
+                    Height = 34,
+                    Width = 120,
+                    Margin =
+                        new Padding(
+                            0,
+                            0,
+                            10,
+                            0),
+                    FlatStyle =
+                        FlatStyle.Flat,
+                    BackColor =
+                        Color.White,
+                    ForeColor =
+                        ColorTexto,
+                    Font =
+                        new Font(
+                            "Segoe UI",
+                            9F),
+                    Text =
+                        texto,
+                    UseVisualStyleBackColor =
+                        false
+                };
+
+            boton.FlatAppearance.BorderColor =
+                ColorBorde;
+
+            boton.FlatAppearance.BorderSize =
+                1;
+
+            return boton;
+        }
+
+        private static DataGridView
+            CrearGrillaBase()
         {
             var grilla =
                 new DataGridView
                 {
-                    Anchor =
-                        AnchorStyles.Top |
-                        AnchorStyles.Bottom |
-                        AnchorStyles.Left |
-                        AnchorStyles.Right,
+                    Dock = DockStyle.Fill,
+                    AutoGenerateColumns =
+                        false,
                     AllowUserToAddRows =
                         false,
                     AllowUserToDeleteRows =
                         false,
                     AllowUserToResizeRows =
                         false,
-                    AutoGenerateColumns =
-                        false,
-                    BackgroundColor =
-                        Color.White,
-                    Location =
-                        new Point(24, 224),
                     MultiSelect =
                         false,
                     ReadOnly =
@@ -289,41 +900,56 @@ namespace SIGEVIP.WinForms.Forms
                     RowHeadersVisible =
                         false,
                     SelectionMode =
-                        DataGridViewSelectionMode.FullRowSelect,
-                    Size =
-                        new Size(1155, 355)
+                        DataGridViewSelectionMode
+                            .FullRowSelect,
+                    BackgroundColor =
+                        Color.White,
+                    BorderStyle =
+                        BorderStyle.FixedSingle,
+                    EnableHeadersVisualStyles =
+                        false,
+                    RowTemplate =
+                    {
+                        Height = 28
+                    }
                 };
 
-            AgregarColumna(
-                grilla,
-                "IdVisita",
-                "Id",
-                55);
+            grilla.ColumnHeadersDefaultCellStyle
+                .BackColor =
+                    Color.FromArgb(
+                        241,
+                        245,
+                        249);
 
-            AgregarColumna(
-                grilla,
-                "Fecha",
-                "Fecha",
-                95,
-                "dd/MM/yyyy");
+            grilla.ColumnHeadersDefaultCellStyle
+                .ForeColor =
+                    ColorTexto;
 
-            AgregarColumna(
-                grilla,
-                "LocalidadEncuentro",
-                "Localidad",
-                150);
+            grilla.ColumnHeadersDefaultCellStyle
+                .Font =
+                    new Font(
+                        "Segoe UI",
+                        9F,
+                        FontStyle.Bold);
 
-            AgregarColumna(
-                grilla,
-                "Observacion",
-                "Observación",
-                360);
+            grilla.ColumnHeadersHeight =
+                32;
 
-            AgregarColumna(
-                grilla,
-                "ClientesResumen",
-                "Clientes",
-                380);
+            grilla.AlternatingRowsDefaultCellStyle
+                .BackColor =
+                    Color.FromArgb(
+                        248,
+                        250,
+                        252);
+
+            grilla.CellFormatting +=
+                Grilla_CellFormatting;
+
+            grilla.DataBindingComplete +=
+                Grilla_DataBindingComplete;
+
+            grilla.Sorted +=
+                Grilla_Sorted;
 
             return grilla;
         }
@@ -345,7 +971,10 @@ namespace SIGEVIP.WinForms.Forms
                     Name =
                         propiedad,
                     Width =
-                        ancho
+                        ancho,
+                    SortMode =
+                        DataGridViewColumnSortMode
+                            .Automatic
                 };
 
             if (!string.IsNullOrWhiteSpace(
@@ -359,114 +988,516 @@ namespace SIGEVIP.WinForms.Forms
                 columna);
         }
 
-        private Panel CrearPanelAcciones()
-        {
-            var panel =
-                new FlowLayoutPanel
-                {
-                    Anchor =
-                        AnchorStyles.Left |
-                        AnchorStyles.Right |
-                        AnchorStyles.Bottom,
-                    FlowDirection =
-                        FlowDirection.LeftToRight,
-                    Location =
-                        new Point(24, 596),
-                    Size =
-                        new Size(1155, 50),
-                    WrapContents =
-                        false
-                };
-
-            _btnNuevaVisita =
-                CrearBotonAccion(
-                    "Nueva visita");
-
-            _btnCerrar =
-                CrearBotonAccion(
-                    "Cerrar");
-
-            _btnNuevaVisita.Click +=
-                BtnNuevaVisita_Click;
-
-            _btnCerrar.Click +=
-                delegate
-                {
-                    Close();
-                };
-
-            panel.Controls.Add(
-                _btnNuevaVisita);
-
-            panel.Controls.Add(
-                _btnCerrar);
-
-            return panel;
-        }
-
-        private static Button CrearBotonAccion(
-            string texto)
-        {
-            return new Button
-            {
-                Margin =
-                    new Padding(0, 0, 10, 0),
-                Size =
-                    new Size(145, 36),
-                Text =
-                    texto,
-                UseVisualStyleBackColor =
-                    true
-            };
-        }
-
         private void ConfigurarPermisos()
         {
-            bool puedeRegistrar =
+            _puedeRegistrar =
                 _sesionActual.HayUsuarioAutenticado
-                && _autorizacionService
+                &&
+                _autorizacionService
                     .TienePermiso(
                         _sesionActual.UsuarioActual,
-                        VisitaService.PermisoRegistrar);
+                        VisitaService
+                            .PermisoRegistrar);
 
             _btnNuevaVisita.Visible =
-                puedeRegistrar;
+                _puedeRegistrar;
 
-            _btnNuevaVisita.Enabled =
-                puedeRegistrar;
+            _btnModificarVisita.Visible =
+                _puedeRegistrar;
+
+            ActualizarEstadoAccionesVisita();
         }
 
         private void VisitasForm_Load(
             object sender,
             EventArgs e)
         {
-            CargarViajes();
+            CargarEstados();
+            RestablecerFiltrosViaje();
+            BuscarViajes();
         }
 
-        private void BtnBuscar_Click(
+        private void CargarEstados()
+        {
+            var opciones =
+                new List<EstadoFiltroItem>
+                {
+                    new EstadoFiltroItem(
+                        null,
+                        "Todos")
+                };
+
+            foreach (
+                EstadoViaje estado
+                in Enum.GetValues(
+                    typeof(EstadoViaje)))
+            {
+                opciones.Add(
+                    new EstadoFiltroItem(
+                        estado,
+                        FormatearEnum(
+                            estado.ToString())));
+            }
+
+            _cmbEstadoViaje.DataSource =
+                opciones;
+
+            _cmbEstadoViaje.DisplayMember =
+                "Texto";
+
+            _cmbEstadoViaje.SelectedIndex =
+                0;
+        }
+
+        private void RestablecerFiltrosViaje()
+        {
+            _txtBuscarViaje.Text =
+                string.Empty;
+
+            _dtpViajeDesde.Value =
+                DateTime.Today
+                    .AddMonths(-1);
+
+            _dtpViajeHasta.Value =
+                DateTime.Today;
+
+            _dtpViajeDesde.Checked =
+                false;
+
+            _dtpViajeHasta.Checked =
+                false;
+
+            if (_cmbEstadoViaje.Items.Count > 0)
+            {
+                _cmbEstadoViaje.SelectedIndex =
+                    0;
+            }
+        }
+
+        private void BtnBuscarViajes_Click(
+            object sender,
+            EventArgs e)
+        {
+            BuscarViajes();
+        }
+
+        private void BtnLimpiarViajes_Click(
+            object sender,
+            EventArgs e)
+        {
+            RestablecerFiltrosViaje();
+            BuscarViajes();
+        }
+
+        private void BtnConsultarSeleccion_Click(
             object sender,
             EventArgs e)
         {
             CargarVisitas();
         }
 
-        private void BtnActualizar_Click(
+        private void GrillaViajes_CellDoubleClick(
+            object sender,
+            DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 ||
+                e.RowIndex >=
+                    _grillaViajes.Rows.Count)
+            {
+                return;
+            }
+
+            ViajeListadoDto viaje =
+                _grillaViajes.Rows[
+                    e.RowIndex]
+                    .DataBoundItem
+                    as ViajeListadoDto;
+
+            EstablecerViajeSeleccionado(
+                viaje);
+
+            CargarVisitas();
+        }
+
+        private void GrillaViajes_SelectionChanged(
             object sender,
             EventArgs e)
         {
-            CargarViajes();
+            ViajeListadoDto viaje =
+                null;
+
+            if (_grillaViajes.SelectedRows.Count > 0)
+            {
+                viaje =
+                    _grillaViajes
+                        .SelectedRows[0]
+                        .DataBoundItem
+                        as ViajeListadoDto;
+            }
+
+            EstablecerViajeSeleccionado(
+                viaje);
+        }
+
+        private void EstablecerViajeSeleccionado(
+            ViajeListadoDto viaje)
+        {
+            _viajeSeleccionado =
+                viaje;
+
+            ActualizarEstadoAccionesVisita();
+
+            if (viaje == null)
+            {
+                _lblViajeSeleccionado.Text =
+                    "Seleccione un viaje para consultar sus visitas.";
+
+                return;
+            }
+
+            _lblViajeSeleccionado.Text =
+                "Seleccionado: #"
+                +
+                viaje.IdViaje
+                +
+                " — "
+                +
+                viaje.FechaInicio
+                    .ToString(
+                        "dd/MM/yyyy")
+                +
+                " al "
+                +
+                viaje.FechaFin
+                    .ToString(
+                        "dd/MM/yyyy")
+                +
+                " — "
+                +
+                viaje.Descripcion
+                +
+                " — "
+                +
+                FormatearEnum(
+                    viaje.Estado
+                        .ToString());
+        }
+
+        private void BuscarViajes()
+        {
+            CambiarEstadoCarga(
+                true);
+
+            try
+            {
+                EstadoFiltroItem
+                    estadoSeleccionado =
+                        _cmbEstadoViaje
+                            .SelectedItem
+                            as EstadoFiltroItem;
+
+                var filtro =
+                    new ViajeFiltro(
+                        _dtpViajeDesde.Checked
+                            ? _dtpViajeDesde.Value
+                            : (DateTime?)null,
+                        _dtpViajeHasta.Checked
+                            ? _dtpViajeHasta.Value
+                            : (DateTime?)null,
+                        estadoSeleccionado == null
+                            ? (EstadoViaje?)null
+                            : estadoSeleccionado.Valor,
+                        null);
+
+                string busqueda =
+                    (
+                        _txtBuscarViaje.Text
+                        ?? string.Empty
+                    ).Trim();
+
+                List<ViajeListadoDto>
+                    viajes =
+                        _viajeService
+                            .Listar(
+                                filtro)
+                            .Where(
+                                viaje =>
+                                    CoincideBusqueda(
+                                        viaje,
+                                        busqueda))
+                            .OrderByDescending(
+                                viaje =>
+                                    viaje.FechaInicio)
+                            .ThenByDescending(
+                                viaje =>
+                                    viaje.IdViaje)
+                            .ToList();
+
+                _grillaViajes.DataSource =
+                    new SortableBindingList
+                        <ViajeListadoDto>(
+                            viajes);
+
+                EstablecerViajeSeleccionado(
+                    null);
+
+                LimpiarVisitas();
+
+                if (viajes.Count == 0)
+                {
+                    _lblViajeSeleccionado.Text =
+                        "No se encontraron viajes con los filtros indicados.";
+                }
+            }
+            catch (Exception exception)
+            {
+                _grillaViajes.DataSource =
+                    null;
+
+                EstablecerViajeSeleccionado(
+                    null);
+
+                _lblViajeSeleccionado.Text =
+                    "No fue posible cargar los viajes.";
+
+                LimpiarVisitas();
+
+                MostrarErrorControlado(
+                    exception);
+            }
+            finally
+            {
+                CambiarEstadoCarga(
+                    false);
+            }
+        }
+
+        private static bool CoincideBusqueda(
+            ViajeListadoDto viaje,
+            string busqueda)
+        {
+            if (string.IsNullOrWhiteSpace(
+                busqueda))
+            {
+                return true;
+            }
+
+            string termino =
+                busqueda.Trim();
+
+            string posibleId =
+                termino.StartsWith(
+                    "#",
+                    StringComparison.Ordinal)
+                    ? termino.Substring(1)
+                    : termino;
+
+            int idBuscado;
+
+            if (int.TryParse(
+                    posibleId,
+                    out idBuscado)
+                &&
+                viaje.IdViaje ==
+                    idBuscado)
+            {
+                return true;
+            }
+
+            return ContieneTexto(
+                    viaje.Descripcion,
+                    termino)
+                ||
+                ContieneTexto(
+                    viaje.ParticipantesResumen,
+                    termino);
+        }
+
+        private static bool ContieneTexto(
+            string origen,
+            string termino)
+        {
+            return (
+                origen
+                ?? string.Empty
+            ).IndexOf(
+                termino,
+                StringComparison
+                    .OrdinalIgnoreCase)
+                >= 0;
+        }
+
+        private void GrillaVisitas_SelectionChanged(
+            object sender,
+            EventArgs e)
+        {
+            ActualizarEstadoAccionesVisita();
+        }
+
+        private void GrillaVisitas_DataBindingComplete(
+            object sender,
+            DataGridViewBindingCompleteEventArgs e)
+        {
+            ActualizarEstadoAccionesVisita();
+        }
+
+        private void GrillaVisitas_CellDoubleClick(
+            object sender,
+            DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 ||
+                e.RowIndex >=
+                    _grillaVisitas.Rows.Count)
+            {
+                return;
+            }
+
+            VisitaListadoDto visita =
+                _grillaVisitas.Rows[
+                    e.RowIndex]
+                    .DataBoundItem
+                    as VisitaListadoDto;
+
+            AbrirModificacionVisita(
+                visita);
+        }
+
+        private void BtnModificarVisita_Click(
+            object sender,
+            EventArgs e)
+        {
+            AbrirModificacionVisita(
+                ObtenerVisitaSeleccionada());
+        }
+
+        private void AbrirModificacionVisita(
+            VisitaListadoDto visitaSeleccionada)
+        {
+            if (_viajeSeleccionado == null)
+            {
+                MostrarViajeRequerido();
+                return;
+            }
+
+            if (_viajeSeleccionado.Estado !=
+                EstadoViaje.Abierto)
+            {
+                MessageBox.Show(
+                    "Solo se pueden modificar visitas de viajes abiertos.",
+                    "Visitas",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            if (visitaSeleccionada == null)
+            {
+                MessageBox.Show(
+                    "Seleccione una visita para modificarla.",
+                    "Visitas",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return;
+            }
+
+            CambiarEstadoCarga(
+                true);
+
+            try
+            {
+                Visita visita =
+                    _visitaService.Obtener(
+                        _viajeSeleccionado.IdViaje,
+                        visitaSeleccionada.IdVisita);
+
+                using (
+                    var formulario =
+                        new VisitaEditForm(
+                            _visitaService,
+                            _viajeSeleccionado.IdViaje,
+                            _viajeSeleccionado.FechaInicio,
+                            _viajeSeleccionado.FechaFin,
+                            CrearDescripcionCompleta(
+                                _viajeSeleccionado),
+                            visita))
+                {
+                    if (formulario.ShowDialog(this) ==
+                        DialogResult.OK)
+                    {
+                        CargarVisitas();
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                MostrarErrorControlado(
+                    exception);
+            }
+            finally
+            {
+                CambiarEstadoCarga(
+                    false);
+            }
+        }
+
+        private VisitaListadoDto
+            ObtenerVisitaSeleccionada()
+        {
+            if (_grillaVisitas.SelectedRows.Count == 0)
+            {
+                return null;
+            }
+
+            return _grillaVisitas
+                .SelectedRows[0]
+                .DataBoundItem
+                as VisitaListadoDto;
+        }
+
+        private void ActualizarEstadoAccionesVisita()
+        {
+            bool viajeAbierto =
+                _viajeSeleccionado != null &&
+                _viajeSeleccionado.Estado ==
+                    EstadoViaje.Abierto;
+
+            if (_btnNuevaVisita != null)
+            {
+                _btnNuevaVisita.Enabled =
+                    _puedeRegistrar &&
+                    viajeAbierto;
+            }
+
+            if (_btnModificarVisita != null)
+            {
+                _btnModificarVisita.Enabled =
+                    _puedeRegistrar &&
+                    viajeAbierto &&
+                    ObtenerVisitaSeleccionada() != null;
+            }
         }
 
         private void BtnNuevaVisita_Click(
             object sender,
             EventArgs e)
         {
-            ViajeItem viaje =
-                ObtenerViajeSeleccionado();
-
-            if (viaje == null)
+            if (_viajeSeleccionado == null)
             {
                 MostrarViajeRequerido();
+                return;
+            }
+
+            if (_viajeSeleccionado.Estado !=
+                EstadoViaje.Abierto)
+            {
+                MessageBox.Show(
+                    "Solo se pueden registrar visitas en viajes abiertos.",
+                    "Visitas",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
                 return;
             }
 
@@ -474,10 +1505,11 @@ namespace SIGEVIP.WinForms.Forms
                 var formulario =
                     new VisitaEditForm(
                         _visitaService,
-                        viaje.IdViaje,
-                        viaje.FechaInicio,
-                        viaje.FechaFin,
-                        viaje.DescripcionCompleta))
+                        _viajeSeleccionado.IdViaje,
+                        _viajeSeleccionado.FechaInicio,
+                        _viajeSeleccionado.FechaFin,
+                        CrearDescripcionCompleta(
+                            _viajeSeleccionado)))
             {
                 if (formulario.ShowDialog(this) ==
                     DialogResult.OK)
@@ -487,121 +1519,11 @@ namespace SIGEVIP.WinForms.Forms
             }
         }
 
-        private void CargarViajes()
-        {
-            CambiarEstadoCarga(
-                true);
-
-            int? idAnterior =
-                ObtenerViajeSeleccionado()
-                    ?.IdViaje;
-
-            try
-            {
-                List<ViajeListadoDto> viajes =
-                    _viajeService
-                        .Listar(
-                            ViajeFiltro
-                                .CrearSinFiltros())
-                        .OrderByDescending(
-                            viaje =>
-                                viaje.FechaInicio)
-                        .ThenByDescending(
-                            viaje =>
-                                viaje.IdViaje)
-                        .ToList();
-
-                _cmbViaje.DataSource =
-                    null;
-
-                _cmbViaje.DataSource =
-                    viajes
-                        .Select(
-                            viaje =>
-                                new ViajeItem(
-                                    viaje))
-                        .ToList();
-
-                _cmbViaje.DisplayMember =
-                    "DescripcionCompleta";
-
-                if (_cmbViaje.Items.Count == 0)
-                {
-                    _lblViajeSeleccionado.Text =
-                        "No existen viajes disponibles.";
-
-                    LimpiarGrilla();
-                    return;
-                }
-
-                SeleccionarViajeAnterior(
-                    idAnterior);
-
-                CargarVisitas();
-            }
-            catch (Exception exception)
-            {
-                _cmbViaje.DataSource =
-                    null;
-
-                _lblViajeSeleccionado.Text =
-                    "No fue posible cargar los viajes.";
-
-                LimpiarGrilla();
-
-                MostrarErrorControlado(
-                    exception);
-            }
-            finally
-            {
-                CambiarEstadoCarga(
-                    false);
-            }
-        }
-
-        private void SeleccionarViajeAnterior(
-            int? idAnterior)
-        {
-            if (!idAnterior.HasValue)
-            {
-                _cmbViaje.SelectedIndex = 0;
-                return;
-            }
-
-            for (
-                int indice = 0;
-                indice < _cmbViaje.Items.Count;
-                indice++)
-            {
-                ViajeItem item =
-                    _cmbViaje.Items[indice]
-                        as ViajeItem;
-
-                if (item != null &&
-                    item.IdViaje ==
-                        idAnterior.Value)
-                {
-                    _cmbViaje.SelectedIndex =
-                        indice;
-
-                    return;
-                }
-            }
-
-            _cmbViaje.SelectedIndex = 0;
-        }
-
         private void CargarVisitas()
         {
-            ViajeItem viaje =
-                ObtenerViajeSeleccionado();
-
-            if (viaje == null)
+            if (_viajeSeleccionado == null)
             {
-                _lblViajeSeleccionado.Text =
-                    "Seleccione un viaje para consultar sus visitas.";
-
-                LimpiarGrilla();
+                MostrarViajeRequerido();
                 return;
             }
 
@@ -610,28 +1532,32 @@ namespace SIGEVIP.WinForms.Forms
 
             try
             {
-                List<VisitaListadoDto> visitas =
-                    _visitaService
-                        .ListarPorViaje(
-                            viaje.IdViaje)
-                        .ToList();
+                List<VisitaListadoDto>
+                    visitas =
+                        _visitaService
+                            .ListarPorViaje(
+                                _viajeSeleccionado
+                                    .IdViaje)
+                            .ToList();
 
-                _grilla.DataSource =
-                    null;
-
-                _grilla.DataSource =
-                    visitas;
+                _grillaVisitas.DataSource =
+                    new SortableBindingList
+                        <VisitaListadoDto>(
+                            visitas);
 
                 _lblCantidad.Text =
-                    "Resultados: " +
+                    "Resultados: "
+                    +
                     visitas.Count;
 
-                _lblViajeSeleccionado.Text =
-                    viaje.DescripcionCompleta;
+                EstablecerViajeSeleccionado(
+                    _viajeSeleccionado);
+
+                ActualizarEstadoAccionesVisita();
             }
             catch (Exception exception)
             {
-                LimpiarGrilla();
+                LimpiarVisitas();
 
                 MostrarErrorControlado(
                     exception);
@@ -643,19 +1569,46 @@ namespace SIGEVIP.WinForms.Forms
             }
         }
 
-        private ViajeItem ObtenerViajeSeleccionado()
+        private void LimpiarVisitas()
         {
-            return _cmbViaje.SelectedItem
-                as ViajeItem;
-        }
-
-        private void LimpiarGrilla()
-        {
-            _grilla.DataSource =
+            _grillaVisitas.DataSource =
                 null;
 
             _lblCantidad.Text =
                 "Resultados: 0";
+
+            ActualizarEstadoAccionesVisita();
+        }
+
+        private static string
+            CrearDescripcionCompleta(
+                ViajeListadoDto viaje)
+        {
+            return "#"
+                +
+                viaje.IdViaje
+                +
+                " - "
+                +
+                viaje.FechaInicio
+                    .ToString(
+                        "dd/MM/yyyy")
+                +
+                " al "
+                +
+                viaje.FechaFin
+                    .ToString(
+                        "dd/MM/yyyy")
+                +
+                " - "
+                +
+                viaje.Descripcion
+                +
+                " - "
+                +
+                FormatearEnum(
+                    viaje.Estado
+                        .ToString());
         }
 
         private static void MostrarViajeRequerido()
@@ -670,24 +1623,160 @@ namespace SIGEVIP.WinForms.Forms
         private void CambiarEstadoCarga(
             bool cargando)
         {
-            _btnBuscar.Enabled =
+            _txtBuscarViaje.Enabled =
                 !cargando;
 
-            _btnActualizar.Enabled =
+            _dtpViajeDesde.Enabled =
                 !cargando;
 
-            _cmbViaje.Enabled =
+            _dtpViajeHasta.Enabled =
                 !cargando;
+
+            _cmbEstadoViaje.Enabled =
+                !cargando;
+
+            _btnBuscarViajes.Enabled =
+                !cargando;
+
+            _btnLimpiarViajes.Enabled =
+                !cargando;
+
+            _btnConsultarSeleccion.Enabled =
+                !cargando;
+
+            _grillaViajes.Enabled =
+                !cargando;
+
+            if (cargando)
+            {
+                _btnNuevaVisita.Enabled =
+                    false;
+
+                _btnModificarVisita.Enabled =
+                    false;
+            }
+            else
+            {
+                ActualizarEstadoAccionesVisita();
+            }
 
             UseWaitCursor =
                 cargando;
+
+            Cursor =
+                cargando
+                    ? Cursors.WaitCursor
+                    : Cursors.Default;
+        }
+
+        private static void
+            Grilla_DataBindingComplete(
+                object sender,
+                DataGridViewBindingCompleteEventArgs e)
+        {
+            DataGridView grilla =
+                sender as DataGridView;
+
+            LimpiarSeleccionAutomatica(
+                grilla);
+
+            if (grilla == null
+                ||
+                grilla.IsDisposed
+                ||
+                !grilla.IsHandleCreated)
+            {
+                return;
+            }
+
+            grilla.BeginInvoke(
+                (MethodInvoker)(
+                    delegate
+                    {
+                        if (!grilla.IsDisposed)
+                        {
+                            LimpiarSeleccionAutomatica(
+                                grilla);
+                        }
+                    }));
+        }
+
+        private static void Grilla_Sorted(
+            object sender,
+            EventArgs e)
+        {
+            LimpiarSeleccionAutomatica(
+                sender as DataGridView);
+        }
+
+        private static void
+            LimpiarSeleccionAutomatica(
+                DataGridView grilla)
+        {
+            if (grilla == null
+                ||
+                grilla.IsDisposed)
+            {
+                return;
+            }
+
+            grilla.ClearSelection();
+            grilla.CurrentCell =
+                null;
+        }
+
+        private static void Grilla_CellFormatting(
+            object sender,
+            DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.Value == null)
+            {
+                return;
+            }
+
+            Type tipo =
+                e.Value.GetType();
+
+            if (!tipo.IsEnum)
+            {
+                return;
+            }
+
+            e.Value =
+                FormatearEnum(
+                    e.Value.ToString());
+
+            e.FormattingApplied =
+                true;
+        }
+
+        private static string FormatearEnum(
+            string valor)
+        {
+            switch (valor)
+            {
+                case "EnRendicion":
+                    return "En rendición";
+
+                case "EventoFeria":
+                    return "Evento o feria";
+
+                default:
+                    return valor;
+            }
         }
 
         private static void MostrarErrorControlado(
             Exception exception)
         {
-            if (exception is ReglaNegocioException ||
-                exception is AccesoDenegadoException)
+            if (exception is
+                    ReglaNegocioException
+                ||
+                exception is
+                    AccesoDenegadoException
+                ||
+                exception is
+                    ArgumentException)
             {
                 MessageBox.Show(
                     exception.Message,
@@ -698,11 +1787,14 @@ namespace SIGEVIP.WinForms.Forms
                 return;
             }
 
-            if (exception is PersistenciaException)
+            if (exception is
+                PersistenciaException)
             {
                 MessageBox.Show(
-                    "No fue posible acceder a las visitas. " +
-                    "Verifique la conexión con SQL Server " +
+                    "No fue posible acceder a las visitas. "
+                    +
+                    "Verifique la conexión con SQL Server "
+                    +
                     "e intente nuevamente.",
                     "Error de persistencia",
                     MessageBoxButtons.OK,
@@ -718,53 +1810,25 @@ namespace SIGEVIP.WinForms.Forms
                 MessageBoxIcon.Error);
         }
 
-        private sealed class ViajeItem
+        private sealed class EstadoFiltroItem
         {
-            public ViajeItem(
-                ViajeListadoDto viaje)
+            public EstadoFiltroItem(
+                EstadoViaje? valor,
+                string texto)
             {
-                if (viaje == null)
-                {
-                    throw new ArgumentNullException(
-                        nameof(viaje));
-                }
-
-                IdViaje =
-                    viaje.IdViaje;
-
-                FechaInicio =
-                    viaje.FechaInicio;
-
-                FechaFin =
-                    viaje.FechaFin;
-
-                Estado =
-                    viaje.Estado;
-
-                DescripcionCompleta =
-                    "#" +
-                    viaje.IdViaje +
-                    " - " +
-                    viaje.FechaInicio
-                        .ToString("dd/MM/yyyy") +
-                    " al " +
-                    viaje.FechaFin
-                        .ToString("dd/MM/yyyy") +
-                    " - " +
-                    viaje.Descripcion +
-                    " - " +
-                    viaje.Estado;
+                Valor = valor;
+                Texto =
+                    texto
+                    ?? string.Empty;
             }
 
-            public int IdViaje { get; private set; }
+            public EstadoViaje? Valor
+            {
+                get;
+                private set;
+            }
 
-            public DateTime FechaInicio { get; private set; }
-
-            public DateTime FechaFin { get; private set; }
-
-            public EstadoViaje Estado { get; private set; }
-
-            public string DescripcionCompleta
+            public string Texto
             {
                 get;
                 private set;

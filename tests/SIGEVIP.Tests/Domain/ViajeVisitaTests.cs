@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SIGEVIP.Domain.Entities;
 using SIGEVIP.Domain.Enums;
@@ -244,6 +245,117 @@ namespace SIGEVIP.Tests.Domain
             StringAssert.Contains(
                 excepcion.Message,
                 "otro viaje");
+        }
+
+        [TestMethod]
+        public void ModificarVisita_EnViajeAbierto_ActualizaDatosYClientes()
+        {
+            Viaje viaje = CrearViaje();
+
+            Visita visita =
+                CrearVisitaConCliente(
+                    15,
+                    new DateTime(2026, 7, 11));
+
+            viaje.AgregarVisita(
+                visita);
+
+            Cliente nuevoCliente =
+                new Cliente(
+                    200,
+                    "Empresa modificada",
+                    "30-20000000-1",
+                    string.Empty,
+                    string.Empty,
+                    "Funes",
+                    "Santa Fe");
+
+            viaje.ModificarVisita(
+                visita,
+                new DateTime(2026, 7, 12),
+                "Visita modificada",
+                "Funes",
+                new[]
+                {
+                    nuevoCliente
+                });
+
+            Assert.AreEqual(
+                new DateTime(2026, 7, 12),
+                visita.Fecha);
+
+            Assert.AreEqual(
+                "Visita modificada",
+                visita.Observacion);
+
+            Assert.AreEqual(
+                200,
+                visita.Clientes.Single().IdCliente);
+        }
+
+        [TestMethod]
+        public void ModificarVisita_EnRendicion_RechazaOperacion()
+        {
+            Viaje viaje = CrearViaje();
+
+            Visita visita =
+                CrearVisitaConCliente(
+                    15,
+                    new DateTime(2026, 7, 11));
+
+            viaje.AgregarVisita(
+                visita);
+
+            viaje.EnviarARendicion();
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => viaje.ModificarVisita(
+                    visita,
+                    visita.Fecha,
+                    visita.Observacion,
+                    visita.LocalidadEncuentro,
+                    visita.Clientes));
+        }
+
+        [TestMethod]
+        public void ModificarVisita_DeOtroViaje_RechazaOperacion()
+        {
+            Viaje viaje = CrearViaje();
+
+            Visita visitaAjena =
+                CrearVisitaConCliente(
+                    99,
+                    new DateTime(2026, 7, 11));
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => viaje.ModificarVisita(
+                    visitaAjena,
+                    visitaAjena.Fecha,
+                    visitaAjena.Observacion,
+                    visitaAjena.LocalidadEncuentro,
+                    visitaAjena.Clientes));
+        }
+
+        [TestMethod]
+        public void ModificarVisita_ConFechaFueraDelViaje_RechazaOperacion()
+        {
+            Viaje viaje = CrearViaje();
+
+            Visita visita =
+                CrearVisitaConCliente(
+                    15,
+                    new DateTime(2026, 7, 11));
+
+            viaje.AgregarVisita(
+                visita);
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => viaje.ModificarVisita(
+                    visita,
+                    new DateTime(2026, 7, 20),
+                    visita.Observacion,
+                    visita.LocalidadEncuentro,
+                    visita.Clientes));
         }
 
         [TestMethod]

@@ -382,7 +382,8 @@ Se verifica:
 - rechazo de participantes duplicados;
 - reemplazo de participantes;
 - modificación únicamente en Abierto;
-- conservación de participantes inactivos;
+- conservación de participantes históricos inactivos;
+- rechazo de nuevos participantes inactivos durante una modificación;
 - reconstrucción del agregado;
 - validación del período respecto de Visitas y Viáticos.
 
@@ -439,6 +440,8 @@ Se verifica:
 Se verifica:
 
 - creación válida;
+- modificación de datos y Clientes;
+- rechazo de modificación sin Clientes;
 - fecha válida;
 - observación obligatoria;
 - localidad obligatoria;
@@ -460,6 +463,10 @@ Se verifica:
 - permiso `VIAJE_CONSULTAR`;
 - permiso `CLIENTE_CONSULTAR`;
 - registro válido;
+- obtención de una Visita perteneciente al Viaje;
+- modificación válida y auditoría;
+- rechazo de modificación sin permiso o con Viaje no Abierto;
+- conservación de Cliente histórico inactivo y rechazo de nuevos inactivos;
 - Viaje inexistente;
 - identificadores inválidos;
 - selección vacía;
@@ -477,6 +484,8 @@ Se verifica:
 - exclusión de Clientes inactivos del selector;
 - recuperación histórica de Cliente inactivo;
 - inserción de Visita;
+- actualización transaccional de datos y asociaciones;
+- auditoría transaccional de modificación;
 - asociación con un Cliente;
 - asociación con varios Clientes;
 - consulta por Viaje;
@@ -496,19 +505,16 @@ Se verificó manualmente:
 - selección de Viaje;
 - consulta de Visitas;
 - fecha limitada al período del Viaje;
-- selección múltiple de Clientes activos;
+- selección múltiple de Clientes mediante grilla filtrable y ordenable;
+- conservación de selección al filtrar u ordenar;
 - registro correcto;
+- modificación de Visita mediante botón y doble clic;
 - actualización de la grilla;
 - rechazo de cancelación del Viaje.
 
 ### Resultado consolidado del cierre de Visitas
 
-- 291 pruebas totales;
-- 291 correctas;
-- 0 fallidas;
-- compilación con 0 advertencias;
-- compilación con 0 errores;
-- validación manual satisfactoria.
+La cantidad final de pruebas y el resultado de compilación se registran al ejecutar la regresión completa del incremento de modificación de Visitas y grillas de selección. El cierre exige 0 pruebas fallidas, 0 advertencias y 0 errores antes del commit.
 
 ## Cobertura específica del módulo Gestión de Grupos
 

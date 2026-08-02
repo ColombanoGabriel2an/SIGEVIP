@@ -71,6 +71,83 @@ namespace SIGEVIP.Tests.Integration
         }
 
         [TestMethod]
+        public void Actualizar_ConAuditoriaValida_PersisteCambiosYEvento()
+        {
+            DatosPrueba datos =
+                CrearDatosPrueba();
+
+            try
+            {
+                PrepararContexto(
+                    datos,
+                    true);
+
+                datos.IdVisita =
+                    CrearVisitaRepository()
+                        .Insertar(
+                            CrearVisita(
+                                datos));
+
+                Cliente cliente =
+                    new Cliente(
+                        datos.IdCliente,
+                        datos.RazonSocialCliente,
+                        datos.CuitCliente,
+                        string.Empty,
+                        string.Empty,
+                        "Rosario",
+                        "Santa Fe");
+
+                Visita modificada =
+                    Visita.Reconstruir(
+                        datos.IdVisita,
+                        datos.IdViaje,
+                        datos.FechaVisita.AddDays(1),
+                        datos.Observacion +
+                            " modificada",
+                        "Funes",
+                        new[]
+                        {
+                            cliente
+                        });
+
+                CrearVisitaRepository()
+                    .Actualizar(
+                        modificada,
+                        new AuditoriaRegistro(
+                            datos.IdUsuarioActor,
+                            datos.NombreActor,
+                            "Viajes",
+                            "Modificacion",
+                            "Visita",
+                            null,
+                            datos.Marca +
+                                " modificacion valida"));
+
+                Assert.AreEqual(
+                    1,
+                    ContarAuditoriasModificacion(
+                        datos));
+
+                Assert.AreEqual(
+                    datos.IdVisita,
+                    ObtenerIdEntidadAuditoriaModificacion(
+                        datos));
+
+                Assert.AreEqual(
+                    1,
+                    ContarVisitasPorObservacion(
+                        datos.Observacion +
+                            " modificada"));
+            }
+            finally
+            {
+                EliminarDatosPrueba(
+                    datos);
+            }
+        }
+
+        [TestMethod]
         public void Insertar_ConActorInexistente_RevierteVisitaYClientes()
         {
             DatosPrueba datos =
@@ -641,6 +718,92 @@ WHERE
 
                 return Convert.ToInt32(
                     command.ExecuteScalar());
+            }
+        }
+
+        private static int ContarAuditoriasModificacion(
+            DatosPrueba datos)
+        {
+            const string sql = @"
+SELECT COUNT(*)
+FROM dbo.Auditoria
+WHERE
+    Descripcion LIKE @Marca
+    AND Modulo = N'Viajes'
+    AND Accion = N'Modificacion'
+    AND Entidad = N'Visita';";
+
+            using (
+                SqlConnection connection =
+                    new SqlConnection(
+                        ObtenerConnectionString()))
+            using (
+                SqlCommand command =
+                    new SqlCommand(
+                        sql,
+                        connection))
+            {
+                command.Parameters.Add(
+                    "@Marca",
+                    SqlDbType.NVarChar,
+                    1000).Value =
+                        "%" +
+                        datos.Marca +
+                        "%";
+
+                connection.Open();
+
+                return Convert.ToInt32(
+                    command.ExecuteScalar());
+            }
+        }
+
+        private static int ObtenerIdEntidadAuditoriaModificacion(
+            DatosPrueba datos)
+        {
+            const string sql = @"
+SELECT TOP (1)
+    IdEntidad
+FROM dbo.Auditoria
+WHERE
+    Descripcion LIKE @Marca
+    AND Modulo = N'Viajes'
+    AND Accion = N'Modificacion'
+    AND Entidad = N'Visita'
+ORDER BY IdAuditoria DESC;";
+
+            using (
+                SqlConnection connection =
+                    new SqlConnection(
+                        ObtenerConnectionString()))
+            using (
+                SqlCommand command =
+                    new SqlCommand(
+                        sql,
+                        connection))
+            {
+                command.Parameters.Add(
+                    "@Marca",
+                    SqlDbType.NVarChar,
+                    1000).Value =
+                        "%" +
+                        datos.Marca +
+                        "%";
+
+                connection.Open();
+
+                object resultado =
+                    command.ExecuteScalar();
+
+                Assert.IsNotNull(
+                    resultado);
+
+                Assert.AreNotEqual(
+                    DBNull.Value,
+                    resultado);
+
+                return Convert.ToInt32(
+                    resultado);
             }
         }
 

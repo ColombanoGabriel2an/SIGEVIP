@@ -95,6 +95,32 @@ namespace SIGEVIP.Domain.Entities
             return visita;
         }
 
+        public void Modificar(
+            DateTime fecha,
+            string observacion,
+            string localidadEncuentro,
+            IEnumerable<Cliente> clientes)
+        {
+            ValidarDatosGenerales(
+                fecha,
+                observacion,
+                localidadEncuentro);
+
+            List<Cliente> clientesValidados =
+                ValidarYMaterializarClientes(
+                    clientes,
+                    true);
+
+            Fecha = fecha.Date;
+            Observacion = observacion.Trim();
+            LocalidadEncuentro =
+                localidadEncuentro.Trim();
+
+            _clientes.Clear();
+            _clientes.AddRange(
+                clientesValidados);
+        }
+
         public void AgregarCliente(
             Cliente cliente)
         {

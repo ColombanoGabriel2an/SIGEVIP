@@ -91,11 +91,11 @@ No se admiten participantes duplicados.
 
 ### RN-VIA-22
 
-Para registrar o modificar un Viaje solo pueden seleccionarse Personas activas.
+Para registrar un Viaje solo pueden seleccionarse Personas activas. Al modificar, un participante histórico inactivo puede conservarse o quitarse, pero no puede agregarse una nueva Persona inactiva.
 
 ### RN-VIA-23
 
-Los participantes inactivos se conservan al reconstruir un Viaje histórico.
+Los participantes inactivos se conservan al reconstruir un Viaje histórico y permanecen visibles en el selector de modificación.
 
 ### RN-VIA-24
 
@@ -220,6 +220,30 @@ No admite Clientes duplicados.
 ### RN-VIS-09
 
 Una Visita no puede reasignarse a otro Viaje.
+
+### RN-VIS-10
+
+Una Visita solo puede modificarse mientras su Viaje se encuentra Abierto.
+
+### RN-VIS-11
+
+La modificación conserva el identificador de la Visita y reemplaza sus datos y asociaciones de Clientes dentro de una única transacción.
+
+### RN-VIS-12
+
+La fecha modificada debe permanecer dentro del período del Viaje.
+
+### RN-VIS-13
+
+En una modificación, un Cliente histórico inactivo puede conservarse o quitarse, pero no puede agregarse un nuevo Cliente inactivo.
+
+### RN-VIS-14
+
+Toda modificación de Visita debe registrar una auditoría con acción `Modificacion` e identificador de la Visita.
+
+### RN-VIS-15
+
+La selección de Clientes y Participantes debe conservarse al filtrar u ordenar las grillas de selección.
 
 ## 3. Persona
 

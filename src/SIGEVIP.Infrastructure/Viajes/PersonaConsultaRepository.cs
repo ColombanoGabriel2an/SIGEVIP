@@ -35,6 +35,7 @@ SELECT
     p.IdPersona,
     p.Nombre,
     p.Apellido,
+    p.Email,
     p.Activo
 FROM dbo.Persona AS p
 WHERE p.Activo = 1
@@ -83,6 +84,9 @@ ORDER BY
                                     nombre +
                                     " " +
                                     apellido,
+                                    LeerTextoObligatorio(
+                                        reader,
+                                        "Email"),
                                     reader.GetBoolean(
                                         reader.GetOrdinal(
                                             "Activo"))));

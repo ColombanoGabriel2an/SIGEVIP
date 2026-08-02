@@ -173,7 +173,8 @@ namespace SIGEVIP.Application.Viajes
             }
 
             IReadOnlyCollection<Persona> participantes =
-                ObtenerParticipantesActivos(
+                ObtenerParticipantesParaModificacion(
+                    viaje,
                     idsParticipantes);
 
             viaje.ActualizarDatos(
@@ -249,6 +250,58 @@ namespace SIGEVIP.Application.Viajes
             ObtenerParticipantesActivos(
                 IEnumerable<int> idsParticipantes)
         {
+            IReadOnlyCollection<Persona> participantes =
+                ObtenerParticipantesExistentes(
+                    idsParticipantes);
+
+            if (participantes.Any(
+                participante =>
+                    !participante.Activo))
+            {
+                throw new ReglaNegocioException(
+                    "Uno o más participantes seleccionados se encuentran inactivos.");
+            }
+
+            return participantes;
+        }
+
+        private IReadOnlyCollection<Persona>
+            ObtenerParticipantesParaModificacion(
+                Viaje viaje,
+                IEnumerable<int> idsParticipantes)
+        {
+            IReadOnlyCollection<Persona> participantes =
+                ObtenerParticipantesExistentes(
+                    idsParticipantes);
+
+            HashSet<int> idsHistoricos =
+                new HashSet<int>(
+                    viaje.Participantes
+                        .Where(
+                            participante =>
+                                participante.IdPersona > 0)
+                        .Select(
+                            participante =>
+                                participante.IdPersona));
+
+            foreach (Persona participante in participantes)
+            {
+                if (!participante.Activo &&
+                    !idsHistoricos.Contains(
+                        participante.IdPersona))
+                {
+                    throw new ReglaNegocioException(
+                        "No se pueden agregar participantes inactivos al viaje.");
+                }
+            }
+
+            return participantes;
+        }
+
+        private IReadOnlyCollection<Persona>
+            ObtenerParticipantesExistentes(
+                IEnumerable<int> idsParticipantes)
+        {
             if (idsParticipantes == null)
             {
                 throw new ReglaNegocioException(
@@ -308,12 +361,6 @@ namespace SIGEVIP.Application.Viajes
                 {
                     throw new ReglaNegocioException(
                         "Uno o más participantes seleccionados no existen.");
-                }
-
-                if (!persona.Activo)
-                {
-                    throw new ReglaNegocioException(
-                        "Uno o más participantes seleccionados se encuentran inactivos.");
                 }
 
                 ordenadas.Add(

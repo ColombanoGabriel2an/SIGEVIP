@@ -314,6 +314,103 @@ namespace SIGEVIP.Tests.Application
         }
 
         [TestMethod]
+        public void Modificar_ParticipanteHistoricoInactivo_PermiteConservarlo()
+        {
+            Persona participante =
+                CrearPersona(
+                    1);
+
+            participante.Desactivar();
+
+            ViajeRepositoryFalso viajes =
+                new ViajeRepositoryFalso();
+
+            viajes.Obtenido =
+                CrearViaje();
+
+            viajes.Obtenido
+                .ReemplazarParticipantes(
+                    new[]
+                    {
+                        participante
+                    });
+
+            PersonaRepositoryFalso personas =
+                new PersonaRepositoryFalso();
+
+            personas.Personas.Add(
+                participante);
+
+            ViajeService servicio =
+                CrearServicio(
+                    CrearUsuario(
+                        ViajeService.PermisoCrear),
+                    viajes,
+                    personas);
+
+            Modificar(
+                servicio);
+
+            Assert.IsNotNull(
+                viajes.Actualizado);
+
+            Assert.IsFalse(
+                viajes.Actualizado
+                    .Participantes
+                    .Single()
+                    .Activo);
+        }
+
+        [TestMethod]
+        public void Modificar_NuevoParticipanteInactivo_RechazaOperacion()
+        {
+            ViajeRepositoryFalso viajes =
+                new ViajeRepositoryFalso();
+
+            viajes.Obtenido =
+                CrearViaje();
+
+            viajes.Obtenido
+                .ReemplazarParticipantes(
+                    new[]
+                    {
+                        CrearPersona(1)
+                    });
+
+            Persona participanteInactivo =
+                CrearPersona(
+                    2);
+
+            participanteInactivo.Desactivar();
+
+            PersonaRepositoryFalso personas =
+                CrearPersonas();
+
+            personas.Personas.Add(
+                participanteInactivo);
+
+            ViajeService servicio =
+                CrearServicio(
+                    CrearUsuario(
+                        ViajeService.PermisoCrear),
+                    viajes,
+                    personas);
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => servicio.Modificar(
+                    1,
+                    FechaInicio,
+                    FechaFin,
+                    "Viaje",
+                    TipoViaje.Desplazamiento,
+                    0m,
+                    new[]
+                    {
+                        2
+                    }));
+        }
+
+        [TestMethod]
         public void Modificar_FechasInvalidas_RechazaOperacion()
         {
             ViajeRepositoryFalso viajes =

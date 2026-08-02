@@ -55,7 +55,8 @@ namespace SIGEVIP.Infrastructure.Visitas
             AuditoriaRegistro auditoria)
         {
             ValidarVisitaPersistible(
-                visita);
+                visita,
+                false);
 
             const string sqlVisita = @"
 INSERT INTO dbo.Visita
@@ -152,6 +153,162 @@ SELECT CAST(SCOPE_IDENTITY() AS INT);";
             {
                 throw new PersistenciaException(
                     "La transaccion de registro de la visita no pudo completarse.",
+                    exception);
+            }
+        }
+
+        public void Actualizar(
+            Visita visita)
+        {
+            ActualizarInterno(
+                visita,
+                null);
+        }
+
+        public void Actualizar(
+            Visita visita,
+            AuditoriaRegistro auditoria)
+        {
+            if (auditoria == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(auditoria));
+            }
+
+            ActualizarInterno(
+                visita,
+                auditoria);
+        }
+
+        private void ActualizarInterno(
+            Visita visita,
+            AuditoriaRegistro auditoria)
+        {
+            ValidarVisitaPersistible(
+                visita,
+                true);
+
+            if (visita.IdVisita <= 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(visita),
+                    "La visita a modificar debe estar persistida.");
+            }
+
+            const string sqlActualizar = @"
+UPDATE dbo.Visita
+SET
+    Fecha = @Fecha,
+    Observacion = @Observacion,
+    LocalidadEncuentro = @LocalidadEncuentro
+WHERE
+    IdVisita = @IdVisita
+    AND IdViaje = @IdViaje;";
+
+            const string sqlEliminarClientes = @"
+DELETE FROM dbo.VisitaCliente
+WHERE IdVisita = @IdVisita;";
+
+            try
+            {
+                using (
+                    SqlConnection connection =
+                        _connectionFactory.Create())
+                {
+                    connection.Open();
+
+                    using (
+                        SqlTransaction transaction =
+                            connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            int filasAfectadas;
+
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sqlActualizar,
+                                        connection,
+                                        transaction))
+                            {
+                                command.Parameters.Add(
+                                    "@IdVisita",
+                                    SqlDbType.Int).Value =
+                                        visita.IdVisita;
+
+                                AgregarParametrosVisita(
+                                    command,
+                                    visita);
+
+                                filasAfectadas =
+                                    command.ExecuteNonQuery();
+                            }
+
+                            if (filasAfectadas != 1)
+                            {
+                                throw new PersistenciaException(
+                                    "La visita indicada no existe o no pertenece al viaje informado.");
+                            }
+
+                            using (
+                                SqlCommand command =
+                                    new SqlCommand(
+                                        sqlEliminarClientes,
+                                        connection,
+                                        transaction))
+                            {
+                                command.Parameters.Add(
+                                    "@IdVisita",
+                                    SqlDbType.Int).Value =
+                                        visita.IdVisita;
+
+                                command.ExecuteNonQuery();
+                            }
+
+                            InsertarClientes(
+                                connection,
+                                transaction,
+                                visita.IdVisita,
+                                visita.Clientes);
+
+                            if (auditoria != null)
+                            {
+                                AuditoriaSqlWriter.Insertar(
+                                    connection,
+                                    transaction,
+                                    auditoria.ConIdEntidad(
+                                        visita.IdVisita));
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            if (transaction.Connection != null)
+                            {
+                                transaction.Rollback();
+                            }
+
+                            throw;
+                        }
+                    }
+                }
+            }
+            catch (PersistenciaException)
+            {
+                throw;
+            }
+            catch (SqlException exception)
+            {
+                throw CrearErrorPersistencia(
+                    "No fue posible modificar la visita.",
+                    exception);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new PersistenciaException(
+                    "La transacción de modificación de la visita no pudo completarse.",
                     exception);
             }
         }
@@ -331,7 +488,8 @@ ORDER BY
         }
 
         private static void ValidarVisitaPersistible(
-            Visita visita)
+            Visita visita,
+            bool permitirClientesInactivos)
         {
             if (visita == null)
             {
@@ -370,7 +528,8 @@ ORDER BY
                         "Todos los clientes de la visita deben estar persistidos.");
                 }
 
-                if (!cliente.Activo)
+                if (!permitirClientesInactivos &&
+                    !cliente.Activo)
                 {
                     throw new ReglaNegocioException(
                         "No se pueden registrar visitas con clientes inactivos.");

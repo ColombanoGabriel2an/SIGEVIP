@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SIGEVIP.Domain.Entities;
 using SIGEVIP.Domain.Exceptions;
@@ -148,6 +149,67 @@ namespace SIGEVIP.Tests.Domain
             StringAssert.Contains(
                 excepcion.Message,
                 "ya se encuentra asociado");
+        }
+
+        [TestMethod]
+        public void Modificar_DatosYClientesValidos_ActualizaVisita()
+        {
+            Visita visita = CrearVisita();
+
+            Cliente primero =
+                CrearCliente(
+                    1,
+                    "30-11111111-1");
+
+            Cliente segundo =
+                CrearCliente(
+                    2,
+                    "30-22222222-2");
+
+            visita.AgregarCliente(
+                primero);
+
+            visita.Modificar(
+                new DateTime(2026, 7, 12),
+                "Seguimiento actualizado",
+                "Funes",
+                new[]
+                {
+                    segundo
+                });
+
+            Assert.AreEqual(
+                new DateTime(2026, 7, 12),
+                visita.Fecha);
+
+            Assert.AreEqual(
+                "Seguimiento actualizado",
+                visita.Observacion);
+
+            Assert.AreEqual(
+                "Funes",
+                visita.LocalidadEncuentro);
+
+            Assert.AreEqual(
+                1,
+                visita.Clientes.Count);
+
+            Assert.AreEqual(
+                2,
+                visita.Clientes.Single().IdCliente);
+        }
+
+        [TestMethod]
+        public void Modificar_SinClientes_RechazaOperacion()
+        {
+            Visita visita = CrearVisita();
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => visita.Modificar(
+                    new DateTime(2026, 7, 12),
+                    "Seguimiento actualizado",
+                    "Funes",
+                    new Cliente[0]));
         }
 
         [TestMethod]

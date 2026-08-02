@@ -141,6 +141,64 @@ namespace SIGEVIP.Application.Visitas
                 auditoria);
         }
 
+        public Visita Obtener(
+            int idViaje,
+            int idVisita)
+        {
+            ExigirPermiso(
+                ViajeService.PermisoConsultar);
+
+            Viaje viaje =
+                ObtenerViaje(
+                    idViaje);
+
+            return ObtenerVisitaDelViaje(
+                viaje,
+                idVisita);
+        }
+
+        public void Modificar(
+            int idViaje,
+            int idVisita,
+            DateTime fecha,
+            string observacion,
+            string localidadEncuentro,
+            IEnumerable<int> idsClientes)
+        {
+            ExigirPermiso(
+                PermisoRegistrar);
+
+            Viaje viaje =
+                ObtenerViaje(
+                    idViaje);
+
+            Visita visita =
+                ObtenerVisitaDelViaje(
+                    viaje,
+                    idVisita);
+
+            IReadOnlyCollection<Cliente> clientes =
+                ObtenerClientesParaModificacion(
+                    visita,
+                    idsClientes);
+
+            viaje.ModificarVisita(
+                visita,
+                fecha,
+                observacion,
+                localidadEncuentro,
+                clientes);
+
+            AuditoriaRegistro auditoria =
+                CrearAuditoria(
+                    "Modificacion",
+                    "Se modificó una visita y sus clientes asociados.");
+
+            _visitaRepository.Actualizar(
+                visita,
+                auditoria);
+        }
+
         public IReadOnlyCollection<VisitaListadoDto>
             ListarPorViaje(
                 int idViaje)
@@ -208,6 +266,80 @@ namespace SIGEVIP.Application.Visitas
                        .AsReadOnly();
         }
 
+        private Viaje ObtenerViaje(
+            int idViaje)
+        {
+            ValidarIdViaje(
+                idViaje);
+
+            Viaje viaje =
+                _viajeRepository.ObtenerPorId(
+                    idViaje);
+
+            if (viaje == null)
+            {
+                throw new ReglaNegocioException(
+                    "El viaje indicado no existe.");
+            }
+
+            return viaje;
+        }
+
+        private static Visita ObtenerVisitaDelViaje(
+            Viaje viaje,
+            int idVisita)
+        {
+            ValidarIdVisita(
+                idVisita);
+
+            Visita visita =
+                viaje.Visitas.SingleOrDefault(
+                    actual =>
+                        actual.IdVisita ==
+                            idVisita);
+
+            if (visita == null)
+            {
+                throw new ReglaNegocioException(
+                    "La visita indicada no existe en el viaje seleccionado.");
+            }
+
+            return visita;
+        }
+
+        private IReadOnlyCollection<Cliente>
+            ObtenerClientesParaModificacion(
+                Visita visitaActual,
+                IEnumerable<int> idsClientes)
+        {
+            IReadOnlyCollection<Cliente> clientes =
+                ObtenerClientesExistentes(
+                    idsClientes);
+
+            HashSet<int> idsHistoricos =
+                new HashSet<int>(
+                    visitaActual.Clientes
+                        .Where(
+                            cliente =>
+                                cliente.IdCliente > 0)
+                        .Select(
+                            cliente =>
+                                cliente.IdCliente));
+
+            foreach (Cliente cliente in clientes)
+            {
+                if (!cliente.Activo &&
+                    !idsHistoricos.Contains(
+                        cliente.IdCliente))
+                {
+                    throw new ReglaNegocioException(
+                        "No se pueden agregar clientes inactivos a la visita.");
+                }
+            }
+
+            return clientes;
+        }
+
         private AuditoriaRegistro CrearAuditoria(
             string accion,
             string descripcion)
@@ -227,6 +359,25 @@ namespace SIGEVIP.Application.Visitas
 
         private IReadOnlyCollection<Cliente>
             ObtenerClientesActivos(
+                IEnumerable<int> idsClientes)
+        {
+            IReadOnlyCollection<Cliente> clientes =
+                ObtenerClientesExistentes(
+                    idsClientes);
+
+            if (clientes.Any(
+                cliente =>
+                    !cliente.Activo))
+            {
+                throw new ReglaNegocioException(
+                    "Uno o más clientes seleccionados se encuentran inactivos.");
+            }
+
+            return clientes;
+        }
+
+        private IReadOnlyCollection<Cliente>
+            ObtenerClientesExistentes(
                 IEnumerable<int> idsClientes)
         {
             if (idsClientes == null)
@@ -249,7 +400,7 @@ namespace SIGEVIP.Application.Visitas
                     idCliente <= 0))
             {
                 throw new ReglaNegocioException(
-                    "Los clientes seleccionados no son v�lidos.");
+                    "Los clientes seleccionados no son válidos.");
             }
 
             if (ids.Distinct().Count() !=
@@ -267,7 +418,7 @@ namespace SIGEVIP.Application.Visitas
                 clientes.Count != ids.Count)
             {
                 throw new ReglaNegocioException(
-                    "Uno o m�s clientes seleccionados no existen.");
+                    "Uno o más clientes seleccionados no existen.");
             }
 
             Dictionary<int, Cliente> porId =
@@ -278,9 +429,7 @@ namespace SIGEVIP.Application.Visitas
             var ordenados =
                 new List<Cliente>();
 
-            foreach (
-                int idCliente
-                in ids)
+            foreach (int idCliente in ids)
             {
                 Cliente cliente;
 
@@ -289,13 +438,7 @@ namespace SIGEVIP.Application.Visitas
                     out cliente))
                 {
                     throw new ReglaNegocioException(
-                        "Uno o m�s clientes seleccionados no existen.");
-                }
-
-                if (!cliente.Activo)
-                {
-                    throw new ReglaNegocioException(
-                        "Uno o m�s clientes seleccionados se encuentran inactivos.");
+                        "Uno o más clientes seleccionados no existen.");
                 }
 
                 ordenados.Add(
@@ -312,7 +455,7 @@ namespace SIGEVIP.Application.Visitas
                 _sesionActual.UsuarioActual == null)
             {
                 throw new AccesoDenegadoException(
-                    "Debe iniciar sesi�n para realizar esta operaci�n.");
+                    "Debe iniciar sesión para realizar esta operación.");
             }
 
             if (!_sesionActual.UsuarioActual.Activo)
@@ -326,7 +469,7 @@ namespace SIGEVIP.Application.Visitas
                 codigoPermiso))
             {
                 throw new AccesoDenegadoException(
-                    "No posee permisos para realizar esta operaci�n.");
+                    "No posee permisos para realizar esta operación.");
             }
         }
 
@@ -338,6 +481,17 @@ namespace SIGEVIP.Application.Visitas
                 throw new ArgumentOutOfRangeException(
                     nameof(idViaje),
                     "El identificador del viaje debe ser mayor que cero.");
+            }
+        }
+
+        private static void ValidarIdVisita(
+            int idVisita)
+        {
+            if (idVisita <= 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(idVisita),
+                    "El identificador de la visita debe ser mayor que cero.");
             }
         }
 

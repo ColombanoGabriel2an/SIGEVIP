@@ -72,7 +72,7 @@ namespace SIGEVIP.Tests.Application
                 () => servicio.Registrar(
                     0,
                     FechaVisita,
-                    "Reuni髇",
+                    "Reuni贸n",
                     "Rosario",
                     new[]
                     {
@@ -140,7 +140,7 @@ namespace SIGEVIP.Tests.Application
                         2026,
                         7,
                         20),
-                    "Reuni髇",
+                    "Reuni贸n",
                     "Rosario",
                     new[]
                     {
@@ -158,7 +158,7 @@ namespace SIGEVIP.Tests.Application
                 () => servicio.Registrar(
                     1,
                     FechaVisita,
-                    "Reuni髇",
+                    "Reuni贸n",
                     "Rosario",
                     null));
         }
@@ -173,7 +173,7 @@ namespace SIGEVIP.Tests.Application
                 () => servicio.Registrar(
                     1,
                     FechaVisita,
-                    "Reuni髇",
+                    "Reuni贸n",
                     "Rosario",
                     new int[0]));
         }
@@ -188,7 +188,7 @@ namespace SIGEVIP.Tests.Application
                 () => servicio.Registrar(
                     1,
                     FechaVisita,
-                    "Reuni髇",
+                    "Reuni贸n",
                     "Rosario",
                     new[]
                     {
@@ -206,7 +206,7 @@ namespace SIGEVIP.Tests.Application
                 () => servicio.Registrar(
                     1,
                     FechaVisita,
-                    "Reuni髇",
+                    "Reuni贸n",
                     "Rosario",
                     new[]
                     {
@@ -348,7 +348,7 @@ namespace SIGEVIP.Tests.Application
             servicio.Registrar(
                 1,
                 FechaVisita,
-                "Reuni髇",
+                "Reuni贸n",
                 "Rosario",
                 new[]
                 {
@@ -371,6 +371,208 @@ namespace SIGEVIP.Tests.Application
                     1
                 },
                 ids);
+        }
+
+        [TestMethod]
+        public void Obtener_VisitaDelViaje_DevuelveEntidadCompleta()
+        {
+            ViajeRepositoryFalso viajes =
+                CrearViajesConVisita();
+
+            VisitaService servicio =
+                CrearServicio(
+                    CrearUsuario(
+                        ViajeService.PermisoConsultar),
+                    viajes,
+                    CrearClientes());
+
+            Visita resultado =
+                servicio.Obtener(
+                    1,
+                    10);
+
+            Assert.AreEqual(
+                10,
+                resultado.IdVisita);
+
+            Assert.AreEqual(
+                1,
+                resultado.Clientes.Count);
+        }
+
+        [TestMethod]
+        public void Modificar_SinPermisoRegistrar_RechazaOperacion()
+        {
+            VisitaService servicio =
+                CrearServicio(
+                    CrearUsuario(
+                        ViajeService.PermisoConsultar),
+                    CrearViajesConVisita(),
+                    CrearClientes());
+
+            Assert.ThrowsException<AccesoDenegadoException>(
+                () => Modificar(
+                    servicio));
+        }
+
+        [TestMethod]
+        public void Modificar_ViajeNoAbierto_RechazaOperacion()
+        {
+            ViajeRepositoryFalso viajes =
+                CrearViajesConVisita();
+
+            viajes.Obtenido
+                .EnviarARendicion();
+
+            VisitaService servicio =
+                CrearServicio(
+                    CrearUsuario(
+                        VisitaService.PermisoRegistrar),
+                    viajes,
+                    CrearClientes());
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => Modificar(
+                    servicio));
+        }
+
+        [TestMethod]
+        public void Modificar_VisitaInexistenteEnViaje_RechazaOperacion()
+        {
+            VisitaService servicio =
+                CrearServicio(
+                    CrearUsuario(
+                        VisitaService.PermisoRegistrar),
+                    CrearViajesConViaje(),
+                    CrearClientes());
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => Modificar(
+                    servicio));
+        }
+
+        [TestMethod]
+        public void Modificar_DatosValidos_ActualizaYAudita()
+        {
+            ViajeRepositoryFalso viajes =
+                CrearViajesConVisita();
+
+            ClienteRepositoryFalso clientes =
+                CrearClientes();
+
+            clientes.Clientes.Add(
+                CrearCliente(
+                    2));
+
+            VisitaRepositoryFalso visitas =
+                new VisitaRepositoryFalso();
+
+            VisitaService servicio =
+                CrearServicio(
+                    CrearUsuario(
+                        VisitaService.PermisoRegistrar),
+                    viajes,
+                    clientes,
+                    visitas);
+
+            servicio.Modificar(
+                1,
+                10,
+                new DateTime(2026, 7, 12),
+                "Seguimiento actualizado",
+                "Funes",
+                new[]
+                {
+                    2
+                });
+
+            Assert.IsNotNull(
+                visitas.Actualizada);
+
+            Assert.AreEqual(
+                10,
+                visitas.Actualizada.IdVisita);
+
+            Assert.AreEqual(
+                "Seguimiento actualizado",
+                visitas.Actualizada.Observacion);
+
+            Assert.AreEqual(
+                2,
+                visitas.Actualizada.Clientes.Single().IdCliente);
+
+            Assert.AreEqual(
+                "Modificacion",
+                visitas.AuditoriaActualizacion.Accion);
+        }
+
+        [TestMethod]
+        public void Modificar_ConClienteHistoricoInactivo_PermiteConservarlo()
+        {
+            ClienteRepositoryFalso clientes =
+                CrearClientes();
+
+            clientes.Clientes[0]
+                .Desactivar();
+
+            ViajeRepositoryFalso viajes =
+                CrearViajesConVisita(
+                    clientes.Clientes[0]);
+
+            VisitaRepositoryFalso visitas =
+                new VisitaRepositoryFalso();
+
+            VisitaService servicio =
+                CrearServicio(
+                    CrearUsuario(
+                        VisitaService.PermisoRegistrar),
+                    viajes,
+                    clientes,
+                    visitas);
+
+            Modificar(
+                servicio);
+
+            Assert.IsNotNull(
+                visitas.Actualizada);
+
+            Assert.IsFalse(
+                visitas.Actualizada.Clientes.Single().Activo);
+        }
+
+        [TestMethod]
+        public void Modificar_ConNuevoClienteInactivo_RechazaOperacion()
+        {
+            ClienteRepositoryFalso clientes =
+                CrearClientes();
+
+            Cliente nuevoInactivo =
+                CrearCliente(
+                    2);
+
+            nuevoInactivo.Desactivar();
+
+            clientes.Clientes.Add(
+                nuevoInactivo);
+
+            VisitaService servicio =
+                CrearServicio(
+                    CrearUsuario(
+                        VisitaService.PermisoRegistrar),
+                    CrearViajesConVisita(),
+                    clientes);
+
+            Assert.ThrowsException<ReglaNegocioException>(
+                () => servicio.Modificar(
+                    1,
+                    10,
+                    FechaVisita,
+                    "Seguimiento",
+                    "Rosario",
+                    new[]
+                    {
+                        2
+                    }));
         }
 
         [TestMethod]
@@ -511,7 +713,22 @@ namespace SIGEVIP.Tests.Application
             return servicio.Registrar(
                 1,
                 FechaVisita,
-                "Reuni髇 comercial",
+                "Reuni贸n comercial",
+                "Rosario",
+                new[]
+                {
+                    1
+                });
+        }
+
+        private static void Modificar(
+            VisitaService servicio)
+        {
+            servicio.Modificar(
+                1,
+                10,
+                FechaVisita,
+                "Seguimiento comercial",
                 "Rosario",
                 new[]
                 {
@@ -554,6 +771,35 @@ namespace SIGEVIP.Tests.Application
             {
                 Obtenido =
                     CrearViaje()
+            };
+        }
+
+        private static ViajeRepositoryFalso
+            CrearViajesConVisita(
+                Cliente cliente = null)
+        {
+            Viaje viaje =
+                CrearViaje();
+
+            Visita visita =
+                new Visita(
+                    10,
+                    FechaVisita,
+                    "Reuni贸n comercial",
+                    "Rosario");
+
+            visita.AgregarCliente(
+                cliente
+                ?? CrearCliente(
+                    1));
+
+            viaje.AgregarVisita(
+                visita);
+
+            return new ViajeRepositoryFalso
+            {
+                Obtenido =
+                    viaje
             };
         }
 
@@ -603,7 +849,7 @@ namespace SIGEVIP.Tests.Application
                 10,
                 1,
                 FechaVisita,
-                "Reuni髇",
+                "Reuni贸n",
                 "Rosario",
                 "Empresa 1");
         }
@@ -798,6 +1044,18 @@ namespace SIGEVIP.Tests.Application
                 private set;
             }
 
+            public Visita Actualizada
+            {
+                get;
+                private set;
+            }
+
+            public AuditoriaRegistro AuditoriaActualizacion
+            {
+                get;
+                private set;
+            }
+
             public int UltimoIdViaje
             {
                 get;
@@ -834,6 +1092,17 @@ namespace SIGEVIP.Tests.Application
                     auditoria;
 
                 return 50;
+            }
+
+            public void Actualizar(
+                Visita visita,
+                AuditoriaRegistro auditoria)
+            {
+                Actualizada =
+                    visita;
+
+                AuditoriaActualizacion =
+                    auditoria;
             }
 
             public IReadOnlyCollection<VisitaListadoDto>

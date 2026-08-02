@@ -10,6 +10,10 @@ namespace SIGEVIP.Application.Visitas
             Visita visita,
             AuditoriaRegistro auditoria);
 
+        void Actualizar(
+            Visita visita,
+            AuditoriaRegistro auditoria);
+
         IReadOnlyCollection<VisitaListadoDto>
             ListarPorViaje(
                 int idViaje);

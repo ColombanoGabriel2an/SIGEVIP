@@ -495,6 +495,29 @@ namespace SIGEVIP.Domain.Entities
                 visita);
         }
 
+        public void ModificarVisita(
+            Visita visita,
+            DateTime fecha,
+            string observacion,
+            string localidadEncuentro,
+            IEnumerable<Cliente> clientes)
+        {
+            Visita existente =
+                ObtenerVisitaPerteneciente(
+                    visita);
+
+            _estadoActual.ValidarModificacion();
+
+            ValidarFechaVisita(
+                fecha);
+
+            existente.Modificar(
+                fecha,
+                observacion,
+                localidadEncuentro,
+                clientes);
+        }
+
         public void ModificarViatico(
             Viatico viatico,
             DateTime fecha,
@@ -993,6 +1016,31 @@ namespace SIGEVIP.Domain.Entities
                 throw new ReglaNegocioException(
                     "La fecha de la visita debe encontrarse dentro del período del viaje.");
             }
+        }
+
+        private Visita ObtenerVisitaPerteneciente(
+            Visita visita)
+        {
+            if (visita == null)
+            {
+                throw new ReglaNegocioException(
+                    "Debe indicar una visita válida.");
+            }
+
+            Visita existente =
+                _visitas.FirstOrDefault(
+                    item =>
+                        SonLaMismaVisita(
+                            item,
+                            visita));
+
+            if (existente == null)
+            {
+                throw new ReglaNegocioException(
+                    "La visita indicada no pertenece al viaje.");
+            }
+
+            return existente;
         }
 
         private void ValidarViaticoPerteneciente(

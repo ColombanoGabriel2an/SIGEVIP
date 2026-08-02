@@ -183,6 +183,83 @@ namespace SIGEVIP.Tests.Integration
         }
 
         [TestMethod]
+        public void Actualizar_VisitaValida_ReemplazaDatosYClientes()
+        {
+            DatosVisitaPrueba datos =
+                CrearDatosPrueba(
+                    2);
+
+            try
+            {
+                datos.IdVisita =
+                    CrearVisitaRepository()
+                        .Insertar(
+                            datos.CrearVisita(
+                                new[]
+                                {
+                                    0
+                                }));
+
+                Cliente segundoCliente =
+                    CrearClienteRepository()
+                        .ObtenerPorIds(
+                            new[]
+                            {
+                                datos.IdClientes[1]
+                            })
+                        .Single();
+
+                Visita modificada =
+                    Visita.Reconstruir(
+                        datos.IdVisita,
+                        datos.IdViaje,
+                        datos.FechaVisita.AddDays(1),
+                        "Observación modificada",
+                        "Funes",
+                        new[]
+                        {
+                            segundoCliente
+                        });
+
+                CrearVisitaRepository()
+                    .Actualizar(
+                        modificada);
+
+                VisitaListadoDto resultado =
+                    CrearVisitaRepository()
+                        .ListarPorViaje(
+                            datos.IdViaje)
+                        .Single(
+                            actual =>
+                                actual.IdVisita ==
+                                    datos.IdVisita);
+
+                Assert.AreEqual(
+                    "Observación modificada",
+                    resultado.Observacion);
+
+                Assert.AreEqual(
+                    "Funes",
+                    resultado.LocalidadEncuentro);
+
+                Assert.AreEqual(
+                    1,
+                    ContarClientesDeVisita(
+                        datos.IdVisita));
+
+                StringAssert.Contains(
+                    resultado.ClientesResumen,
+                    datos.RazonSocialBase +
+                        "1");
+            }
+            finally
+            {
+                EliminarDatosPrueba(
+                    datos);
+            }
+        }
+
+        [TestMethod]
         public void ListarPorViaje_DevuelveVisitaPersistida()
         {
             DatosVisitaPrueba datos =
