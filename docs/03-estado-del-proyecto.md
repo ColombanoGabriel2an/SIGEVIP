@@ -2,19 +2,21 @@
 
 ## Etapa actual
 
-Etapa 4: módulos funcionales documentados.
+Etapa 8: documentación técnica, validación final y preparación de liberación.
 
-Bloque actual: cierre de controles de Auditoría y trazabilidad.
+Bloque actual: cierre documental e integración controlada de la versión funcional.
 
 ## Rama de trabajo
 
-`desarrollo/reportes-auditoria-usabilidad`
+`desarrollo/selector-viajes-visitas`
 
-## Último cierre funcional local
+## Último cierre funcional publicado
 
-- Commit: `0874d48`
-- Mensaje: `Completo consulta de auditoria y controles operativos`
-- Publicación remota: pendiente hasta completar el cierre documental.
+- Commit: `f7a3c59`
+- Mensaje: `Mejora gestion de visitas y selectores relacionados`
+- Publicación remota: rama sincronizada con `origin/desarrollo/selector-viajes-visitas`.
+- Compilación: 0 advertencias y 0 errores.
+- Regresión completa: 739 pruebas correctas y 0 fallidas.
 
 ## Arquitectura vigente
 

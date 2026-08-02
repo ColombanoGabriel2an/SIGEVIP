@@ -137,6 +137,9 @@ Se encuentran implementados:
 - exclusión y reactivación lógica de Viáticos;
 - ajuste de anticipos;
 - aprobación y cancelación de Rendiciones;
+- reportes procesados de Viajes y Viáticos con indicadores, rankings y análisis gráfico;
+- modificación de Visitas en Viajes abiertos, con actualización transaccional y Auditoría;
+- selectores filtrables y ordenables de Viajes, participantes y Clientes;
 - auditoría general consultable de cambios de seguridad, Clientes, Viajes, Visitas, Viáticos y Rendiciones;
 - filtros de Auditoría por fecha, Usuario, módulo, acción y texto general;
 - catálogos dinámicos de módulos y acciones;
@@ -146,15 +149,15 @@ Se encuentran implementados:
 - rollback comprobado cuando no puede persistirse el evento de Auditoría;
 - cálculo de total gastado vigente y saldo pendiente;
 - validación SQL de las migraciones `003` a `006`;
-- 700 pruebas automatizadas correctas;
+- 739 pruebas automatizadas correctas;
 - compilación con 0 advertencias y 0 errores;
-- validación manual de Usuarios, Cambio de clave, Grupos, jerarquías de Grupos, Permisos, Clientes, Viajes, Visitas, Viáticos y Rendiciones.
+- validación manual de Usuarios, Cambio de clave, Grupos, jerarquías de Grupos, Permisos, Clientes, Viajes, Visitas, Viáticos, Rendiciones, Auditoría y Reportes.
 
 Permanecen pendientes:
 
 - recuperación de contraseña;
 - historial funcional completo del cliente;
-- reportes adicionales;
+- reportes adicionales fuera del alcance funcional cerrado;
 - extensión progresiva del ordenamiento reutilizable a las grillas restantes;
 - mapa y geolocalización;
 - datos de demostración finales;

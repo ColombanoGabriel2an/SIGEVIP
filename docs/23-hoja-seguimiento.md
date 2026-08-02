@@ -143,3 +143,20 @@ Evidencia del cierre:
 - 700 pruebas de regresión correctas;
 - validación manual completa;
 - documentación posterior registrada en un commit separado.
+
+## Actualización 2026-08-02
+
+| Fecha | Commit | Mensaje | Iteración | Trazabilidad | Resultado |
+|---|---|---|---|---|---|
+| 2026-08-02 | `3854e00` | Implementa reportes, analisis y mejoras de usabilidad | Reportes y análisis | Consultas procesadas, indicadores, rankings, gráfico y selectores filtrables | Reportes de Viajes y Viáticos integrados mediante Application, Infrastructure y WinForms |
+| 2026-08-02 | `f7a3c59` | Mejora gestion de visitas y selectores relacionados | Viajes y Visitas | Modificación de Visitas, selección escalable y tratamiento de históricos inactivos | Compilación 0/0, 99 pruebas específicas y regresión 739/739 |
+
+Evidencia del cierre:
+
+- rama `desarrollo/selector-viajes-visitas` publicada y sincronizada;
+- compilación completa con 0 advertencias y 0 errores;
+- 99 pruebas específicas correctas;
+- 739 pruebas de regresión correctas;
+- modificación de Visitas limitada a Viajes abiertos;
+- selectores filtrables y ordenables para Viajes, participantes y Clientes;
+- persistencia y Auditoría transaccionales verificadas.

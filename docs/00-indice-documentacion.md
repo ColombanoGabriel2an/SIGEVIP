@@ -10,7 +10,7 @@ Ante contradicciones, se aplicará el siguiente orden:
 
 1. Requisitos vigentes, criterios de aceptación y observaciones de las partes interesadas.
 2. Documento maestro de requisitos, alcance y diseño, luego de incorporar las decisiones definitivas.
-3. Código, migraciones y pruebas de la rama `desarrollo/interfaz-funcional`.
+3. Código, migraciones y pruebas de `main`; durante el cierre previo a integración, la rama `desarrollo/selector-viajes-visitas`.
 4. Documentos técnicos canónicos de `docs/`.
 5. Documentos históricos, diagramas preliminares y materiales de apoyo.
 
@@ -18,13 +18,14 @@ La implementación no se considerará completa si no existe correspondencia entr
 
 ## 3. Estado técnico de referencia
 
-- Rama: `desarrollo/interfaz-funcional`.
-- Línea base: commit `5c16c08`.
+- Rama de cierre: `desarrollo/selector-viajes-visitas`.
+- Cierre funcional: commit `f7a3c59`.
+- Destino de integración: `main`.
 - Compilación: 0 advertencias y 0 errores.
-- Pruebas automatizadas: 682 correctas.
+- Pruebas automatizadas: 739 correctas.
 - Persistencia: SQL Server y ADO.NET.
 - Arquitectura: Domain, Application, Infrastructure, WinForms, Tests y herramienta de Setup.
-- Migraciones aplicadas: 001 a 007.
+- Migraciones aplicadas: 001 a 008.
 
 ## 4. Clasificación de documentos
 

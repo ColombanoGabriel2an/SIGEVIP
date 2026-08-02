@@ -71,8 +71,8 @@ El total definitivo se toma del ejecutor VSTest.
 
 Último resultado consolidado:
 
-- 700 pruebas totales;
-- 700 correctas;
+- 739 pruebas totales;
+- 739 correctas;
 - 0 fallidas.
 
 El conjunto incluye pruebas:
@@ -765,10 +765,10 @@ Resultado:
 
 ### Regresión completa
 
-- 700 pruebas ejecutadas;
-- 700 correctas;
+- 739 pruebas ejecutadas;
+- 739 correctas;
 - 0 fallidas;
-- tiempo registrado: 23,2707 segundos.
+- tiempo registrado: 23,1099 segundos.
 
 ### Validación manual
 
