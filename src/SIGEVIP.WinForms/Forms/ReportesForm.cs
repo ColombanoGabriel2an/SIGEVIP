@@ -143,6 +143,9 @@ namespace SIGEVIP.WinForms.Forms
             _lblCantidadClientes;
 
         private Label
+            _lblAnticipoResumen;
+
+        private Label
             _lblTotalGastosResumen;
 
         private Label
@@ -1195,9 +1198,7 @@ namespace SIGEVIP.WinForms.Forms
                 2);
 
             tabla.Controls.Add(
-                CrearFilaIndicadorResumen(
-                    "Total gastos",
-                    out _lblTotalGastosResumen),
+                CrearFilaFinancieraResumen(),
                 0,
                 3);
 
@@ -1210,6 +1211,54 @@ namespace SIGEVIP.WinForms.Forms
                 tabla);
 
             return grupo;
+        }
+
+        private Control CrearFilaFinancieraResumen()
+        {
+            var tabla =
+                new TableLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    ColumnCount = 2,
+                    RowCount = 1,
+                    Margin =
+                        new Padding(0),
+                    Padding =
+                        new Padding(0),
+                    BackColor =
+                        ColorTarjeta
+                };
+
+            tabla.ColumnStyles.Add(
+                new ColumnStyle(
+                    SizeType.Percent,
+                    50F));
+
+            tabla.ColumnStyles.Add(
+                new ColumnStyle(
+                    SizeType.Percent,
+                    50F));
+
+            tabla.RowStyles.Add(
+                new RowStyle(
+                    SizeType.Percent,
+                    100F));
+
+            tabla.Controls.Add(
+                CrearFilaIndicadorResumen(
+                    "Anticipado",
+                    out _lblAnticipoResumen),
+                0,
+                0);
+
+            tabla.Controls.Add(
+                CrearFilaIndicadorResumen(
+                    "Total gastos",
+                    out _lblTotalGastosResumen),
+                1,
+                0);
+
+            return tabla;
         }
 
         private Control CrearTarjetaSaldo()
@@ -3405,6 +3454,10 @@ namespace SIGEVIP.WinForms.Forms
                 resumen.CantidadClientesDistintos
                     .ToString(
                         CulturaArgentina);
+
+            _lblAnticipoResumen.Text =
+                FormatearMoneda(
+                    resumen.MontoAnticipado);
 
             _lblTotalGastosResumen.Text =
                 FormatearMoneda(
